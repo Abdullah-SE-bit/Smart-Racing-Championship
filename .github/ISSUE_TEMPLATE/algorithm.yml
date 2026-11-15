@@ -1,0 +1,52 @@
+name: Algorithm
+description: Specify a mandatory algorithm and its correctness obligations.
+title: "[Algorithm] "
+body:
+  - type: input
+    id: requirement
+    attributes:
+      label: Assignment requirement reference
+    validations:
+      required: true
+  - type: input
+    id: algorithm
+    attributes:
+      label: Algorithm name
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose and gameplay integration
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Inputs, outputs, and data structures
+    validations:
+      required: true
+  - type: textarea
+    id: correctness
+    attributes:
+      label: Expected time and space complexity, assumptions, and edge cases
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and merge order
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required correctness, invariant, and determinism tests
+    validations:
+      required: true

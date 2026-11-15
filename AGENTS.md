@@ -1,7 +1,7 @@
 # Repository instructions
 
-Current phase: **Phase 0 scaffolding only**. No playable application exists.
-Do not begin future implementation phases without explicit user instructions.
+Current scope: repository infrastructure and development process only. No
+playable application exists. Feature development needs explicit user instructions.
 
 1. Read the relevant project documentation before modifying code, including
    `README.md`, `PROJECT_STRUCTURE.md`, and applicable documents under `docs/`.
@@ -31,7 +31,34 @@ Do not begin future implementation phases without explicit user instructions.
 The Algorithm Lab and experiments must use the exact implementations used by
 gameplay. Keep submitted assets, assignment documentation, datasets, and
 experimental results trackable in Git. Do not create fake results or placeholder
-tests. In Phase 0, Python files must remain empty `__init__.py` files; do not add
-application entry points, placeholder classes, functions, or gameplay logic.
+tests. Application package files remain empty initializers until implementation
+is authorized. Infrastructure validation scripts and meaningful infrastructure
+tests are allowed in this task; do not add game entry points or gameplay logic.
+
+## Development and agent coordination
+
+- Read [WORKFLOW.md](docs/development/WORKFLOW.md), the relevant contracts,
+  ownership proposal, and your member handoff before work. Inspect existing
+  implementations before editing; do not rewrite working code unnecessarily.
+- Follow issue-based development on a focused branch from `game`, or from an
+  explicitly documented parent feature branch. Work only on assigned scope.
+- Respect module boundaries and documented rules. Stop affected work and report
+  unresolved architectural conflicts; continue unrelated authorized work.
+- Keep readable Python, custom mandatory algorithms, deterministic simulation,
+  shared gameplay/Lab implementations, and separation of engine and rendering.
+- Add relevant tests with implementation. Activate applicable gates in
+  `docs/development/validation.json` when declaring a capability implemented;
+  update specific test paths as capabilities become available, not only at release.
+- Update relevant documentation and your own handoff after meaningful work and
+  before preparing a PR. Do not overwrite another member's handoff.
+- PRs into `main` require one eligible non-author teammate approval. PRs into
+  `game` do **not** require review; optional teammate feedback is welcome.
+  Never self-approve or count author feedback as approval for `main`.
+- Do not merge PRs without explicit user authorization. For `main`, also obtain
+  the required teammate approval. Do not bypass CI or protections. Do not
+  force-push shared branches or rewrite existing history in this task.
+- Do not silently introduce dependencies or fabricate test/CI/assignment results.
+- Never automatically begin another phase. See the current remote enforcement
+  limits in [GOVERNANCE_STATUS.md](docs/development/GOVERNANCE_STATUS.md).
 
 Do not create commits or push changes without explicit user permission.
