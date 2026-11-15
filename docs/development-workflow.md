@@ -3,8 +3,8 @@
 This guide maps the complete assignment to practical work. The
 [assignment specification](assignment-specification.md) is the source for exact
 rules, formulas, examples and deliverables; consult the original PDF if wording
-is unclear. The current repository is Phase 0 scaffolding: implementation starts
-when the user explicitly requests it. This map is a guide, not a set of gates.
+is unclear. Implementation has started at the user's request. This map is a
+guide, not a set of gates; consult the code and tests for actual progress.
 
 ## Working together
 
@@ -18,9 +18,10 @@ when the user explicitly requests it. This map is a guide, not a set of gates.
 3. Agree on contracts when tasks meet: graph data, route results, engine actions,
    event ordering, algorithm traces and screen inputs. Record consequential
    decisions and tuned rules in `docs/architecture/`.
-4. Work on a short-lived branch from `main` if useful, connect related changes to
-   their issue, and open a pull request for feedback. Direct work is also possible
-   when appropriate. Agent commits and pushes require explicit user permission.
+4. Work on a short-lived branch from `main`, connect related changes to their
+   issue, and open a pull request. The protected `main` branch requires the
+   Python CI check to pass before merging, including for administrators; no
+   approval is required. Agent commits and pushes require explicit permission.
 5. Include meaningful tests with implemented behavior, update documentation, and
    share screenshots or a recording for visual changes. Explain what was actually
    checked. Review and merge, then clean up temporary branches where appropriate.

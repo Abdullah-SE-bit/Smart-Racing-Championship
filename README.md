@@ -5,10 +5,9 @@ course. Players plan routes, manage fuel and nitro, and respond to changing
 roads while racing deterministic opponents. The project combines a polished,
 animated Pygame interface with algorithms that have real roles in gameplay.
 
-**Current status: Phase 0 scaffolding.** There is no playable application or
-startup command yet. Source packages, supporting directories, configuration,
-documentation, and the initial GitHub workflow are in place. Implementation
-begins only when explicitly requested.
+**Current status: implementation in progress.** A playable prototype, initial
+algorithms, circuits, and tests are being built; the complete assignment and
+bonus work are not yet finished.
 
 ## Project scope
 
@@ -57,9 +56,32 @@ dependencies. To add the optional packaging tools later:
 .\.venv\Scripts\python.exe -m pip install -e ".[packaging]"
 ```
 
-There is no game command yet. Once real tests have been added, run them with
-`.\.venv\Scripts\python.exe -m pytest`. An empty collection does not mean the
-game has passed testing. No installation is required to browse the scaffold.
+Launch the current prototype with:
+
+```powershell
+.\.venv\Scripts\python.exe -m smart_racing
+```
+
+Use the mouse to navigate. In a race, select a road with the left/right arrow
+keys, press Enter to drive, press N for nitro, and press F at a fuel station to
+refuel. Space pauses the simulation. The planner can compare presets, switch to
+an ordered checkpoint plan, generate a seeded circuit, show an invalid candidate,
+and save a circuit for later selection. Saved circuits are stored in
+`%USERPROFILE%\SmartRacingChampionship\circuits`.
+Run the current automated tests with `.\.venv\Scripts\python.exe -m pytest`.
+
+To build a Windows executable after installing the optional packaging tools, run
+`powershell -ExecutionPolicy Bypass -File .\scripts\build.ps1`. The output is
+`dist/SmartRacingChampionship.exe` and
+contains the circuit data. Build outputs are generated locally and Git-ignored.
+
+To regenerate the current draft report, install `.[report]` and run
+`.\.venv\Scripts\python.exe scripts/build_report.py`. The reproducible studies
+are run with `.\.venv\Scripts\python.exe experiments/benchmarks/run_studies.py`;
+raw results and an analysis are written under `experiments/results/`.
+
+`scripts/package_submission.py` can later prepare a local ZIP once the actual
+registration numbers and section are known. It does not upload or submit it.
 
 ## Repository guide
 

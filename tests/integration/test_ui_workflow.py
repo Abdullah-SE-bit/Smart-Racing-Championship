@@ -1,0 +1,165 @@
+import os
+import subprocess
+import sys
+
+os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
+
+import pygame
+import pytest
+
+from smart_racing.tracks.circuits import load_circuit, save_circuit
+from smart_racing.tracks import generator
+from smart_racing.tracks.generator import generate_circuit
+from smart_racing.algorithms.routing.shortest import shortest_path
+from smart_racing.ui.app import ACCENT, MUTED, PANEL, TEXT, App, LAB_ALGORITHMS, PROFILES
+
+
+def test_all_screens_render_and_primary_navigation():
+    app = App()
+    try:
+        for name, draw in (("menu", app.draw_menu), ("settings", app.draw_settings),
+                           ("planner", app.draw_planner), ("compare", app.draw_comparison), ("lab", app.draw_lab)):
+            app.go(name)
+            app.buttons = []
+            app.background()
+            draw()
+            assert app.buttons
+        for algorithm in LAB_ALGORITHMS:
+            app.lab_algorithm = algorithm
+            trace, description = app.lab_result()
+            assert trace and description
+        app.change_lab_speed()
+        assert app.lab_speed == 6
+        app.step_lab(1)
+        assert not app.lab_playing and app.lab_step == 1
+        paths = {tuple(shortest_path(app.circuit.graph, 0, 4, profile).vertices) for profile in PROFILES.values()}
+        assert len(paths) > 1
+        app.ordered_plan = True
+        ordered = app.planned_route(PROFILES["Balanced"])
+        assert ordered.vertices[0] == ordered.vertices[-1] == 0
+        assert [v for v in ordered.vertices if v in app.circuit.checkpoints] == app.circuit.checkpoints
+        app.demonstrate_rejection()
+        assert app.validation_message.startswith("Rejected:")
+        app.start_race(championship=True)
+        app.background()
+        app.draw_race()
+        app.race.elapsed = app.race.time_limit
+        app.finish_race()
+        app.background()
+        app.draw_dashboard()
+        app.go("standings")
+        app.background()
+        app.draw_standings()
+        assert app.screen == "standings"
+        assert app.recorded
+        app.next_championship_race()
+        assert app.screen == "race" and app.track_index == 1
+    finally:
+        pygame.quit()
+
+
+def test_seeded_generated_circuits_are_repeatable(tmp_path):
+    first, second = generate_circuit(42), generate_circuit(42)
+    assert first.graph.vertices == second.graph.vertices
+    assert first.graph.edges == second.graph.edges
+    assert len(first.checkpoints) == 10
+    assert sum(edge.shortcut for edge in first.graph.edges.values()) >= 2
+    path = tmp_path / "generated.json"
+    save_circuit(first, path)
+    assert load_circuit(path).graph.edges == first.graph.edges
+
+
+def test_generation_retries_are_bounded_and_deterministic(monkeypatch):
+    original = generator._generate_candidate
+    attempts = []
+
+    def fail_once(seed, attempt):
+        attempts.append(attempt)
+        if attempt == 0:
+            raise ValueError("invalid candidate")
+        return original(seed, attempt)
+
+    monkeypatch.setattr(generator, "_generate_candidate", fail_once)
+    assert generator.generate_circuit(42, max_attempts=2).name == "Generated 42"
+    assert attempts == [0, 1]
+    attempts.clear()
+    with pytest.raises(ValueError, match="after 1 attempts"):
+        generator.generate_circuit(42, max_attempts=1)
+
+
+def test_complete_three_race_championship():
+    app = App()
+    try:
+        app.start_race(championship=True)
+        for race_number in range(3):
+            race = app.race
+            for _ in range(4000):
+                human = race.racers[0]
+                if human.edge_id is None and not human.finished and not human.dnf:
+                    route = shortest_path(race.circuit.graph, human.vertex, race._destination(human))
+                    if len(route.vertices) > 1:
+                        race.choose(0, route.vertices[1])
+                race.tick(.1)
+                if race.over:
+                    break
+            assert race.over and all(racer.finished for racer in race.racers)
+            app.finish_race()
+            assert sum(entry.total_points for entry in app.entries) == (race_number + 1) * 70
+            app.next_championship_race()
+        assert app.screen == "menu"
+    finally:
+        pygame.quit()
+
+
+def test_mouse_and_keyboard_start_and_drive_a_quick_race():
+    app = App()
+    try:
+        app.buttons = []
+        app.background()
+        app.draw_menu()
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(100, 480)))
+        assert app.screen == "race"
+        human = app.race.racers[0]
+        initial_vertex = human.vertex
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_n))
+        assert human.nitro == 0
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN))
+        for _ in range(100):
+            app.race.tick(.1)
+            if human.vertex != initial_vertex:
+                break
+        assert human.vertex != initial_vertex
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE))
+        assert app.paused
+    finally:
+        pygame.quit()
+
+
+def test_module_entry_point_runs_headless_smoke_check():
+    env = os.environ.copy()
+    env["SDL_VIDEODRIVER"] = "dummy"
+    env["SDL_AUDIODRIVER"] = "dummy"
+    result = subprocess.run([sys.executable, "-m", "smart_racing", "--smoke-test"],
+                            env=env, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_reduced_motion_and_text_contrast():
+    def luminance(color):
+        channels = [value / 255 for value in color]
+        channels = [value / 12.92 if value <= .04045 else ((value + .055) / 1.055) ** 2.4 for value in channels]
+        return .2126 * channels[0] + .7152 * channels[1] + .0722 * channels[2]
+
+    for color in (TEXT, MUTED, ACCENT):
+        ratio = (luminance(color) + .05) / (luminance(PANEL) + .05)
+        assert ratio >= 4.5
+    app = App()
+    try:
+        app.go("settings")
+        assert app.transition_remaining > 0
+        app.toggle_motion()
+        app.go("menu")
+        assert app.reduced_motion and app.transition_remaining == 0
+    finally:
+        pygame.quit()

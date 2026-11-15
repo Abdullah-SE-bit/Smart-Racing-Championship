@@ -1,18 +1,17 @@
 # Project structure and architectural boundaries
 
-Status: **Scaffolding Only — Not Yet Implemented**. Every Python file is an empty
-package initializer. The responsibilities below describe intended future work.
+Status: **Implementation in progress**. The responsibilities below describe the
+intended boundaries; consult the code and tests for what is implemented.
 
 The assignment specification is transcribed in
 [docs/assignment-specification.md](docs/assignment-specification.md) and has been
-checked against the supplied PDF. This structure remains Phase 0 scaffolding;
-implementation still requires explicit user instructions.
+checked against the supplied PDF. The user has authorized implementation.
 
 ## Source packages
 
 | Directory under `src/smart_racing/` | Intended responsibility |
 | --- | --- |
-| Package root | Public package boundary; no startup behavior yet. |
+| Package root | Public package boundary and `python -m smart_racing` entry point. |
 | `core/` | Shared models, graph representations, configuration, and application contracts. |
 | `algorithms/` | Manually implemented mandatory algorithms, independent of Pygame and presentation. |
 | `algorithms/graph/` | Graph traversal and related graph operations. |
@@ -51,7 +50,7 @@ implementation still requires explicit user instructions.
 | `tests/integration/` | Tests across domain, loading, and presentation boundaries. |
 | `tests/fixtures/` | Reusable test data and fixtures. |
 | `experiments/` | Reproducible experimental study tooling and artifacts. |
-| `experiments/benchmarks/` | Drivers for the five required studies. |
+| `experiments/benchmarks/` | Driver for the five required studies. |
 | `experiments/datasets/` | Recorded benchmark input datasets. |
 | `experiments/results/` | Raw measurements, derived summaries, and charts intended for submission. |
 | `docs/` | Project documentation. |
@@ -80,8 +79,8 @@ is needed, future algorithm contracts should expose plain Python traces or
 observer data that both gameplay and the UI can consume, without rendering
 inside algorithms. Experiment drivers must also call these shared algorithms.
 
-Future deterministic behavior requires explicit random seeds where randomness
+Deterministic behavior requires explicit random seeds where randomness
 is allowed, stable tie-breaking, and an engine-controlled simulation clock for
 opponents and events. Studies must record inputs, seeds, dependency versions,
-measurement methods, and raw results. These are architectural intentions only;
-no models, interfaces, algorithms, game behavior, or experiments exist yet.
+measurement methods, and raw results. Continue checking these requirements as
+the game and studies are implemented.
