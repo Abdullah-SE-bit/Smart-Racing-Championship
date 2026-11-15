@@ -4,7 +4,8 @@
 
 Smart Racing Championship is a planned 2D top-down racing game for the Design and
 Analysis of Algorithms course. This repository currently contains only package
-directories, configuration, and documentation. **No playable game exists yet.**
+directories, development infrastructure, configuration, and documentation.
+**No playable game exists yet.**
 There is no application entry point or game command in this phase.
 
 The planned stack is Python 3.12+, Pygame, JSON data files, pytest, Matplotlib,
@@ -49,12 +50,21 @@ For future executable packaging, install the optional packaging tools:
 .\.venv\Scripts\python.exe -m pip install -e ".[packaging]"
 ```
 
-No dependencies need to be installed to inspect this scaffold. Tests will be
-added with functionality in later phases. Once tests exist, run them with
-`.\.venv\Scripts\python.exe -m pytest`; currently pytest has no tests to collect.
+No dependencies need to be installed to inspect this scaffold. Development
+dependencies include Ruff for static analysis and PyYAML for infrastructure
+configuration validation. Application tests will be added with functionality.
+Infrastructure tests validate CI behavior without claiming game correctness.
+Run `.\.venv\Scripts\python.exe -m pytest` to execute discovered tests, or
+`.\.venv\Scripts\python.exe scripts/run_tests.py` for the CI feature-gate report.
 Dependency ranges describe compatibility constraints, not a locked environment.
 Future experimental submissions must record exact versions, inputs, and seeds.
 
 See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for package boundaries and
 [AGENTS.md](AGENTS.md) for repository contribution instructions. Later phases
 require explicit user instructions.
+
+Development uses feature branches into `game`, then an integration PR into
+`main`. Only `main` requires teammate approval; review is optional for `game`.
+See [the workflow](docs/development/WORKFLOW.md),
+[CI policy](docs/development/CI_POLICY.md), and
+[verified governance status](docs/development/GOVERNANCE_STATUS.md).

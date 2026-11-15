@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "features": {
+    "algorithm_correctness": {"status": "pending", "test_paths": ["tests/unit/test_algorithms*.py"]},
+    "game_integration": {"status": "pending", "test_paths": ["tests/integration/test_game*.py"]},
+    "determinism": {"status": "pending", "test_paths": ["tests/integration/test_determinism*.py"]},
+    "experimental_reproducibility": {"status": "pending", "test_paths": ["tests/integration/test_experiments*.py"]},
+    "windows_packaging": {"status": "pending", "test_paths": ["tests/integration/test_packaging*.py"]}
+  }
+}

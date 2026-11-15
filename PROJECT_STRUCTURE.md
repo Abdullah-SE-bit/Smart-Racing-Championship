@@ -1,7 +1,8 @@
 # Project structure and architectural boundaries
 
-Status: **Scaffolding Only — Not Yet Implemented**. Every Python file is an empty
-package initializer. The responsibilities below describe intended future work.
+Status: **Scaffolding Only — Not Yet Implemented**. Every application Python file
+is an empty package initializer. Infrastructure scripts and their tests support
+development only. Domain responsibilities below describe intended future work.
 
 The original `Project.pdf` is unavailable and has not been verified. This design
 uses the supplied Phase 0 requirements; the exact twelve algorithm families,
@@ -59,7 +60,10 @@ before implementation.
 | `docs/algorithms/` | Algorithm explanations, complexity analysis, and assignment mapping. |
 | `docs/testing/` | Test strategy and verification documentation. |
 | `docs/report/` | Assignment report sources and submission material. |
-| `scripts/` | Future maintenance and reproducibility scripts. |
+| `scripts/` | Repository validation and pytest feature-gate reporting; future maintenance tooling. |
+| `.github/` | CI workflow, PR template, and issue forms; no deployment pipeline. |
+| `docs/development/` | Branching, CI, contracts, ownership, review policy, and governance evidence. |
+| `docs/development/handoffs/` | Separate accurate progress records for the three team members. |
 
 Empty non-package directories contain `.gitkeep` so Git preserves them. Runtime
 assets and JSON inputs remain outside the Python package for now; loading paths
@@ -84,4 +88,6 @@ Future deterministic behavior requires explicit random seeds where randomness
 is allowed, stable tie-breaking, and an engine-controlled simulation clock for
 opponents and events. Studies must record inputs, seeds, dependency versions,
 measurement methods, and raw results. These are architectural intentions only;
-no models, interfaces, algorithms, game behavior, or experiments exist yet.
+no domain models, implemented interfaces, algorithms, game behavior, or
+experiments exist yet. See [development contracts](docs/development/INTEGRATION_CONTRACTS.md)
+for proposed fields requiring team approval.

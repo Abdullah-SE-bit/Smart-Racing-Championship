@@ -1,0 +1,41 @@
+name: Feature
+description: Define a focused feature and its acceptance criteria.
+title: "[Feature] "
+body:
+  - type: input
+    id: owner
+    attributes:
+      label: Responsible developer
+      description: Use Member 1, Member 2, or Member 3 until actual identities are agreed.
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective and requirement reference
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and exclusions
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and prerequisite PRs
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Test expectations and integration evidence
+    validations:
+      required: true

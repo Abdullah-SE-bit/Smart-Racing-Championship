@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = ["pygame>=2.6,<3"]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "matplotlib>=3.9,<4"]
+dev = ["pytest>=8,<10", "matplotlib>=3.9,<4", "ruff>=0.14,<1", "PyYAML>=6,<7"]
 packaging = ["pyinstaller>=6,<7"]
 
 [tool.setuptools.packages.find]
@@ -21,3 +21,18 @@ include = ["smart_racing*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+markers = [
+    "algorithm: algorithm correctness and invariant checks",
+    "regression: previously reported defects",
+    "determinism: repeatable outcomes for identical inputs and seeds",
+    "integration: checks spanning domain boundaries",
+    "experiment: benchmark correctness and output reproducibility",
+    "packaging: Windows executable and bundled data checks",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
