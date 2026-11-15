@@ -83,7 +83,7 @@ def _place_obstacles(graph: Graph, main_route: list[int], count: int = 2) -> lis
     return _assign_checkpoints(candidates, count, compatible=separated)
 
 
-def _generate_candidate(seed: int, attempt: int) -> Circuit:
+def _generate_candidate(seed: int, attempt: int, trace: list[dict] | None = None) -> Circuit:
     rng = Random(seed if attempt == 0 else f"{seed}:{attempt}")
     graph = Graph()
     candidates = list(range(1, 11))
@@ -91,6 +91,8 @@ def _generate_candidate(seed: int, attempt: int) -> Circuit:
     checkpoints = _assign_checkpoints(candidates, 10, compatible=_ring_compatible)
     if checkpoints is None:
         raise ValueError("Unable to place ordered checkpoints on the loop")
+    if trace is not None:
+        trace.append({"stage": "checkpoints", "detail": f"Placed {len(checkpoints)} ordered checkpoints"})
     for vertex_id in range(11):
         angle = 2 * pi * vertex_id / 11 - pi / 2
         radius = rng.uniform(.86, 1.06)
@@ -111,6 +113,8 @@ def _generate_candidate(seed: int, attempt: int) -> Circuit:
     if services is None:
         raise ValueError("Unable to place spaced fuel and nitro services")
     fuel_vertex, nitro_vertex = services
+    if trace is not None:
+        trace.append({"stage": "services", "detail": f"Fuel {fuel_vertex}, nitro {nitro_vertex}; spacing checked"})
     graph.add_vertex(Vertex(13, 180, 300, "dead_end"))
     for vertex_id, (x, y) in service_locations.items():
         kind = "fuel" if vertex_id == fuel_vertex else "nitro" if vertex_id == nitro_vertex else "intersection"
@@ -130,11 +134,15 @@ def _generate_candidate(seed: int, attempt: int) -> Circuit:
             candidate_id += 1
     pairs = {(min(candidate.edges[e].source, candidate.edges[e].target),
               max(candidate.edges[e].source, candidate.edges[e].target)) for e in kruskal(candidate)}
+    if trace is not None:
+        trace.append({"stage": "backbone", "detail": f"Kruskal selected {len(pairs)} candidate roads"})
     # Add a guaranteed lap cycle, service alternatives and a single dead end.
     pairs.update((min(i, (i + 1) % 11), max(i, (i + 1) % 11)) for i in range(11))
     pairs.update({(2, fuel_vertex), (3, fuel_vertex), (6, nitro_vertex),
                   (7, nitro_vertex), (4, 13)})
     shortcut_pairs = {(3, fuel_vertex), (7, nitro_vertex)}
+    if trace is not None:
+        trace.append({"stage": "roads", "detail": f"Added lap and alternatives: {len(pairs)} roads"})
     for edge_id, (a, b) in enumerate(sorted(pairs)):
         first, second = graph.vertices[a], graph.vertices[b]
         length = hypot(first.x - second.x, first.y - second.y) / 20
@@ -144,12 +152,14 @@ def _generate_candidate(seed: int, attempt: int) -> Circuit:
     obstacles = _place_obstacles(graph, main_route)
     if obstacles is None:
         raise ValueError("Unable to place spaced obstacles on non-bridge roads")
+    if trace is not None:
+        trace.append({"stage": "obstacles", "detail": f"Placed {len(obstacles)} spaced non-bridge obstacles"})
     for edge_id in obstacles:
         graph.edges[edge_id].obstacle = 1.0
     return Circuit(f"Generated {seed}", graph, 0, checkpoints, main_route)
 
 
-def generate_circuit(seed: int, max_attempts: int = 5) -> Circuit:
+def generate_circuit(seed: int, max_attempts: int = 5, trace: list[dict] | None = None) -> Circuit:
     """Generate and validate deterministic candidates up to a bounded limit."""
     if isinstance(seed, bool) or not isinstance(seed, int):
         raise ValueError("Seed must be an integer")
@@ -158,11 +168,19 @@ def generate_circuit(seed: int, max_attempts: int = 5) -> Circuit:
     last_error = "no candidate"
     for attempt in range(max_attempts):
         try:
-            circuit = _generate_candidate(seed, attempt)
+            if trace is not None:
+                trace.append({"stage": "attempt", "detail": f"Seed {seed}, attempt {attempt + 1}"})
+                circuit = _generate_candidate(seed, attempt, trace)
+            else:
+                circuit = _generate_candidate(seed, attempt)
             errors = validate_circuit(circuit)
             if not errors:
+                if trace is not None:
+                    trace.append({"stage": "accepted", "detail": "Circuit passed validation"})
                 return circuit
             last_error = "; ".join(errors)
         except ValueError as error:
             last_error = str(error)
+        if trace is not None:
+            trace.append({"stage": "rejected", "detail": last_error})
     raise ValueError(f"Could not generate a valid circuit after {max_attempts} attempts: {last_error}")

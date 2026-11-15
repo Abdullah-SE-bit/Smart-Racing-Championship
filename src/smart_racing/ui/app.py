@@ -91,6 +91,8 @@ class App:
         self.alternative_paths = []
         self.alternative_index = 0
         self.alternative_truncated = False
+        self.generation_trace = []
+        self.generation_started = 0.0
 
     def label(self, text, x, y, size=18, color=TEXT):
         self.surface.blit(self.fonts[size].render(str(text), True, color), (int(x), int(y)))
@@ -449,7 +451,8 @@ class App:
             self.validation_message = "Championship circuits follow the fixed season order"
             return
         try:
-            self.circuit = generate_circuit(int(self.time * 1000))
+            self.generation_trace = []
+            self.circuit = generate_circuit(int(self.time * 1000), trace=self.generation_trace)
         except ValueError as error:
             self.validation_message = f"Generation failed: {error}"
             return
@@ -457,6 +460,28 @@ class App:
         self._refuel_cache.clear()
         self.source = self.circuit.start
         self.target = self.circuit.checkpoints[min(3, len(self.circuit.checkpoints) - 1)]
+        self.generation_started = self.time
+        self.go("generation")
+
+    def draw_generation(self):
+        self.header("01 / Generate", "Circuit workshop",
+                    "Follow the actual generation and validation stages for this seeded track.")
+        self.nav()
+        self.card((40, 220, 800, 530))
+        self.draw_map((60, 242, 760, 480), self.circuit)
+        self.label("GENERATED CIRCUIT  /  VALIDATED", 75, 715, 14, ACCENT)
+        self.card((860, 220, 380, 530))
+        self.label(self.circuit.name.upper(), 885, 245, 20, ACCENT)
+        count = len(self.generation_trace) if self.reduced_motion else min(
+            len(self.generation_trace), 1 + int(max(0, self.time - self.generation_started) * 2))
+        visible = self.generation_trace[:count][-7:]
+        for index, step in enumerate(visible):
+            y = 285 + index * 45
+            self.label(step["stage"].upper(), 885, y, 14, GOLD if step["stage"] == "rejected" else ACCENT)
+            self.label(step["detail"][:46], 885, y + 19, 14, MUTED)
+        self.label(self.validation_message, 885, 611, 14, GOLD)
+        self.button((885, 638, 330, 42), "TEST INVALID TRACK", self.demonstrate_rejection)
+        self.button((885, 691, 330, 42), "BACK TO PLANNER", lambda: self.go("planner"))
 
     def draw_comparison(self):
         self.header("01 / Compare", "Route trade-offs", "Each preset optimizes its own normalized, weighted scalar cost.")
@@ -771,7 +796,7 @@ class App:
             self.buttons = []
             self.background()
             {"menu": self.draw_menu, "settings": self.draw_settings, "planner": self.draw_planner,
-             "alternatives": self.draw_alternatives,
+             "alternatives": self.draw_alternatives, "generation": self.draw_generation,
              "compare": self.draw_comparison, "lab": self.draw_lab,
              "race": self.draw_race, "dashboard": self.draw_dashboard,
              "standings": self.draw_standings}[self.screen]()
