@@ -58,6 +58,91 @@ tie-break order follow the assignment. Unfinished racers receive no points.
 | Quick Sort | Alternate standings comparison | O(n log n) average, O(n²) worst case |
 | Heap Sort | Alternate standings comparison | O(n log n) time, O(1) auxiliary space after copying |
 
+## Pseudocode and correctness arguments
+
+**BFS.** Set the start parent to none and enqueue it. While the queue is not
+empty, remove its front vertex; for each open outgoing road, record the parent
+and enqueue an undiscovered neighbor. The FIFO queue visits vertices in
+nondecreasing edge count, so the first parent chain found for a vertex has the
+minimum number of roads. The explorer uses the resulting parents and trace.
+
+**DFS and bounded alternatives.** Mark the start, then repeatedly follow an
+unvisited outgoing neighbor, recording its parent; backtrack when a vertex has
+no remaining neighbors. A visited set prevents infinite traversal of cycles.
+Separate graph helpers test cycles, weak components and dead ends. Alternative
+paths backtrack over vertices already on the current path and stop at explicit
+state, path-count and length limits. A limited search can be incomplete; a
+single traversal is linear, while simple-path enumeration may be exponential.
+
+**Dijkstra.** Set the start distance to zero, push it into a min-heap, and
+repeatedly extract the least tentative distance. For each legal outgoing road,
+relax the destination and push an improved value; ignore stale heap entries.
+With non-negative costs, the first current extraction of the destination has
+optimal cost. Parent roads reconstruct the path; blocked roads are excluded.
+
+**A-star.** Use the same relaxation and parents, but order the heap by the sum
+of tentative cost and a geometric lower bound to the target. The minimum current
+edge-cost-to-geometric-length ratio makes this bound consistent; zero is a safe
+fallback. Therefore a current target extraction is optimal under the same
+non-negative cost assumption. Ordered laps run separate searches for each next
+checkpoint while excluding later checkpoints from each leg.
+
+**Knapsack DP.** For each pickup and budget, store the better value between
+skipping it and taking it if its integer cost fits. Begin with an all-zero row,
+then walk the completed table backwards to recover chosen items. Each row uses
+only the previous row, so every item is used at most once and induction on the
+number of items gives the optimal benefit for each budget. Runtime and storage
+are O(mB), where B is the numeric budget, not its bit length.
+
+**Refuelling DP.** Map each reachable discrete fuel amount to its smallest
+accumulated stop time and purchase history. At each route vertex, try permitted
+purchases, subtract the next edge's requirement, and retain the best history
+for each arrival fuel. A state records everything needed for later transitions,
+so discarding a slower history with the same fuel preserves an optimal plan.
+Fuel is discretized in tenths with conservative rounding; the race engine fills
+up to 40 units at the same fixed stop time. This can leave more fuel than the
+minimum DP purchase without invalidating the plan.
+
+**Greedy pickup choice.** Process positive-benefit zero-cost items first, then
+consider the remaining items in descending exact benefit-to-cost ratio with ID
+ties. Select an item only if it fits the remaining scalar detour budget. The
+result is feasible but not always optimal: the supplied budget-10 case produces
+benefit 30 versus the DP optimum of 48. The study includes two further checked
+counterexamples.
+
+**Backtracking and Kruskal.** The generator attempts candidate placements,
+rejects choices that violate spacing or route constraints, and backtracks when a
+partial placement cannot be completed. It accepts a candidate only after circuit
+validation, with bounded retries. Kruskal sorts undirected candidate roads by
+weight and adds an edge only when union-find places its endpoints in different
+components. The cut property yields a minimum spanning forest; connected
+candidates yield a spanning tree. Extra roads supply laps and alternatives.
+
+**Binary heap and event queue.** Insert by appending and sifting upward; remove
+the root by moving the last element to the root and sifting downward. These
+operations preserve the parent-before-children invariant. Event keys include
+trigger time, priority and insertion sequence, so extracting the minimum gives
+the specified deterministic order. Cancellation is lazy and temporary effects
+have independent expiration events.
+
+**Merge Sort.** Recursively split the entries, sort each half, and merge by the
+shared championship key. Both halves are sorted by induction, and repeatedly
+choosing their smallest front entry produces the sorted result. Its O(n log n)
+work uses O(n) additional storage for merging.
+
+**Quick Sort.** Choose the middle entry's key as pivot, partition entries into
+lower, equal and greater groups, then recursively sort and concatenate the
+outer groups. Each partition preserves all entries and places every lower key
+before every greater key, so induction gives a sorted result. Work averages
+O(n log n) but can be O(n^2); the lists used by this implementation take space.
+
+**Heap Sort and top-k.** Heap Sort builds a max-heap, repeatedly swaps its
+root with the final unsorted position, then restores the heap invariant. Each
+extraction fixes the greatest remaining key at the end. Top-k instead heapifies
+the shared championship keys in a min-heap and extracts k entries. Its output
+is the first k entries of the same total ordering, using O(n + k log n) time
+and O(n) storage. The studies compare this with all three full sorts.
+
 The A* heuristic uses straight-line distance times the smallest current edge
 cost per straight-line edge length, giving a consistent lower bound. Zero is a
 safe fallback. The knapsack recurrence chooses the better of skipping an item
@@ -96,6 +181,21 @@ and `experiments/results/studies.json`. The companion analysis is included
 after this report. Measurements are empirical for one machine and are not proof
 of asymptotic complexity.
 
+## Advanced challenges and observed checks
+
+Generated circuits use a seeded Kruskal backbone and bounded backtracking. A
+separate local check generated and validated seeds 0 through 99; the automated
+suite also completes races on five generated tracks. These checks do not prove
+that every possible seed or layout will succeed. The generator retries invalid
+candidates up to its documented limit, and the interface can save a valid track.
+
+The balanced, speed, economy and safety profiles combine normalized non-negative
+road attributes with different weights. An automated fixture confirms that
+different presets choose different paths; scores from different profiles do not
+share a common scale. The championship dashboard supports a selectable k and
+the heap leaders use the same comparator as the three full sorting methods.
+The fifth study records measured timings for small k and for k close to n.
+
 ## Limitations and remaining submission work
 
 The prototype needs further review against all assignment requirements, broader
@@ -109,5 +209,15 @@ unfinished features or unverified packaging as complete.
 ## Acknowledgements
 
 The project uses Python, Pygame, pytest, Matplotlib, and optional PyInstaller and
-ReportLab. Its prototype graphics are drawn in code. Attribute any third-party
-art, fonts or audio added later according to their licenses.
+ReportLab; dependency declarations and version ranges are in `pyproject.toml`,
+and the measured study environment records installed versions. Circuit data and
+the prototype graphics are authored in this repository. The interface asks the
+operating system for Segoe UI and does not distribute that font. No external art
+or audio is included in the current prototype. Attribute any third-party art,
+fonts or audio added later according to their licenses.
+
+Reference material: the assignment transcription in `docs/assignment-specification.md`;
+Python documentation at https://docs.python.org/3/; Pygame documentation at
+https://pygame.org/docs; pytest documentation at https://docs.pytest.org/;
+Matplotlib documentation at https://matplotlib.org/; PyInstaller documentation
+at https://pyinstaller.org/; and ReportLab at https://www.reportlab.com/.
