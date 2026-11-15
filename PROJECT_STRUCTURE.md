@@ -28,7 +28,7 @@ implementation still requires explicit user instructions.
 | `resources/` | Fuel, nitro, pickups, refuelling, and resource constraints. |
 | `championship/` | Race results, points, rankings, tie-breaking, and progression. |
 | `ui/` | Pygame presentation and input translation. |
-| `ui/screens/` | The five required screens, with exact definitions pending PDF verification. |
+| `ui/screens/` | Main Menu, Track Explorer / Route Planner, Racing Screen, Algorithm Lab, and Championship Dashboard. |
 | `ui/components/` | Reusable presentation components. |
 | `ui/visualization/` | Algorithm Lab rendering of shared algorithm state or traces. |
 | `utils/` | Small utilities that do not belong to a specific domain. |

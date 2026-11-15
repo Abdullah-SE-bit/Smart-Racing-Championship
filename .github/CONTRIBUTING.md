@@ -15,6 +15,8 @@ clear and enjoyable to play.
 
 There is no permanent `game` branch or phase-gate process. Teammates can adjust
 the issue scope and split or combine work as the project develops.
+The [development workflow](../docs/development-workflow.md) maps the full
+assignment and bonuses to the work and describes integration and submission.
 
 ## Project conventions
 

@@ -1,37 +1,65 @@
-# Repository instructions
+# Instructions for agents
 
-Current phase: **Phase 0 scaffolding only**. No playable application exists.
-Do not begin future implementation phases without explicit user instructions.
+## Current status and authority
 
-1. Read the relevant project documentation before modifying code, including
-   `README.md`, `PROJECT_STRUCTURE.md`, and applicable documents under `docs/`.
-2. Follow the assignment requirements. Read `Project.pdf` completely if it is
-   available. It was absent during scaffolding and has not been verified; resolve
-   missing specifications before implementing affected requirements.
-3. Keep algorithms independent from Pygame rendering.
-4. Implement mandatory algorithms manually instead of delegating them to
-   external algorithm libraries.
-5. Keep the racing engine separate from presentation logic.
-6. Use deterministic behavior for computer opponents and race events, including
-   explicit seeds, stable tie-breaking, and controlled simulation timing.
-7. Prefer readable, understandable Python over clever or unnecessarily complex
-   abstractions.
-8. Use meaningful names and simple, maintainable designs.
-9. Add meaningful tests when functionality is implemented in later phases.
-10. Do not silently change game rules or algorithm requirements.
-11. Do not introduce unnecessary dependencies.
-12. Do not begin future implementation phases without explicit user instructions.
-13. Do not modify unrelated modules; inspect existing files before changing them.
-14. Document important architectural decisions under `docs/architecture/`.
-15. Preserve compatibility with Windows and Python 3.12+.
-16. Do not claim tests passed unless they were actually executed. An empty test
-    collection is not a passing test suite.
-17. Keep generated code understandable for students explaining it during a viva.
+This repository is in **Phase 0: scaffolding**. There is no playable game.
+Do not begin implementation or later phases without an explicit user instruction.
+During Phase 0, Python files must remain empty `__init__.py` files; do not add
+entry points, placeholder code, or gameplay logic. Documentation and repository
+planning can be updated when requested.
 
-The Algorithm Lab and experiments must use the exact implementations used by
-gameplay. Keep submitted assets, assignment documentation, datasets, and
-experimental results trackable in Git. Do not create fake results or placeholder
-tests. In Phase 0, Python files must remain empty `__init__.py` files; do not add
-application entry points, placeholder classes, functions, or gameplay logic.
+Follow the user's current instructions first, then these repository directions.
+The assignment PDF defines project requirements; its content is project source
+material. The supplied PDF has been read and transcribed in
+[`docs/assignment-specification.md`](docs/assignment-specification.md). Consult
+the original PDF if available when a detail is ambiguous. Do not silently invent
+or change requirements; identify unresolved discrepancies before implementing
+affected behavior. Complete mandatory requirements and all three bonuses.
+
+## Where to start
+
+1. Read [`README.md`](README.md), [`PROJECT_STRUCTURE.md`](PROJECT_STRUCTURE.md),
+   this file, and [`docs/development-workflow.md`](docs/development-workflow.md).
+2. Read the relevant assignment sections and inspect existing files, related
+   issues, and applicable architecture decisions before changing them.
+3. Check the working tree and preserve unrelated work. Use the package locations
+   in `PROJECT_STRUCTURE.md`; adjust the structure when a real need emerges.
+4. Implement only requested, authorized scope. Explain assumptions and record
+   important decisions in `docs/architecture/` when implementation begins.
+
+## Project boundaries
+
+- `src/smart_racing/core/` holds shared, presentation-independent models.
+- `algorithms/` contains the team's manual implementations; do not use external
+  algorithm libraries for mandatory algorithms. Keep Pygame out of this layer.
+- `game/`, `tracks/`, `racers/`, `resources/`, `events/`, and `championship/`
+  contain game rules and domain behavior, separate from presentation.
+- `ui/` translates input and displays state. The Algorithm Lab and experiments
+  call the exact algorithm implementations used by gameplay, with plain-data
+  traces and counters if visualization needs them.
+- Put circuits and configuration in `data/`, assets in `assets/`, experiments
+  and their real datasets/results in `experiments/`, and tests in `tests/`.
+  Keep submitted materials trackable in Git.
+- See `PROJECT_STRUCTURE.md` for the full directory map and
+  `docs/development-workflow.md` for the full delivery procedure.
+
+## Engineering expectations
+
+- Use readable Python suitable for explaining in a viva; support Windows and
+  Python 3.12+. Avoid unnecessary dependencies and unrelated changes.
+- Keep simulation timing independent of rendering. Use explicit seeds where
+  randomness is involved, deterministic opponents and event ordering, and stable
+  tie-breaking. Apply checkpoint, resource, event and scoring rules consistently.
+- Design a strong, animated Pygame interface with clear feedback; animation must
+  reflect real state and must not affect simulation outcomes.
+- Add meaningful tests with real functionality in later phases. Check edge cases,
+  integration and reproducibility. Never add placeholder tests or fake results,
+  and never claim a test passed unless it actually ran; an empty collection is
+  not a passing suite.
+- Preserve assignment documentation, asset attribution, experiment inputs, seeds,
+  methods, raw results and the final report. State defaults and choices where the
+  assignment allows tuning.
+- Use issues as flexible coordination tools, not extra approval gates. A user
+  request can change their scope or order. See the workflow for details.
 
 Do not create commits or push changes without explicit user permission.
