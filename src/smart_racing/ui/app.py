@@ -479,12 +479,24 @@ class App:
             pygame.draw.line(self.surface, (69, 85, 69), (75, y - 10), (1195, y - 10))
             for value, x in zip(values, (75, 245, 390, 520, 655, 805, 950)):
                 self.label(value, x, y, 18, ACCENT if index == self.profile_index else TEXT)
-            self.label(" → ".join(map(str, route.vertices))[:50] or "No route", 75, y + 27, 14, MUTED)
+            self.label(self.comparison_path(route.vertices, index), 75, y + 27, 14, MUTED)
         self.label("Scalar costs use different weights; lower scores across presets are not directly comparable.", 75, 640, 16, MUTED)
         self.label(self.validation_message[:90], 75, 615, 14, GOLD)
         self.button((75, 675, 255, 50), "VALIDATE BAD TRACK", self.demonstrate_rejection)
         self.button((350, 675, 255, 50), "SAVE CIRCUIT", self.save_current_circuit)
         self.button((900, 675, 280, 50), "BACK TO PLANNER", lambda: self.go("planner"))
+
+    def comparison_path(self, vertices, row):
+        """Reveal the actual route gradually without affecting route selection."""
+        if not vertices:
+            return "No route"
+        if self.reduced_motion:
+            visible = vertices
+        else:
+            step = int(self.time * 3 + row * 2) % (len(vertices) + 6)
+            visible = vertices[:min(len(vertices), step + 1)]
+        suffix = " ..." if len(visible) < len(vertices) else ""
+        return (" → ".join(map(str, visible)) + suffix)[:50]
 
     def demonstrate_rejection(self):
         invalid = deepcopy(self.circuit)

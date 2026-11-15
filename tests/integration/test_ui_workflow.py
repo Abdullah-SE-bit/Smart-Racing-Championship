@@ -219,6 +219,22 @@ def test_planner_alternatives_show_real_bounded_paths():
         pygame.quit()
 
 
+def test_route_comparison_animation_uses_actual_vertices_and_respects_reduced_motion():
+    app = App()
+    try:
+        vertices = [0, 2, 7, 9]
+        app.time = 0
+        assert app.comparison_path(vertices, 0) == "0 ..."
+        app.time = 1
+        assert app.comparison_path(vertices, 0) == "0 → 2 → 7 → 9"
+        app.reduced_motion = True
+        app.time = 0
+        assert app.comparison_path(vertices, 0) == "0 → 2 → 7 → 9"
+        assert app.comparison_path([], 0) == "No route"
+    finally:
+        pygame.quit()
+
+
 def test_module_entry_point_runs_headless_smoke_check():
     env = os.environ.copy()
     env["SDL_VIDEODRIVER"] = "dummy"

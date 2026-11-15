@@ -66,7 +66,7 @@ Use the mouse to navigate. In a race, select a road with the left/right arrow
 keys, press Enter to drive, press N for nitro, and press F at a fuel station to
 refuel. Space pauses the simulation. Championship mode opens the planner before
 each race in the fixed three-circuit season; results carry forward between races.
-The planner can compare presets, switch to
+The planner can compare presets with an animated reveal of each computed route, switch to
 an ordered checkpoint plan, generate a seeded circuit, show an invalid candidate,
 inspect bounded endpoint alternatives, and save a circuit for later selection.
 Generated circuits are available for quick races. Saved circuits are stored in
