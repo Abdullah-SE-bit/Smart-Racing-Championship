@@ -31,7 +31,8 @@ def markdown_flowables(path):
                               fontSize=12, leading=16, textColor=colors.HexColor("#12616a"),
                               spaceBefore=12, spaceAfter=6, keepWithNext=True))
     styles.add(ParagraphStyle(name="BodySmall", parent=styles["BodyText"], fontSize=9.2,
-                              leading=13.5, spaceAfter=7, alignment=TA_LEFT))
+                              leading=13.5, spaceAfter=7, alignment=TA_LEFT,
+                              allowWidows=0, allowOrphans=0))
     styles.add(ParagraphStyle(name="TableSmall", parent=styles["BodyText"], fontSize=7.1,
                               leading=9.2, spaceAfter=0))
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -56,8 +57,8 @@ def markdown_flowables(path):
                                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
                                        ("LEFTPADDING", (0, 0), (-1, -1), 4),
                                        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
-                                       ("TOPPADDING", (0, 0), (-1, -1), 4),
-                                       ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
+                                       ("TOPPADDING", (0, 0), (-1, -1), 1),
+                                       ("BOTTOMPADDING", (0, 0), (-1, -1), 1)]))
             flow.extend([table, Spacer(1, 5 * mm)])
             continue
         if line.startswith("# "):
