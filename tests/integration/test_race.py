@@ -205,6 +205,21 @@ def test_main_route_opponent_uses_fixed_detour_and_waits_if_it_closes():
     assert race._ai_target(opponent) is None
 
 
+def test_fixed_detour_avoids_checkpoints_before_intermediate_service():
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "checkpoint", 1),
+                   Vertex(2, 2, 0, "checkpoint", 2), Vertex(10, 1, 1, "fuel"),
+                   Vertex(11, 0, 1, "intersection")):
+        graph.add_vertex(vertex)
+    for edge in (Edge(0, 0, 10, 1, 1, 1), Edge(1, 10, 1, 1, 1, 1),
+                 Edge(2, 1, 2, 1, 1, 1), Edge(3, 2, 0, 1, 1, 1),
+                 Edge(4, 0, 1, 1, 1, 1), Edge(5, 0, 11, 3, 1, 1),
+                 Edge(6, 11, 10, 3, 1, 1)):
+        graph.add_edge(edge)
+    race = Race(Circuit("Detour", graph, 0, [1, 2], [0, 10, 1, 2, 0]))
+    assert race._fixed_detours[(0, 10)] == [11, 10]
+
+
 def test_distance_opponent_only_seeks_reachable_station_on_its_route():
     race = Race(load_circuit(CIRCUITS[0]))
     opponent = race.racers[3]
@@ -216,6 +231,23 @@ def test_distance_opponent_only_seeks_reachable_station_on_its_route():
     main_road = next(edge for neighbor, edge in race.circuit.graph.neighbors(2) if neighbor == 3)
     main_road.status = "blocked"
     assert race._ai_target(opponent) == 11
+
+
+@pytest.mark.parametrize("strategy", ["main", "shortcut"])
+def test_low_fuel_station_detour_does_not_cross_future_checkpoint(strategy):
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "checkpoint", 1),
+                   Vertex(2, 2, 0, "checkpoint", 2), Vertex(3, 0, 1, "fuel")):
+        graph.add_vertex(vertex)
+    graph.add_edge(Edge(0, 0, 1, 1, 1, 1))
+    graph.add_edge(Edge(1, 0, 2, 1, 1, 1))
+    graph.add_edge(Edge(2, 2, 3, 1, 1, 1))
+    circuit = Circuit("Future checkpoint", graph, 0, [1, 2], [0, 1])
+    racer = Racer(1, "Opponent", strategy, 0, fuel=20)
+    race = Race(circuit, racers=[racer])
+    # The only station route crosses checkpoint 2 before checkpoint 1.
+    # Follow the legal main route instead of taking that station detour.
+    assert race._ai_target(racer) == 1
 
 
 def test_race_ties_and_unfinished_order_use_the_required_keys():

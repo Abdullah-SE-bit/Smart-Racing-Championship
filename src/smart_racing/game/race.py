@@ -105,14 +105,19 @@ class Race:
     def _prepare_detours(self):
         graph = self.circuit.graph
         distance = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0)
-        for index, (source, target) in enumerate(zip(self.circuit.main_route, self.circuit.main_route[1:])):
+        progress = 0
+        for source, target in zip(self.circuit.main_route, self.circuit.main_route[1:]):
+            if progress < len(self.circuit.checkpoints) and source == self.circuit.checkpoints[progress]:
+                progress += 1
             road = next((edge for neighbor, edge in graph.neighbors(source) if neighbor == target), None)
             if road is None:
                 continue
             old_status = road.status
             road.status = "blocked"
             try:
-                future = set(self.circuit.checkpoints[index + 1:])
+                # Main routes can contain service/intersection vertices between
+                # checkpoints, so route position is not checkpoint progress.
+                future = set(self.circuit.checkpoints[progress:]) - {target}
                 route = shortest_path(graph, source, target, distance, avoid_vertices=future)
                 self._fixed_detours[(source, target)] = route.vertices[1:]
             finally:
@@ -257,11 +262,15 @@ class Race:
             # Search active stations that can be reached on the remaining fuel.
             fuel_profile = CostProfile(distance=0, time=0, fuel=1, difficulty=0, obstacle=0,
                                        fuel_reference=1)
+            # A station detour must not route through a checkpoint that has not
+            # become eligible yet; the normal opponent routes obey this too.
+            future = set(self.circuit.checkpoints[racer.next_checkpoint + 1:])
             candidates = []
             for vertex in graph.vertices.values():
                 if vertex.kind != "fuel" or not self.service_active[vertex.id] or vertex.id == racer.vertex:
                     continue
-                route = shortest_path(graph, racer.vertex, vertex.id, fuel_profile)
+                route = shortest_path(graph, racer.vertex, vertex.id, fuel_profile,
+                                      avoid_vertices=future)
                 if route.vertices and route.cost <= racer.fuel:
                     candidates.append((route.cost, vertex.id, route.vertices[1]))
             if candidates:
