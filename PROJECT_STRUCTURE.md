@@ -3,10 +3,10 @@
 Status: **Scaffolding Only — Not Yet Implemented**. Every Python file is an empty
 package initializer. The responsibilities below describe intended future work.
 
-The original `Project.pdf` is unavailable and has not been verified. This design
-uses the supplied Phase 0 requirements; the exact twelve algorithm families,
-five screens, five studies, and detailed game rules require assignment review
-before implementation.
+The assignment specification is transcribed in
+[docs/assignment-specification.md](docs/assignment-specification.md) and has been
+checked against the supplied PDF. This structure remains Phase 0 scaffolding;
+implementation still requires explicit user instructions.
 
 ## Source packages
 

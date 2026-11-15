@@ -1,0 +1,27 @@
+name: Feature or improvement
+description: Propose work for the racing game, algorithms, or animated interface.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: What should we build?
+      description: Describe the outcome in a few sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: assignment
+    attributes:
+      label: Assignment requirement or project area
+      description: Link the relevant PDF section or say whether this is a bonus feature.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: How will we know it is done?
+    validations:
+      required: false
+

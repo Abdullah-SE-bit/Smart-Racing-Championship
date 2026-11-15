@@ -21,11 +21,10 @@ baseline development version recorded in `.python-version`.
 - An Algorithm Lab using the exact algorithm implementations used by gameplay.
 - Five reproducible experimental algorithm studies, automated tests, and reports.
 
-The original assignment `Project.pdf` is absent and has **not been verified**.
-This scaffold follows the supplied Phase 0 requirements. Exact algorithm lists,
-screen definitions, experiment specifications, and game rules must be checked
-against the PDF before implementation. No requirements have been invented to
-fill those gaps.
+The complete assignment specification has been transcribed to
+[docs/assignment-specification.md](docs/assignment-specification.md) and verified
+against the supplied `Project.pdf`. Consult it before implementation; this
+repository remains at Phase 0 scaffolding only.
 
 ## Windows setup (PowerShell)
 
@@ -58,3 +57,6 @@ Future experimental submissions must record exact versions, inputs, and seeds.
 See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for package boundaries and
 [AGENTS.md](AGENTS.md) for repository contribution instructions. Later phases
 require explicit user instructions.
+
+See [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) for the lightweight
+issue, branch, and pull request workflow.

@@ -1,0 +1,31 @@
+name: Algorithm or experiment
+description: Track an algorithm, visualization, or required study.
+title: "algo: "
+labels:
+  - area:algorithms
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Algorithm or experiment and its role
+    validations:
+      required: true
+  - type: textarea
+    id: integration
+    attributes:
+      label: Where it appears in gameplay or the Algorithm Lab
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Expected result and useful checks
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Complexity, assumptions, or other notes
+    validations:
+      required: false
+
