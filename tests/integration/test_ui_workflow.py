@@ -56,6 +56,8 @@ def test_all_screens_render_and_primary_navigation():
         assert app.screen == "standings"
         assert app.recorded
         app.next_championship_race()
+        assert app.screen == "planner" and app.track_index == 1
+        app.start_planned_race()
         assert app.screen == "race" and app.track_index == 1
     finally:
         pygame.quit()
@@ -142,6 +144,9 @@ def test_complete_three_race_championship():
             app.finish_race()
             assert sum(entry.total_points for entry in app.entries) == (race_number + 1) * 70
             app.next_championship_race()
+            if race_number < 2:
+                assert app.screen == "planner"
+                app.start_planned_race()
         assert app.screen == "menu"
     finally:
         pygame.quit()
@@ -167,6 +172,24 @@ def test_mouse_and_keyboard_start_and_drive_a_quick_race():
         assert human.vertex != initial_vertex
         app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE))
         assert app.paused
+    finally:
+        pygame.quit()
+
+
+def test_championship_menu_plans_first_circuit_and_preserves_season_order():
+    app = App()
+    try:
+        app.draw_menu()
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(100, 400)))
+        assert app.screen == "planner" and app.pending_championship
+        first = app.circuit.name
+        app.generate()
+        assert app.circuit.name == first
+        assert "fixed season order" in app.validation_message
+        app.start_planned_race()
+        assert app.championship and not app.pending_championship
+        assert app.race.circuit.name == first
+        assert len(app.entries) == 4
     finally:
         pygame.quit()
 

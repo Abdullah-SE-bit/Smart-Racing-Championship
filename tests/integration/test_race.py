@@ -232,6 +232,19 @@ def test_race_ties_and_unfinished_order_use_the_required_keys():
     assert [record.points_awarded for record in records] == [25, 18, 0, 0]
 
 
+def test_full_ten_racer_points_table():
+    racers = [Racer(index, f"Racer {index}", "human", 0) for index in range(10)]
+    race = Race(load_circuit(CIRCUITS[0]), racers=racers)
+    for index, racer in enumerate(racers):
+        racer.finished = True
+        racer.finish_time = 10 + index
+    results = race.result_records(1)
+    assert [result.points_awarded for result in results] == [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
+    entries = [ChampionshipEntry(racer.id, racer.name) for racer in racers]
+    award_results(entries, results)
+    assert [entry.racer_id for entry in standings(entries)] == list(range(10))
+
+
 def test_closed_road_and_low_fuel_do_not_permit_illegal_move():
     race = Race(load_circuit(CIRCUITS[0]))
     human = race.racers[0]
