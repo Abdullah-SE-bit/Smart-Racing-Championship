@@ -22,3 +22,12 @@ road may be examined from both endpoints. Heap operations count insertions and
 extractions; bottom-up heap construction is included in elapsed time but is not
 counted as insertions. Experiment timing conventions are in the generated
 `experiments/results/analysis.md`.
+
+The explorer's alternatives view uses the shared DFS-style simple-path search.
+It displays up to five routes other than the selected optimum and bounds the
+search to 10,000 states and 16 vertices per path. These limits keep interactive
+search responsive; because enumerating simple paths can be exponential, the UI
+reports when a bound is reached and the result may be incomplete. Parallel roads
+produce one vertex sequence, displayed using the cheapest available road for the
+selected cost profile. This view compares endpoints and does not enforce the
+checkpoint order required by an ordered lap.

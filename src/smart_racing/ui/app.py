@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pygame
 
-from smart_racing.algorithms.graph.traversal import bfs, dead_ends, dfs, has_cycle, weak_components
+from smart_racing.algorithms.graph.traversal import bfs, bounded_simple_paths, dead_ends, dfs, has_cycle, weak_components
 from smart_racing.algorithms.generation.mst import kruskal
 from smart_racing.algorithms.optimization.resources import Pickup, greedy, knapsack
 from smart_racing.algorithms.routing.shortest import checkpoint_route, shortest_path
@@ -87,6 +87,9 @@ class App:
         self.sort_method = "Merge"
         self.validation_message = ""
         self._refuel_cache = {}
+        self.alternative_paths = []
+        self.alternative_index = 0
+        self.alternative_truncated = False
 
     def label(self, text, x, y, size=18, color=TEXT):
         self.surface.blit(self.fonts[size].render(str(text), True, color), (int(x), int(y)))
@@ -282,6 +285,7 @@ class App:
         depth = dfs(graph, self.source)
         unreachable = set(self.circuit.checkpoints) - set(breadth.parents)
         self.draw_map((60, 242, 760, 480), self.circuit, route.edges, route.vertices, unreachable=unreachable)
+        self.button((615, 658, 205, 42), "ALTERNATIVES", self.open_alternatives)
         self.label(f"CHECKPOINTS {len(self.circuit.checkpoints) - len(unreachable)}/{len(self.circuit.checkpoints)} REACHABLE   "
                    f"DFS {len(depth.order)}   "
                    f"Components: {len(weak_components(graph))}   Cycles: {'yes' if has_cycle(graph) else 'no'}   "
@@ -323,6 +327,58 @@ class App:
 
     def toggle_ordered_plan(self):
         self.ordered_plan = not self.ordered_plan
+
+    def open_alternatives(self):
+        """Search a bounded set of simple routes between the selected vertices."""
+        graph = self.circuit.graph
+        paths, self.alternative_truncated = bounded_simple_paths(
+            graph, self.source, self.target, limit=6,
+            max_length=min(len(graph.vertices), 16), max_states=10000)
+        profile = PROFILES[list(PROFILES)[self.profile_index]]
+        selected = shortest_path(graph, self.source, self.target, profile, self.route_algorithm)
+        self.alternative_paths = [path for path in paths if path != selected.vertices][:5]
+        self.alternative_index = 0
+        self.go("alternatives")
+
+    def change_alternative(self, direction):
+        if self.alternative_paths:
+            self.alternative_index = (self.alternative_index + direction) % len(self.alternative_paths)
+
+    def draw_alternatives(self):
+        self.header("01 / Explore", "Alternative roads",
+                    "Simple routes between the selected vertices; checkpoint order is not enforced here.")
+        self.nav()
+        graph = self.circuit.graph
+        breadth, depth = bfs(graph, self.source), dfs(graph, self.source)
+        self.card((40, 220, 800, 530))
+        route = self.alternative_paths[self.alternative_index] if self.alternative_paths else []
+        profile = PROFILES[list(PROFILES)[self.profile_index]]
+        roads = []
+        for source, target in zip(route, route[1:]):
+            road = min((edge for neighbor, edge in graph.neighbors(source) if neighbor == target),
+                       key=lambda edge: (profile.cost(edge), edge.id))
+            roads.append(road)
+        self.draw_map((60, 242, 760, 480), self.circuit, [road.id for road in roads], route)
+        self.label("LIME  /  SELECTED ALTERNATIVE", 75, 715, 14, MUTED)
+        self.card((860, 220, 380, 530))
+        self.label(f"FROM {self.source}  TO {self.target}", 885, 246, 14, ACCENT)
+        minimum = breadth.path_to(self.target)
+        self.label(f"BFS minimum: {len(minimum) - 1} roads" if minimum else "BFS: destination unreachable",
+                   885, 280, 18)
+        self.label(f"DFS visited {len(depth.order)} vertices", 885, 313, 16, MUTED)
+        self.label(f"ALTERNATIVE {self.alternative_index + 1} / {len(self.alternative_paths)}"
+                   if route else "NO ALTERNATIVE FOUND", 885, 361, 18, GOLD)
+        if route:
+            self.label(f"{len(roads)} roads   /   cost {sum(profile.cost(edge) for edge in roads):.3f}",
+                       885, 397, 16)
+            self.label(" > ".join(map(str, route))[:38], 885, 429, 14, MUTED)
+        self.button((885, 480, 157, 48), "PREVIOUS", lambda: self.change_alternative(-1))
+        self.button((1055, 480, 160, 48), "NEXT", lambda: self.change_alternative(1))
+        self.label("At most 5 alternatives shown.", 885, 551, 14, MUTED)
+        self.label("Search: 10,000 states, 16 vertices.", 885, 576, 14, MUTED)
+        self.label("Results may be incomplete." if self.alternative_truncated else "Search finished within its limits.",
+                   885, 601, 14, GOLD if self.alternative_truncated else MUTED)
+        self.button((885, 657, 330, 48), "BACK TO PLANNER", lambda: self.go("planner"))
 
     def draw_settings(self):
         self.header("00 / Race setup", "Controls & settings", "Tune the race and learn the controls before you head to the grid.")
@@ -671,6 +727,7 @@ class App:
             self.buttons = []
             self.background()
             {"menu": self.draw_menu, "settings": self.draw_settings, "planner": self.draw_planner,
+             "alternatives": self.draw_alternatives,
              "compare": self.draw_comparison, "lab": self.draw_lab,
              "race": self.draw_race, "dashboard": self.draw_dashboard,
              "standings": self.draw_standings}[self.screen]()

@@ -171,6 +171,31 @@ def test_mouse_and_keyboard_start_and_drive_a_quick_race():
         pygame.quit()
 
 
+def test_planner_alternatives_show_real_bounded_paths():
+    app = App()
+    try:
+        app.source, app.target = 0, 4
+        app.open_alternatives()
+        assert app.screen == "alternatives"
+        assert app.alternative_paths
+        chosen = shortest_path(app.circuit.graph, 0, 4, PROFILES["Balanced"])
+        for path in app.alternative_paths:
+            assert path[0] == 0 and path[-1] == 4
+            assert path != chosen.vertices and len(path) == len(set(path))
+            assert all(any(neighbor == target for neighbor, _ in app.circuit.graph.neighbors(source))
+                       for source, target in zip(path, path[1:]))
+        app.background()
+        app.draw_alternatives()
+        app.change_alternative(1)
+        assert 0 <= app.alternative_index < len(app.alternative_paths)
+        app.target = app.source
+        app.open_alternatives()
+        assert app.alternative_paths == []
+        app.draw_alternatives()
+    finally:
+        pygame.quit()
+
+
 def test_module_entry_point_runs_headless_smoke_check():
     env = os.environ.copy()
     env["SDL_VIDEODRIVER"] = "dummy"
