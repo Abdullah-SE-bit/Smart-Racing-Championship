@@ -69,6 +69,7 @@ class App:
         self.race = None
         self.selected_road = 0
         self.championship = False
+        self.pending_championship = False
         self.entries = []
         self.recorded = False
         self.profile_index = 0
@@ -141,6 +142,7 @@ class App:
         self.track_index = (self.track_index + direction) % len(self.circuit_paths)
         self.circuit = load_circuit(self.circuit_paths[self.track_index])
         self._refuel_cache.clear()
+        self.validation_message = ""
         self.source = self.circuit.start
         self.target = self.circuit.checkpoints[min(3, len(self.circuit.checkpoints) - 1)]
 
@@ -150,6 +152,7 @@ class App:
             self.circuit = load_circuit(self.circuit_paths[0])
             self.entries = [ChampionshipEntry(i, name) for i, name in enumerate(("YOU", "NOVA", "BLAZE", "VECTOR"))]
         self.championship = championship
+        self.pending_championship = False
         self.race = Race(deepcopy(self.circuit), laps_required=self.laps_setting,
                          time_limit=self.limit_setting)
         graph = self.race.circuit.graph
@@ -177,23 +180,47 @@ class App:
     def next_championship_race(self):
         if self.track_index + 1 < len(self.authored_paths):
             self.set_track(1)
-            self.start_race(True, True)
+            self.pending_championship = True
+            self.go("planner")
         else:
+            self.pending_championship = False
             self.go("menu")
+
+    def prepare_championship(self):
+        """Begin a new championship at the first circuit's planning screen."""
+        self.track_index = 0
+        self.circuit = load_circuit(self.authored_paths[0])
+        self.source = self.circuit.start
+        self.target = self.circuit.checkpoints[min(3, len(self.circuit.checkpoints) - 1)]
+        self._refuel_cache.clear()
+        self.validation_message = ""
+        self.entries = [ChampionshipEntry(i, name) for i, name in enumerate(("YOU", "NOVA", "BLAZE", "VECTOR"))]
+        self.pending_championship = True
+        self.go("planner")
+
+    def open_quick_planner(self):
+        self.pending_championship = False
+        self.go("planner")
+
+    def start_planned_race(self):
+        if self.pending_championship:
+            self.start_race(championship=True, next_race=True)
+        else:
+            self.start_race(championship=False)
 
     def draw_menu(self):
         self.label("SMART RACING CHAMPIONSHIP  /  SEASON 01", 50, 113, 14, ACCENT)
         self.label("FIND YOUR", 45, 150, 62)
         self.label("RACING LINE.", 45, 229, 42, ACCENT)
         self.label("Ten checkpoints. Changing roads. One finish line.", 50, 309, 18, MUTED)
-        self.button((50, 375, 360, 70), "START CHAMPIONSHIP", lambda: self.start_race(True), subtitle="Three circuits  /  one champion")
+        self.button((50, 375, 360, 70), "START CHAMPIONSHIP", self.prepare_championship, subtitle="Three circuits  /  one champion")
         self.button((50, 457, 360, 70), "QUICK RACE", lambda: self.start_race(False), subtitle="Jump straight onto the circuit")
-        self.button((50, 539, 172, 52), "ROUTE PLANNER", lambda: self.go("planner"))
+        self.button((50, 539, 172, 52), "ROUTE PLANNER", self.open_quick_planner)
         self.button((238, 539, 172, 52), "ALGORITHM LAB", lambda: self.go("lab"))
         self.button((50, 600, 360, 38), "CONTROLS & SETTINGS", lambda: self.go("settings"))
         self.label("CHOOSE CIRCUIT", 50, 642, 14, MUTED)
         self.button((50, 670, 50, 46), "‹", lambda: self.set_track(-1))
-        self.button((112, 670, 236, 46), self.circuit.name.upper(), lambda: self.go("planner"))
+        self.button((112, 670, 236, 46), self.circuit.name.upper(), self.open_quick_planner)
         self.button((360, 670, 50, 46), "›", lambda: self.set_track(1))
         self.card((480, 100, 750, 630), (25, 41, 34), 22)
         self.label("CIRCUIT PREVIEW", 510, 124, 14, ACCENT)
@@ -298,8 +325,10 @@ class App:
         self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", 885, 391, 14, MUTED)
         self.button((885, 430, 330, 48), f"PRESET: {profile_name.upper()}", self.cycle_profile)
         self.button((885, 488, 330, 48), f"ALGORITHM: {self.route_algorithm.upper()}", self.toggle_route_algorithm)
-        self.button((885, 546, 330, 48), "GENERATE CIRCUIT", self.generate)
-        self.button((885, 604, 330, 48), "START QUICK RACE", lambda: self.start_race(False))
+        self.button((885, 546, 330, 48), "FIXED SEASON ORDER" if self.pending_championship else "GENERATE CIRCUIT", self.generate)
+        race_label = (f"START RACE {self.track_index + 1} / {len(self.authored_paths)}"
+                      if self.pending_championship else "START QUICK RACE")
+        self.button((885, 604, 330, 48), race_label, self.start_planned_race)
         suggestions = pickup_suggestions(self.circuit.graph, self.source, self.target)
         selected = [item for item in suggestions if item.dp_selected]
         recommendation = (f"PICKUP {selected[0].vertex} / DP {selected[0].benefit} / GREEDY {int(selected[0].greedy_selected)}"
@@ -416,6 +445,9 @@ class App:
             self.transition_remaining = 0
 
     def generate(self):
+        if self.pending_championship:
+            self.validation_message = "Championship circuits follow the fixed season order"
+            return
         try:
             self.circuit = generate_circuit(int(self.time * 1000))
         except ValueError as error:
