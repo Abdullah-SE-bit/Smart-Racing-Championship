@@ -67,25 +67,55 @@ def dfs(graph: Graph, start: int) -> Traversal:
 
 def simple_paths(graph: Graph, start: int, target: int, limit: int = 10,
                  max_length: int | None = None) -> list[list[int]]:
-    """Enumerate at most limit simple paths; enumeration can be exponential."""
+    """Enumerate at most limit simple paths within the bounded search."""
+    paths, _ = bounded_simple_paths(graph, start, target, limit, max_length)
+    return paths
+
+
+def bounded_simple_paths(graph: Graph, start: int, target: int, limit: int = 10,
+                         max_length: int | None = None,
+                         max_states: int = 50000) -> tuple[list[list[int]], bool]:
+    """Return simple vertex paths and whether a search bound was reached.
+
+    Enumeration can be exponential even when no route exists, so both the
+    number of explored states and the number and length of paths are bounded.
+    Parallel roads do not produce duplicate vertex sequences.
+    """
     if start not in graph.vertices or target not in graph.vertices:
         raise ValueError("Unknown vertex")
     if limit <= 0:
-        return []
+        return [], False
+    if max_states < 1:
+        raise ValueError("Search state limit must be positive")
     max_length = max_length if max_length is not None else len(graph.vertices)
     if max_length < 1:
         raise ValueError("Path length limit must be positive")
     result = []
     path = [start]
     visited = {start}
+    explored = 0
+    truncated = False
+    stopped = False
 
     def visit(current):
+        nonlocal explored, truncated, stopped
+        if explored >= max_states:
+            truncated = True
+            stopped = True
+            return
+        explored += 1
         if current == target:
             result.append(path.copy())
             return
         if len(path) >= max_length:
+            if any(neighbor not in visited for neighbor, _ in graph.neighbors(current)):
+                truncated = True
             return
+        considered = set()
         for neighbor, _ in graph.neighbors(current):
+            if neighbor in considered:
+                continue
+            considered.add(neighbor)
             if neighbor not in visited:
                 visited.add(neighbor)
                 path.append(neighbor)
@@ -93,10 +123,14 @@ def simple_paths(graph: Graph, start: int, target: int, limit: int = 10,
                 path.pop()
                 visited.remove(neighbor)
                 if len(result) >= limit:
+                    truncated = True
+                    stopped = True
+                    return
+                if stopped:
                     return
 
     visit(start)
-    return result
+    return result, truncated
 
 
 def ordered_lap_paths(graph: Graph, start: int, checkpoints: list[int], limit: int = 2,

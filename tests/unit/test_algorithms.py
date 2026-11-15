@@ -5,7 +5,7 @@ from random import Random
 import pytest
 
 from smart_racing.algorithms.generation.mst import kruskal
-from smart_racing.algorithms.graph.traversal import bfs, dead_ends, dfs, has_cycle, simple_paths, weak_components
+from smart_racing.algorithms.graph.traversal import bfs, bounded_simple_paths, dead_ends, dfs, has_cycle, simple_paths, weak_components
 from smart_racing.algorithms.optimization.resources import Pickup, greedy, knapsack, refuel_plan
 from smart_racing.algorithms.routing.shortest import checkpoint_route, shortest_path
 from smart_racing.algorithms.sorting.rankings import heap_sort, merge_sort, quick_sort, top_k
@@ -38,6 +38,22 @@ def test_traversals_reachability_and_simple_paths():
     assert 3 in dead_ends(graph, 0)
     graph.edges[2].status = "blocked"
     assert bfs(graph, 0).path_to(2) == [0, 1, 2]
+
+
+def test_bounded_alternative_paths_report_limits_and_avoid_parallel_duplicates():
+    graph = sample_graph()
+    graph.add_edge(Edge(9, 0, 1, 2, 2, 2))
+    paths, truncated = bounded_simple_paths(graph, 0, 2, limit=10)
+    assert paths == [[0, 1, 2], [0, 2]]
+    assert not truncated
+    paths, truncated = bounded_simple_paths(graph, 0, 2, limit=1)
+    assert len(paths) == 1 and truncated
+    paths, truncated = bounded_simple_paths(graph, 0, 4, max_states=2)
+    assert paths == [] and truncated
+    paths, truncated = bounded_simple_paths(graph, 0, 2, max_length=2)
+    assert paths == [[0, 2]] and truncated
+    with pytest.raises(ValueError, match="state limit"):
+        bounded_simple_paths(graph, 0, 2, max_states=0)
 
 
 def test_shortest_paths_blocked_edges_zero_cost_and_waypoints():
