@@ -54,6 +54,9 @@ reports unknown main-route vertices before accessing adjacency lists.
   A racer with no affordable outgoing edge and no available refuelling option
   is DNF; the time limit resolves other prolonged waits. Unaffordable selected
   roads are rejected if another affordable road exists.
+- Fixed detours calculate checkpoint progress from the actual main route, which
+  may include intermediate services or intersections. Refuelling searches avoid
+  later checkpoints; neither kind of detour is allowed to visit them early.
 - The score table is 25, 18, 15, 12, 10, 8, 6, 4, 2, 1. There are no bonus
   points. Championship ties use wins, sum of positions, best lap, then racer ID.
 
