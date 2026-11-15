@@ -35,8 +35,9 @@ automatically. No automated direct pushes, fixes, merges, or deployments.
 
 `main` requires one approving eligible teammate other than the author, resolved
 conversations, and ultimately all verified required CI checks. `game` requires
-no review approval; feedback is optional. CI is intended for both branches, but
-required status enforcement is pending publication and a successful first run.
+no review approval; feedback is optional. All four CI contexts and strict
+up-to-date enforcement are active on `game`. Main's status enforcement awaits
+its separately authorized rollout and successful main-target run.
 See [current remote status](GOVERNANCE_STATUS.md).
 
 A main reviewer checks the requirement mapping, contracts, readable algorithm

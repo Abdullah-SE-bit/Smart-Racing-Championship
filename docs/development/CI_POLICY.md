@@ -17,8 +17,10 @@ required checks. Manual dispatch requires the workflow on the default branch.
 | Integration Validation | Windows / 3.12 | Dependency consistency, installed package import, dummy SDL display infrastructure and full pytest/gates on Windows. |
 
 Workflow display may show `CI / <job>`, but required check contexts are the
-actual check-run names, expected to be the four job names above. **No names have
-yet been observed in remote Actions runs.** Do not configure assumed contexts.
+actual check-run names. The four names above were observed succeeding on PR #1
+and are now required on `game`, bound to GitHub Actions with strict up-to-date
+enforcement. Main's required contexts await its separate rollout. Do not
+configure assumed contexts or treat a previous revision's success as current.
 
 Ruff explicitly selects `E4`, `E7`, `E9`, and `F` for import/statement errors,
 syntax/common mistakes, unused imports and undefined names. No line-length,
@@ -80,8 +82,8 @@ exist and no build is claimed.
 5. Do not require a context that has never run successfully, invent check
    results, disable review, or bypass protection to bootstrap CI.
 
-See [remote status and manual paths](GOVERNANCE_STATUS.md). Until rollout, review
-protections exist but required CI and up-to-date enforcement do not.
+See [remote status and manual paths](GOVERNANCE_STATUS.md). Required CI and strict
+up-to-date enforcement are active on `game`; main's status gates remain pending.
 
 Fix failures on the feature branch, rerun relevant local checks and CI, and
 refresh main review after changing the diff. Do not bypass failing checks.

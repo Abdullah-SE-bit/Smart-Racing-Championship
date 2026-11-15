@@ -12,11 +12,12 @@ This is an observation record, not a guarantee that later settings remain unchan
   classic branch protection, and successful API mutations/read-back verify support.
 - `main` remains at `ab22643faaf574df8d986009d0f65eb44213ec0c`.
 - Remote `game` was created from that exact current main commit, without rewriting history.
-- Local `game` tracks `origin/game`; uncommitted infrastructure work is isolated
-  on local `chore/repository-governance`, which has not been published.
-- No feature branches, issues, commits, PRs, merges, or pushes were created by
-  this infrastructure task. Creating the explicitly requested remote `game`
-  reference used the GitHub API.
+- Local `game` tracks `origin/game`. Infrastructure branch
+  `chore/repository-governance` is published as PR #1 into `game`, with user
+  authorization to push and merge after successful CI. No main merge is authorized.
+- No feature implementation issues or branches were created. The remote `game`
+  reference was created using the GitHub API; infrastructure commits and PR #1
+  were subsequently published with explicit user authorization.
 - No existing workflow, template, ruleset or protection was found initially.
   Classic protection is now the sole configured mechanism; rulesets remain empty.
 - Automatic branch deletion and auto-merge remain disabled. No visibility,
@@ -33,8 +34,8 @@ This is an observation record, not a guarantee that later settings remain unchan
 | Administrator enforcement | Enabled and verified | Enabled and verified |
 | Force pushes | Blocked and verified | Blocked and verified |
 | Branch deletion | Blocked and verified | Blocked and verified |
-| Required status checks | Not enabled; no published successful checks yet | Not enabled; no published successful checks yet |
-| Require branch up to date | Not enabled; requires status-check rollout | Not enabled; requires status-check rollout |
+| Required status checks | Pending a successful main-target rollout | Four verified GitHub Actions contexts enabled |
+| Require branch up to date | Pending main status-check rollout | Enabled and verified (strict checks) |
 | Code-owner approval | Not enabled; no eligible ownership entries | Not enabled |
 | Explicit PR bypass allowances | None returned by protection API | None returned by protection API |
 
@@ -46,19 +47,28 @@ Only the owner is currently listed as a collaborator. Add eligible teammates
 before attempting a main PR authored by the owner. No extra review accounts or
 team approvals were invented. The main approval gate must not be bypassed.
 
-## Remaining rollout (requires explicit publication authorization)
+## Publication and remaining main rollout
 
-Local files do not activate Actions or templates. No remote CI run has occurred.
-Follow [CI_POLICY.md](CI_POLICY.md) to publish through an infrastructure PR,
-observe successful check names, and enable exact required contexts. Do not
-weaken review protection or require unseen contexts to bootstrap CI.
+The user authorized pushing and merging the infrastructure branch into `game`.
+[PR #1](https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/pull/1)
+published the workflow. The first
+[CI run](https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/actions/runs/43735487239)
+succeeded on Linux and Windows. Its actual check names are Repository Validation,
+Python Quality, Automated Tests, and Integration Validation. All four are now
+required on `game`, bound to the GitHub Actions app, with strict freshness and
+zero required approvals; configuration was read back from the API.
+
+The PR must pass again after documentation updates before the authorized merge.
+Main integration is a separate task requiring explicit authorization and one
+eligible non-author approval. Observe a successful main-target run before
+enabling main's required contexts. Do not bypass review to bootstrap CI.
 
 Manual paths in this repository:
 
 - **Settings → Collaborators → Add people**: invite the actual teammate accounts
   with appropriate write access; acceptance is required for eligible review.
 - **Settings → Branches → Branch protection rules → Edit** `main` or `game`:
-  preserve the table above. After actual successful runs, enable **Require
+  preserve the table above. For main, after actual successful runs, enable **Require
   status checks to pass before merging**, select all four actual job contexts
   from GitHub Actions, and enable **Require branches to be up to date before
   merging**. Keep game's required approval count at zero; main's at one.
@@ -92,7 +102,8 @@ Executed on Windows with Python 3.12.16 in ignored `.venv`:
 
 Selected installed tool versions: pytest 9.2.0, Ruff 0.17.5, PyYAML 6.0.3,
 Pygame 2.6.1, Matplotlib 3.11.2. These observations are not a dependency lock.
-Linux execution and actual GitHub Actions conclusions are **not verified**.
+Remote Linux and Windows execution subsequently passed in the linked initial CI
+run. This verifies infrastructure only; later revisions require fresh checks.
 Algorithm correctness, game integration, determinism, experimental
 reproducibility and Windows executable packaging remain pending in the manifest.
 
