@@ -74,8 +74,11 @@ they are not arbitrarily dependent on each other.
 
 ## Pending integrations
 
-Current coordination infrastructure branch/PR will be recorded once actually
-published. No application PR is open. Do not infer a PR number before creation.
+Infrastructure [PR #190](https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/pull/190)
+targets main from maintenance/phase-gate-governance. Initial revision 7eb1402
+passed all five checks, including Phase Gate Validation. It remains OPEN,
+awaiting eligible non-author approval; review requests failed with HTTP 422
+because Taha/Shaheer are not collaborators. No application PR is open.
 
 ## Latest accepted phase
 
@@ -124,3 +127,6 @@ Planned Phase 01 issue links are recorded in each named handoff; no implementati
   Ruff, compilation and all three workflow actionlint checks passed.
 - Read-only live gate audit found 0 closed gates: no phase is accepted.
 - Main promotion/default-branch audit activation and eligible review remain pending.
+- Main now requires five observed check contexts with strict freshness, verified
+  by API. Game retains the original four; additional phase enforcement awaits
+  infrastructure synchronization and a successful game-target run.

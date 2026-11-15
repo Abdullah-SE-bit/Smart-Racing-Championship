@@ -19,8 +19,11 @@ required checks. Manual dispatch requires the workflow on the default branch.
 Workflow display may show `CI / <job>`, but required check contexts are the
 actual check-run names. The four names above were observed succeeding on PR #1
 and are now required on `game`, bound to GitHub Actions with strict up-to-date
-enforcement. Main's required contexts await its separate rollout. Do not
-configure assumed contexts or treat a previous revision's success as current.
+enforcement. PR #190 subsequently emitted all four plus Phase Gate Validation
+successfully against main; those five contexts are now configured as required
+on main with strict freshness. The new policy files are not yet merged into
+main/game, and the default-branch issue audit is not activated. Do not configure
+assumed contexts or treat a previous revision's success as current.
 
 Ruff explicitly selects `E4`, `E7`, `E9`, and `F` for import/statement errors,
 syntax/common mistakes, unused imports and undefined names. No line-length,
@@ -83,7 +86,9 @@ exist and no build is claimed.
    results, disable review, or bypass protection to bootstrap CI.
 
 See [remote status and manual paths](GOVERNANCE_STATUS.md). Required CI and strict
-up-to-date enforcement are active on `game`; main's status gates remain pending.
+up-to-date enforcement are active on `game`; main has five observed required
+contexts. Game's additional phase context awaits publication and a verified
+game-target run; default-branch issue audit activation awaits the reviewed merge.
 
 Fix failures on the feature branch, rerun relevant local checks and CI, and
 refresh main review after changing the diff. Do not bypass failing checks.

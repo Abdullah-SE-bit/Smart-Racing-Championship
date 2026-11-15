@@ -32,3 +32,7 @@ definition or final schema has been approved by this log.
   early future-phase implementation examples. Planning is allowed; code is not.
 - Gate audit is read-only. Premature closure is a failing diagnostic, not an
   automatic issue rewrite. No privileged PR execution or fake completion history.
+- PR #190 targets main to bootstrap default-branch issue events. Initial Linux/
+  Windows CI and Phase Gate Validation succeeded; main now requires the five
+  actual observed contexts with strict freshness. Default audit and game phase
+  check rollout remain pending the reviewed publication/synchronization.

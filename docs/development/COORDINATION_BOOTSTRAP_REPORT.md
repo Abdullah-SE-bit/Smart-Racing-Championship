@@ -1,6 +1,6 @@
 # Coordination bootstrap report
 
-Status: prepared locally; real GitHub backlog and dependencies verified. Publication/approval pending.
+Status: prepared and pushed in [PR #190](https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/pull/190); real backlog/dependencies verified. Not fully activated: main approval/merge and shared-branch rollout remain pending.
 
 ## A. Repository changes
 
@@ -88,15 +88,15 @@ mandoff.md and all three named files exist; legacy MEMBER records are preserved.
 
 ## F. CI and activation
 
-26 local infrastructure tests passed; validator, Ruff, compileall and actionlint passed. No application features are verified. Phase Gate Validation and read-only Issue Gate Audit are prepared. Issue-event audit needs default-branch publication; new required check contexts must follow actual successful runs and activation. No gate is closed or accepted.
+26 local infrastructure tests passed; validator, Ruff, compileall and actionlint passed. No application features are verified. Phase Gate Validation passed on the actual bootstrap PR. Initial main-target CI run [43739881327](https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/actions/runs/43739881327) and phase run [43739881267](https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/actions/runs/43739881267) succeeded on revision 7eb1402. Main now requires five observed contexts with strict freshness, read back from the API. Game retains four original CI contexts; its new phase context awaits source publication and a successful game-target run. Issue Gate Audit is locally tested/read-only but not activated on the default branch. No gate is closed or accepted.
 
 ## G. Git / PR
 
-Branch: maintenance/phase-gate-governance. Initial publication is pending. No protected branch was pushed or rewritten; main/game remain unchanged by this task so far.
+Branch: maintenance/phase-gate-governance; initial commit 7eb1402 is pushed. [PR #190](https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/pull/190) is OPEN into main and requires a non-author approval. No protected branch was pushed or rewritten; main/game commit SHAs remain unchanged. Documentation updates follow on this same branch; inspect current PR head checks for final results.
 
 ## H. Manual prerequisites
 
-Add TahaSohail-Goat and Artfever as eligible collaborators (Settings ? Collaborators ? Add people), then obtain non-author approval for the main bootstrap PR. Both accounts are verified but not currently assignable. Project.pdf is absent; plan claims of prior PDF review are not verification by this task. Activate required phase contexts only after actual successful available runs and target workflow publication.
+Add TahaSohail-Goat and Artfever as eligible collaborators (Settings ? Collaborators ? Add people), then obtain non-author approval for the main bootstrap PR. Both accounts are verified but not currently assignable. Review requests were attempted and rejected by GitHub with HTTP 422 because neither is a collaborator. Project.pdf is absent; plan claims of prior PDF review are not verification by this task. After approved main publication, synchronize infrastructure into game through a PR, verify its phase check and enable that context there. Run the default-branch issue audit and complete actual P00 acceptance evidence. Main review and CI cannot be bypassed.
 
 ## I. Next authorized step
 

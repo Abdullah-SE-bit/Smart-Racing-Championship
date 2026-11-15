@@ -34,8 +34,8 @@ This is an observation record, not a guarantee that later settings remain unchan
 | Administrator enforcement | Enabled and verified | Enabled and verified |
 | Force pushes | Blocked and verified | Blocked and verified |
 | Branch deletion | Blocked and verified | Blocked and verified |
-| Required status checks | Pending a successful main-target rollout | Four verified GitHub Actions contexts enabled |
-| Require branch up to date | Pending main status-check rollout | Enabled and verified (strict checks) |
+| Required status checks | Five observed successful contexts configured, including Phase Gate Validation | Four original verified CI contexts; additional phase context pending rollout |
+| Require branch up to date | Enabled and verified (strict checks) | Enabled and verified (strict checks) |
 | Code-owner approval | Not enabled; no eligible ownership entries | Not enabled |
 | Explicit PR bypass allowances | None returned by protection API | None returned by protection API |
 
@@ -60,9 +60,10 @@ zero required approvals; configuration was read back from the API.
 
 PR #1 subsequently passed the final revision and merged into game at
 f66889e70e83f27d95a256c97cb08c45cd34c125; the merge-triggered CI also passed.
-Main integration is a separate task requiring explicit authorization and one
-eligible non-author approval. Observe a successful main-target run before
-enabling main's required contexts. Do not bypass review to bootstrap CI.
+Main integration requires explicit authorization and one eligible non-author
+approval. PR #190 supplied the first successful main-target run; five exact
+contexts are now configured with strict freshness. The PR remains open and the
+issue audit is not active on the default branch. Do not bypass review to bootstrap CI.
 
 Manual paths in this repository:
 
@@ -128,10 +129,19 @@ an infrastructure PR, but no gameplay or automatic phase advancement. Branch
 maintenance/phase-gate-governance prepares named handoffs, central mandoff,
 strict phase policy and read-only Phase Gate Validation / Issue Gate Audit.
 Publication, CI results and activation status are recorded in the final bootstrap
-report; local files alone do not activate enforcement. P00 remains open.
+report; local files alone do not activate enforcement. PR #190 passed all five
+checks on initial revision 7eb1402, and main's five required contexts were read
+back from the API. The workflow files remain unmerged; P00 remains open.
 
 Accounts TahaSohail-Goat (Taha) and Artfever (Shaheer) were user-supplied and
 verified via GitHub user API; neither is currently assignable. Their issue
 ownership remains in bodies, and eligible teammate access/review is unresolved.
 All three share coordination, with one central writer at a time. 04-P05 remains
 optional by explicit user decision. No real student implementation is recorded.
+
+Requesting reviews from TahaSohail-Goat and Artfever on PR #190 returned HTTP 422:
+GitHub permits review requests only from collaborators. Add eligible access and
+obtain a real non-author approval before main integration. After main merge,
+synchronize infrastructure into game through a validated PR, verify the new
+phase check there and add it as required. Run the default-branch issue audit and
+complete actual P00 acceptance evidence; do not begin Phase 01 automatically.

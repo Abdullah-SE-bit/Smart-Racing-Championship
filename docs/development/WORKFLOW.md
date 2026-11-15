@@ -40,8 +40,10 @@ automatically. No automated direct pushes, fixes, merges, or deployments.
 `main` requires one approving eligible teammate other than the author, resolved
 conversations, and ultimately all verified required CI checks. `game` requires
 no review approval; feedback is optional. All four CI contexts and strict
-up-to-date enforcement are active on `game`. Main's status enforcement awaits
-its separately authorized rollout and successful main-target run.
+up-to-date enforcement are active on `game`. Main now requires those checks plus
+Phase Gate Validation after successful bootstrap PR #190 runs. The new policy
+files are still awaiting publication to main/game; game phase enforcement and
+default-branch issue-event auditing are not yet activated.
 See [current remote status](GOVERNANCE_STATUS.md).
 
 A main reviewer checks the requirement mapping, contracts, readable algorithm

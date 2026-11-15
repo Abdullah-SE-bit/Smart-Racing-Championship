@@ -4,8 +4,10 @@
 development integration branch. Do not develop features directly on either.
 Feature branches normally start from `game`. `main` needs one eligible
 non-author approval; **`game` has no approval requirement**. Both require PRs,
-block force pushes/deletion, and are intended to require the same four CI jobs
-after successful rollout. See [verified settings](GOVERNANCE_STATUS.md).
+block force pushes/deletion, and require the original four CI jobs with strict
+freshness. Main additionally requires Phase Gate Validation after its verified
+bootstrap run; the additional game phase context awaits publication/rollout.
+See [verified settings](GOVERNANCE_STATUS.md).
 
 For planned work, prefer `feature/01-c01-description` (or `feature/p01-c01-description`)
 so the phase validator can match the leading exact plan ID. Off-plan work may
