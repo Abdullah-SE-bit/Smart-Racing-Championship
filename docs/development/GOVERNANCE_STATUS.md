@@ -58,7 +58,8 @@ Python Quality, Automated Tests, and Integration Validation. All four are now
 required on `game`, bound to the GitHub Actions app, with strict freshness and
 zero required approvals; configuration was read back from the API.
 
-The PR must pass again after documentation updates before the authorized merge.
+PR #1 subsequently passed the final revision and merged into game at
+f66889e70e83f27d95a256c97cb08c45cd34c125; the merge-triggered CI also passed.
 Main integration is a separate task requiring explicit authorization and one
 eligible non-author approval. Observe a successful main-target run before
 enabling main's required contexts. Do not bypass review to bootstrap CI.
@@ -119,3 +120,18 @@ gh api repos/Abdullah-SE-bit/Smart-Racing-Championship/actions/workflows
 
 References: [protected branches and public-plan availability](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches),
 [protection API](https://docs.github.com/en/rest/branches/branch-protection).
+
+## Phase coordination bootstrap (2026-11-15)
+
+The new task authorizes creating real backlog issues/dependencies and publishing
+an infrastructure PR, but no gameplay or automatic phase advancement. Branch
+maintenance/phase-gate-governance prepares named handoffs, central mandoff,
+strict phase policy and read-only Phase Gate Validation / Issue Gate Audit.
+Publication, CI results and activation status are recorded in the final bootstrap
+report; local files alone do not activate enforcement. P00 remains open.
+
+Accounts TahaSohail-Goat (Taha) and Artfever (Shaheer) were user-supplied and
+verified via GitHub user API; neither is currently assignable. Their issue
+ownership remains in bodies, and eligible teammate access/review is unresolved.
+All three share coordination, with one central writer at a time. 04-P05 remains
+optional by explicit user decision. No real student implementation is recorded.

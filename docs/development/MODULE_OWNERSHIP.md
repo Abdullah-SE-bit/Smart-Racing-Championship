@@ -1,37 +1,34 @@
-# Proposed ownership and review policy
+# Team ownership and review policy
 
-Temporary identifiers only. This matrix is a **proposal**, not accepted team
-assignments. No real identities, account permissions, or registration numbers
-are inferred.
+The user supplied the provisional A/B/C mapping below. Exact per-task ownership,
+including joint owners, comes from implementation_plan.md and the issue registry.
+Primary responsibility is not exclusive file ownership or permission to claim
+future implementation. All students must contribute and understand the project.
 
-| Scope | Proposed primary | Suggested reviewer | Backup reviewer |
-| --- | --- | --- | --- |
-| Core graphs, traversal, routing, generation, track validation | Member 1 | Member 2 | Member 3 |
-| Engine, racers, events, resources, optimization | Member 2 | Member 3 | Member 1 |
-| UI, Algorithm Lab, championship, sorting, experiments | Member 3 | Member 1 | Member 2 |
-| Shared structures, integration tests, contracts, CI, final packaging | All; name one owner per issue | A non-author member | The remaining non-author member |
+| Role | Developer | Verified account | Primary responsibility | Suggested review / backup |
+| --- | --- | --- | --- | --- |
+| A | Abdullah | Abdullah-SE-bit | Algorithms, graph modelling, optimization | Reviews B; backup C |
+| B | Taha | TahaSohail-Goat | Racing simulation, opponents, events, championship | Reviews C; backup A |
+| C | Shaheer | Artfever | Pygame UI, visualization, tests, demos, tooling | Reviews A; backup B |
 
-All three review shared interfaces. Member 1 proposes graph/route contracts,
-Member 2 proposes simulation/event/resource contracts, and Member 3 proposes
-presentation/result/metrics consumers. Integration responsibility belongs to
-the issue owner with affected consumers participating. These roles need team
-confirmation before implementation.
+Account identities were supplied by the user and verified through GitHub's user
+API. Only Abdullah is currently assignable in this repository; other issue
+assignees remain unset with human-readable ownership preserved. Actual teammate
+access must be added before eligible main/kickoff review. No registration numbers
+are known or invented. Joint ownership remains joint even when only one owner
+can be represented by an eligible GitHub assignee.
 
-Only `main` requires one eligible teammate approval; `game` requires none.
-Optional feedback may follow this matrix. Never require both suggested and
-backup reviewers, and never count author approval. A reviewer must have eligible
-repository access; assign actual collaborators before the first main merge.
+All three share coordination under the one-writer-at-a-time central handoff
+procedure. Each kickoff names an acting writer and one integrator per task;
+explicitly hand over that role rather than editing shared state concurrently.
 
-As verified on 2026-11-15, the API lists only the repository owner as a
-collaborator. The other students' accounts and access remain unconfigured; the
-owner cannot satisfy their own PR's main approval requirement. Do not switch
-accounts to impersonate a teammate or bypass this requirement.
+Shared graph/route/trace, simulation/event/resource and result/metrics interfaces
+need producer/consumer agreement before dependent code. Per-task plan ownership
+overrides this broad module map. Escalate conflicts, serialize changes, record
+accepted decisions and add contract tests. No silent interface/rule changes.
 
-CODEOWNERS is intentionally omitted until real eligible usernames and paths
-are agreed. It is optional and never replaces the one-approval rule. Do not
-enable required code-owner review without actual eligible owners.
-
-For overlapping edits, stop the affected edits, compare contracts and diffs,
-agree one issue owner, record the decision, and have an unaffected member
-resolve disagreement. Escalate unresolved architecture or assignment conflicts
-to the user rather than silently changing behavior.
+Main requires one eligible non-author approval; game retains zero required
+reviews. Kickoff teammate sign-off is an additional phase-start policy. Optional
+feedback otherwise follows the review suggestions above; never require both
+primary and backup reviewer. CODEOWNERS remains omitted until eligible accounts
+and final paths are agreed; code-owner approval is not enabled.

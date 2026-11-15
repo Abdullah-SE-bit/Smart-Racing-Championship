@@ -68,3 +68,11 @@ Development uses feature branches into `game`, then an integration PR into
 See [the workflow](docs/development/WORKFLOW.md),
 [CI policy](docs/development/CI_POLICY.md), and
 [verified governance status](docs/development/GOVERNANCE_STATUS.md).
+
+The complete [implementation roadmap](implementation_plan.md) defines task IDs
+and planned A/B/C ownership. It does not authorize implementation. Start every
+session with [mandoff.md](mandoff.md), the named personal handoff and the
+[issue registry](docs/development/ISSUE_REGISTRY.md). Abdullah, Taha and Shaheer
+share coordination with one central writer at a time. Phase 01 must wait for
+accepted P00, explicit authorization and a published kickoff. See
+[phase policy](docs/development/PHASE_GATE_POLICY.md).

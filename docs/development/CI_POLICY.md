@@ -104,6 +104,23 @@ Windows packaging with real assets, manual gameplay/visual evidence, eligible
 main review and successful full CI. The missing PDF, performance interpretation,
 viva understanding and visual quality cannot be resolved by a green job alone.
 
+## Phase governance rollout
+
+Separate read-only workflows add `Phase Gate Validation` for PRs/reviews and
+`Issue Gate Audit` for issue close/reopen/edit events. They reuse Python/checkout
+pins and never run PR code with issue-write permissions. The normal CI job
+names remain unchanged. New phase checks are not active merely because files
+exist: observe a successful actual run before adding their exact contexts to
+protection. Issue-event audit requires default-branch publication; normal PR
+validation can run on the infrastructure bootstrap PR into game.
+
+Gate data is read from the trusted target revision, not a self-authorizing PR.
+Infrastructure-only maintenance has an explicit validated bootstrap exception;
+missing metadata otherwise fails. Follow [PHASE_GATE_POLICY.md](PHASE_GATE_POLICY.md).
+The read-only audit reports premature closures and requires human reopening;
+automatic reopening is not configured. Rerun phase checks after external gate
+or authorization updates when the PR head has not changed.
+
 References: [GitHub workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax),
 [required checks](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks),
 [pytest exit codes](https://docs.pytest.org/en/stable/reference/exit-codes.html),

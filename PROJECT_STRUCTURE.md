@@ -64,6 +64,8 @@ before implementation.
 | `.github/` | CI workflow, PR template, and issue forms; no deployment pipeline. |
 | `docs/development/` | Branching, CI, contracts, ownership, review policy, and governance evidence. |
 | `docs/development/handoffs/` | Separate accurate progress records for the three team members. |
+| `mandoff.md` | Central activity/blocker/next-action record, consolidated by one acting writer at a time. |
+| `implementation_plan.md` | Authoritative task roadmap; not evidence of implementation or phase authorization. |
 
 Empty non-package directories contain `.gitkeep` so Git preserves them. Runtime
 assets and JSON inputs remain outside the Python package for now; loading paths

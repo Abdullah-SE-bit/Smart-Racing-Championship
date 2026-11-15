@@ -7,8 +7,12 @@ Merge → Handoff. This document authorizes no feature implementation or merges.
 
 Read the assignment (currently unavailable), root instructions, relevant
 contracts, issue, existing code, and your handoff. Confirm the assigned scope
-and owner. No implementation issues have been created by this infrastructure
-task. Once feature work is authorized, agree an issue before implementation.
+and owner. Task issues are mapped in [ISSUE_REGISTRY.md](ISSUE_REGISTRY.md).
+Read [mandoff.md](../../mandoff.md), own named handoff and the complete plan.
+Before implementation, accepted previous gate, human authorization, merged
+shared kickoff and a separate pushed personal-handoff claim are mandatory.
+Follow [CONCURRENCY_POLICY.md](CONCURRENCY_POLICY.md) and
+[HANDOFF_POLICY.md](HANDOFF_POLICY.md). The issue backlog does not authorize code.
 
 Check `git status`, fetch the remote, and inspect the intended parent branch.
 Do not overwrite dirty work. Start `feature/<descriptive-name>` from current

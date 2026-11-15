@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "authorized_phase": null,
+  "authorization_comment_id": null,
+  "authorized_task_ids": [],
+  "coordination": {"mode": "shared_serialized", "members": ["Abdullah", "Taha", "Shaheer"], "acting_writer": null},
+  "members": {
+    "Abdullah": {"login": "Abdullah-SE-bit", "role": "A", "handoff": "docs/development/handoffs/HANDOFF_ABDULLAH.md"},
+    "Taha": {"login": "TahaSohail-Goat", "role": "B", "handoff": "docs/development/handoffs/HANDOFF_TAHA.md"},
+    "Shaheer": {"login": "Artfever", "role": "C", "handoff": "docs/development/handoffs/HANDOFF_SHAHEER.md"}
+  },
+  "kickoff": null,
+  "claims": {}
+}

@@ -12,3 +12,5 @@
 - Pending reviews: None assigned.
 - Next steps: Confirm identity and ownership; await explicit feature instruction and scoped issue.
 - Last update date: 2026-11-15 (Asia/Karachi), initialized by infrastructure setup.
+
+Legacy bootstrap record preserved. Current named handoff: [HANDOFF_TAHA.md](HANDOFF_TAHA.md).

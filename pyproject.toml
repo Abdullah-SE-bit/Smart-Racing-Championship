@@ -20,6 +20,7 @@ include = ["smart_racing*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-ra"
 markers = [
     "algorithm: algorithm correctness and invariant checks",

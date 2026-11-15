@@ -18,4 +18,17 @@ approvals. Add decisions with context, alternatives, reason, status and evidence
 | D011 | Graph, route, event/resource/results contracts and ownership matrix | Establish integration discussion points without implementing or inventing game rules | Proposed; team approval and PDF verification required |
 
 The assignment PDF is absent. No algorithm-family list, scoring formula, screen
-definition, final schema or team identity has been approved by this log.
+definition or final schema has been approved by this log.
+
+## Coordination decisions (current user task)
+
+- User supplied A=Abdullah, B=Taha, C=Shaheer, preserving joint plan ownership.
+  Verified logins: Abdullah-SE-bit, TahaSohail-Goat, Artfever. Taha/Shaheer are
+  not currently assignable; account access remains a manual prerequisite.
+- User confirmed 04-P05 remains optional; it is represented but does not block P04.
+- All three coordinate handoffs. Shared responsibility uses one acting central
+  writer per update and documented handover, not a permanent exclusive coordinator.
+- Strict previous-gate acceptance and new authorization override the roadmap's
+  early future-phase implementation examples. Planning is allowed; code is not.
+- Gate audit is read-only. Premature closure is a failing diagnostic, not an
+  automatic issue rewrite. No privileged PR execution or fake completion history.

@@ -1,0 +1,1146 @@
+{
+  "schema_version": 1,
+  "repo": "Abdullah-SE-bit/Smart-Racing-Championship",
+  "plan_sha256": "ab44ecc51963dd4a931d87608b82b83733b775418294b3aab295a1de95fa4ab0",
+  "updated_at": "2026-11-15T17:10:48.555235+00:00",
+  "issues": {
+    "P16-GATE": {
+      "number": 189,
+      "id": 6406783109,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/189",
+      "state": "open"
+    },
+    "P15-GATE": {
+      "number": 188,
+      "id": 6406782763,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/188",
+      "state": "open"
+    },
+    "P14-GATE": {
+      "number": 187,
+      "id": 6406782334,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/187",
+      "state": "open"
+    },
+    "P13-GATE": {
+      "number": 186,
+      "id": 6406781982,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/186",
+      "state": "open"
+    },
+    "P12-GATE": {
+      "number": 185,
+      "id": 6406781638,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/185",
+      "state": "open"
+    },
+    "P11-GATE": {
+      "number": 184,
+      "id": 6406781325,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/184",
+      "state": "open"
+    },
+    "P10-GATE": {
+      "number": 183,
+      "id": 6406780974,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/183",
+      "state": "open"
+    },
+    "P09-GATE": {
+      "number": 182,
+      "id": 6406780471,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/182",
+      "state": "open"
+    },
+    "P08-GATE": {
+      "number": 181,
+      "id": 6406780086,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/181",
+      "state": "open"
+    },
+    "P07-GATE": {
+      "number": 180,
+      "id": 6406779672,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/180",
+      "state": "open"
+    },
+    "P06-GATE": {
+      "number": 179,
+      "id": 6406779240,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/179",
+      "state": "open"
+    },
+    "P05-GATE": {
+      "number": 178,
+      "id": 6406778920,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/178",
+      "state": "open"
+    },
+    "P04-GATE": {
+      "number": 177,
+      "id": 6406778547,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/177",
+      "state": "open"
+    },
+    "P03-GATE": {
+      "number": 176,
+      "id": 6406778159,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/176",
+      "state": "open"
+    },
+    "P02-GATE": {
+      "number": 175,
+      "id": 6406777771,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/175",
+      "state": "open"
+    },
+    "P01-GATE": {
+      "number": 174,
+      "id": 6406777333,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/174",
+      "state": "open"
+    },
+    "P00-GATE": {
+      "number": 173,
+      "id": 6406776966,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/173",
+      "state": "open"
+    },
+    "16-I02": {
+      "number": 172,
+      "id": 6406776525,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/172",
+      "state": "open"
+    },
+    "16-I01": {
+      "number": 171,
+      "id": 6406775989,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/171",
+      "state": "open"
+    },
+    "16-P04": {
+      "number": 170,
+      "id": 6406775547,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/170",
+      "state": "open"
+    },
+    "16-P03": {
+      "number": 169,
+      "id": 6406775139,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/169",
+      "state": "open"
+    },
+    "16-P02": {
+      "number": 168,
+      "id": 6406774690,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/168",
+      "state": "open"
+    },
+    "16-P01": {
+      "number": 167,
+      "id": 6406774201,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/167",
+      "state": "open"
+    },
+    "16-C05": {
+      "number": 166,
+      "id": 6406773821,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/166",
+      "state": "open"
+    },
+    "16-C04": {
+      "number": 165,
+      "id": 6406773169,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/165",
+      "state": "open"
+    },
+    "16-C03": {
+      "number": 164,
+      "id": 6406772749,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/164",
+      "state": "open"
+    },
+    "16-C02": {
+      "number": 163,
+      "id": 6406772411,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/163",
+      "state": "open"
+    },
+    "16-C01": {
+      "number": 162,
+      "id": 6406772011,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/162",
+      "state": "open"
+    },
+    "15-I02": {
+      "number": 161,
+      "id": 6406771569,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/161",
+      "state": "open"
+    },
+    "15-I01": {
+      "number": 160,
+      "id": 6406771141,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/160",
+      "state": "open"
+    },
+    "15-P03": {
+      "number": 159,
+      "id": 6406770690,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/159",
+      "state": "open"
+    },
+    "15-P02": {
+      "number": 158,
+      "id": 6406770287,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/158",
+      "state": "open"
+    },
+    "15-P01": {
+      "number": 157,
+      "id": 6406769909,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/157",
+      "state": "open"
+    },
+    "15-C03": {
+      "number": 156,
+      "id": 6406769548,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/156",
+      "state": "open"
+    },
+    "15-C02": {
+      "number": 155,
+      "id": 6406769145,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/155",
+      "state": "open"
+    },
+    "15-C01": {
+      "number": 154,
+      "id": 6406768709,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/154",
+      "state": "open"
+    },
+    "14-I02": {
+      "number": 153,
+      "id": 6406768309,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/153",
+      "state": "open"
+    },
+    "14-I01": {
+      "number": 152,
+      "id": 6406767793,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/152",
+      "state": "open"
+    },
+    "14-P03": {
+      "number": 151,
+      "id": 6406767238,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/151",
+      "state": "open"
+    },
+    "14-P02": {
+      "number": 150,
+      "id": 6406766862,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/150",
+      "state": "open"
+    },
+    "14-P01": {
+      "number": 149,
+      "id": 6406766506,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/149",
+      "state": "open"
+    },
+    "14-C03": {
+      "number": 148,
+      "id": 6406766073,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/148",
+      "state": "open"
+    },
+    "14-C02": {
+      "number": 147,
+      "id": 6406765670,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/147",
+      "state": "open"
+    },
+    "14-C01": {
+      "number": 146,
+      "id": 6406765221,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/146",
+      "state": "open"
+    },
+    "13-I02": {
+      "number": 145,
+      "id": 6406764645,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/145",
+      "state": "open"
+    },
+    "13-I01": {
+      "number": 144,
+      "id": 6406764199,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/144",
+      "state": "open"
+    },
+    "13-P03": {
+      "number": 143,
+      "id": 6406763736,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/143",
+      "state": "open"
+    },
+    "13-P02": {
+      "number": 142,
+      "id": 6406763341,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/142",
+      "state": "open"
+    },
+    "13-P01": {
+      "number": 141,
+      "id": 6406762970,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/141",
+      "state": "open"
+    },
+    "13-C04": {
+      "number": 140,
+      "id": 6406762551,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/140",
+      "state": "open"
+    },
+    "13-C03": {
+      "number": 139,
+      "id": 6406762019,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/139",
+      "state": "open"
+    },
+    "13-C02": {
+      "number": 138,
+      "id": 6406761561,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/138",
+      "state": "open"
+    },
+    "13-C01": {
+      "number": 137,
+      "id": 6406761080,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/137",
+      "state": "open"
+    },
+    "12-I02": {
+      "number": 136,
+      "id": 6406760651,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/136",
+      "state": "open"
+    },
+    "12-I01": {
+      "number": 135,
+      "id": 6406760183,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/135",
+      "state": "open"
+    },
+    "12-P05": {
+      "number": 134,
+      "id": 6406759725,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/134",
+      "state": "open"
+    },
+    "12-P04": {
+      "number": 133,
+      "id": 6406759329,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/133",
+      "state": "open"
+    },
+    "12-P03": {
+      "number": 132,
+      "id": 6406758953,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/132",
+      "state": "open"
+    },
+    "12-P02": {
+      "number": 131,
+      "id": 6406758533,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/131",
+      "state": "open"
+    },
+    "12-P01": {
+      "number": 130,
+      "id": 6406758123,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/130",
+      "state": "open"
+    },
+    "12-C06": {
+      "number": 129,
+      "id": 6406757712,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/129",
+      "state": "open"
+    },
+    "12-C05": {
+      "number": 128,
+      "id": 6406757170,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/128",
+      "state": "open"
+    },
+    "12-C04": {
+      "number": 127,
+      "id": 6406756792,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/127",
+      "state": "open"
+    },
+    "12-C03": {
+      "number": 126,
+      "id": 6406756355,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/126",
+      "state": "open"
+    },
+    "12-C02": {
+      "number": 125,
+      "id": 6406755945,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/125",
+      "state": "open"
+    },
+    "12-C01": {
+      "number": 124,
+      "id": 6406755541,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/124",
+      "state": "open"
+    },
+    "11-I02": {
+      "number": 123,
+      "id": 6406755008,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/123",
+      "state": "open"
+    },
+    "11-I01": {
+      "number": 122,
+      "id": 6406754562,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/122",
+      "state": "open"
+    },
+    "11-P04": {
+      "number": 121,
+      "id": 6406754019,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/121",
+      "state": "open"
+    },
+    "11-P03": {
+      "number": 120,
+      "id": 6406753615,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/120",
+      "state": "open"
+    },
+    "11-P02": {
+      "number": 119,
+      "id": 6406753205,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/119",
+      "state": "open"
+    },
+    "11-P01": {
+      "number": 118,
+      "id": 6406752830,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/118",
+      "state": "open"
+    },
+    "11-C04": {
+      "number": 117,
+      "id": 6406752448,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/117",
+      "state": "open"
+    },
+    "11-C03": {
+      "number": 116,
+      "id": 6406752097,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/116",
+      "state": "open"
+    },
+    "11-C02": {
+      "number": 115,
+      "id": 6406751695,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/115",
+      "state": "open"
+    },
+    "11-C01": {
+      "number": 114,
+      "id": 6406751265,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/114",
+      "state": "open"
+    },
+    "10-I02": {
+      "number": 113,
+      "id": 6406750812,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/113",
+      "state": "open"
+    },
+    "10-I01": {
+      "number": 112,
+      "id": 6406750357,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/112",
+      "state": "open"
+    },
+    "10-P04": {
+      "number": 111,
+      "id": 6406749930,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/111",
+      "state": "open"
+    },
+    "10-P03": {
+      "number": 110,
+      "id": 6406749525,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/110",
+      "state": "open"
+    },
+    "10-P02": {
+      "number": 109,
+      "id": 6406749088,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/109",
+      "state": "open"
+    },
+    "10-P01": {
+      "number": 108,
+      "id": 6406748619,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/108",
+      "state": "open"
+    },
+    "10-C04": {
+      "number": 107,
+      "id": 6406748236,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/107",
+      "state": "open"
+    },
+    "10-C03": {
+      "number": 106,
+      "id": 6406747865,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/106",
+      "state": "open"
+    },
+    "10-C02": {
+      "number": 105,
+      "id": 6406747430,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/105",
+      "state": "open"
+    },
+    "10-C01": {
+      "number": 104,
+      "id": 6406746942,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/104",
+      "state": "open"
+    },
+    "09-I02": {
+      "number": 103,
+      "id": 6406746513,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/103",
+      "state": "open"
+    },
+    "09-I01": {
+      "number": 102,
+      "id": 6406746024,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/102",
+      "state": "open"
+    },
+    "09-P04": {
+      "number": 101,
+      "id": 6406745611,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/101",
+      "state": "open"
+    },
+    "09-P03": {
+      "number": 100,
+      "id": 6406745237,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/100",
+      "state": "open"
+    },
+    "09-P02": {
+      "number": 99,
+      "id": 6406744893,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/99",
+      "state": "open"
+    },
+    "09-P01": {
+      "number": 98,
+      "id": 6406744475,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/98",
+      "state": "open"
+    },
+    "09-C04": {
+      "number": 97,
+      "id": 6406744093,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/97",
+      "state": "open"
+    },
+    "09-C03": {
+      "number": 96,
+      "id": 6406743551,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/96",
+      "state": "open"
+    },
+    "09-C02": {
+      "number": 95,
+      "id": 6406743125,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/95",
+      "state": "open"
+    },
+    "09-C01": {
+      "number": 94,
+      "id": 6406742659,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/94",
+      "state": "open"
+    },
+    "08-I02": {
+      "number": 93,
+      "id": 6406742085,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/93",
+      "state": "open"
+    },
+    "08-I01": {
+      "number": 92,
+      "id": 6406741578,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/92",
+      "state": "open"
+    },
+    "08-P05": {
+      "number": 91,
+      "id": 6406741162,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/91",
+      "state": "open"
+    },
+    "08-P04": {
+      "number": 90,
+      "id": 6406740706,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/90",
+      "state": "open"
+    },
+    "08-P03": {
+      "number": 89,
+      "id": 6406740355,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/89",
+      "state": "open"
+    },
+    "08-P02": {
+      "number": 88,
+      "id": 6406739953,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/88",
+      "state": "open"
+    },
+    "08-P01": {
+      "number": 87,
+      "id": 6406739522,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/87",
+      "state": "open"
+    },
+    "08-C04": {
+      "number": 86,
+      "id": 6406739115,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/86",
+      "state": "open"
+    },
+    "08-C03": {
+      "number": 85,
+      "id": 6406738732,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/85",
+      "state": "open"
+    },
+    "08-C02": {
+      "number": 84,
+      "id": 6406738276,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/84",
+      "state": "open"
+    },
+    "08-C01": {
+      "number": 83,
+      "id": 6406737832,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/83",
+      "state": "open"
+    },
+    "07-I02": {
+      "number": 82,
+      "id": 6406737385,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/82",
+      "state": "open"
+    },
+    "07-I01": {
+      "number": 81,
+      "id": 6406736991,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/81",
+      "state": "open"
+    },
+    "07-P05": {
+      "number": 80,
+      "id": 6406736577,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/80",
+      "state": "open"
+    },
+    "07-P04": {
+      "number": 79,
+      "id": 6406736210,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/79",
+      "state": "open"
+    },
+    "07-P03": {
+      "number": 78,
+      "id": 6406735850,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/78",
+      "state": "open"
+    },
+    "07-P02": {
+      "number": 77,
+      "id": 6406735403,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/77",
+      "state": "open"
+    },
+    "07-P01": {
+      "number": 76,
+      "id": 6406735093,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/76",
+      "state": "open"
+    },
+    "07-C06": {
+      "number": 75,
+      "id": 6406734723,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/75",
+      "state": "open"
+    },
+    "07-C05": {
+      "number": 74,
+      "id": 6406734329,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/74",
+      "state": "open"
+    },
+    "07-C04": {
+      "number": 73,
+      "id": 6406733804,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/73",
+      "state": "open"
+    },
+    "07-C03": {
+      "number": 72,
+      "id": 6406733403,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/72",
+      "state": "open"
+    },
+    "07-C02": {
+      "number": 71,
+      "id": 6406733050,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/71",
+      "state": "open"
+    },
+    "07-C01": {
+      "number": 70,
+      "id": 6406732699,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/70",
+      "state": "open"
+    },
+    "06-I02": {
+      "number": 69,
+      "id": 6406732332,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/69",
+      "state": "open"
+    },
+    "06-I01": {
+      "number": 68,
+      "id": 6406731916,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/68",
+      "state": "open"
+    },
+    "06-P05": {
+      "number": 67,
+      "id": 6406731543,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/67",
+      "state": "open"
+    },
+    "06-P04": {
+      "number": 66,
+      "id": 6406731202,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/66",
+      "state": "open"
+    },
+    "06-P03": {
+      "number": 65,
+      "id": 6406730869,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/65",
+      "state": "open"
+    },
+    "06-P02": {
+      "number": 64,
+      "id": 6406730537,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/64",
+      "state": "open"
+    },
+    "06-P01": {
+      "number": 63,
+      "id": 6406730179,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/63",
+      "state": "open"
+    },
+    "06-C06": {
+      "number": 62,
+      "id": 6406729773,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/62",
+      "state": "open"
+    },
+    "06-C05": {
+      "number": 61,
+      "id": 6406729340,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/61",
+      "state": "open"
+    },
+    "06-C04": {
+      "number": 60,
+      "id": 6406728806,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/60",
+      "state": "open"
+    },
+    "06-C03": {
+      "number": 59,
+      "id": 6406728403,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/59",
+      "state": "open"
+    },
+    "06-C02": {
+      "number": 58,
+      "id": 6406727953,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/58",
+      "state": "open"
+    },
+    "06-C01": {
+      "number": 57,
+      "id": 6406727474,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/57",
+      "state": "open"
+    },
+    "05-I02": {
+      "number": 56,
+      "id": 6406727058,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/56",
+      "state": "open"
+    },
+    "05-I01": {
+      "number": 55,
+      "id": 6406726597,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/55",
+      "state": "open"
+    },
+    "05-P05": {
+      "number": 54,
+      "id": 6406726196,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/54",
+      "state": "open"
+    },
+    "05-P04": {
+      "number": 53,
+      "id": 6406725813,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/53",
+      "state": "open"
+    },
+    "05-P03": {
+      "number": 52,
+      "id": 6406725359,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/52",
+      "state": "open"
+    },
+    "05-P02": {
+      "number": 51,
+      "id": 6406724905,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/51",
+      "state": "open"
+    },
+    "05-P01": {
+      "number": 50,
+      "id": 6406724479,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/50",
+      "state": "open"
+    },
+    "05-C05": {
+      "number": 49,
+      "id": 6406724128,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/49",
+      "state": "open"
+    },
+    "05-C04": {
+      "number": 48,
+      "id": 6406723709,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/48",
+      "state": "open"
+    },
+    "05-C03": {
+      "number": 47,
+      "id": 6406723302,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/47",
+      "state": "open"
+    },
+    "05-C02": {
+      "number": 46,
+      "id": 6406722878,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/46",
+      "state": "open"
+    },
+    "05-C01": {
+      "number": 45,
+      "id": 6406722491,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/45",
+      "state": "open"
+    },
+    "04-I02": {
+      "number": 44,
+      "id": 6406722032,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/44",
+      "state": "open"
+    },
+    "04-I01": {
+      "number": 43,
+      "id": 6406721533,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/43",
+      "state": "open"
+    },
+    "04-P05": {
+      "number": 42,
+      "id": 6406721041,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/42",
+      "state": "open"
+    },
+    "04-P04": {
+      "number": 41,
+      "id": 6406720627,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/41",
+      "state": "open"
+    },
+    "04-P03": {
+      "number": 40,
+      "id": 6406720229,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/40",
+      "state": "open"
+    },
+    "04-P02": {
+      "number": 39,
+      "id": 6406719846,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/39",
+      "state": "open"
+    },
+    "04-P01": {
+      "number": 38,
+      "id": 6406719489,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/38",
+      "state": "open"
+    },
+    "04-C06": {
+      "number": 37,
+      "id": 6406719080,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/37",
+      "state": "open"
+    },
+    "04-C05": {
+      "number": 36,
+      "id": 6406718610,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/36",
+      "state": "open"
+    },
+    "04-C04": {
+      "number": 35,
+      "id": 6406718184,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/35",
+      "state": "open"
+    },
+    "04-C03": {
+      "number": 34,
+      "id": 6406717705,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/34",
+      "state": "open"
+    },
+    "04-C02": {
+      "number": 33,
+      "id": 6406717223,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/33",
+      "state": "open"
+    },
+    "04-C01": {
+      "number": 32,
+      "id": 6406716881,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/32",
+      "state": "open"
+    },
+    "03-I02": {
+      "number": 31,
+      "id": 6406716421,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/31",
+      "state": "open"
+    },
+    "03-I01": {
+      "number": 30,
+      "id": 6406715949,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/30",
+      "state": "open"
+    },
+    "03-P04": {
+      "number": 29,
+      "id": 6406715607,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/29",
+      "state": "open"
+    },
+    "03-P03": {
+      "number": 28,
+      "id": 6406715171,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/28",
+      "state": "open"
+    },
+    "03-P02": {
+      "number": 27,
+      "id": 6406714684,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/27",
+      "state": "open"
+    },
+    "03-P01": {
+      "number": 26,
+      "id": 6406714285,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/26",
+      "state": "open"
+    },
+    "03-C04": {
+      "number": 25,
+      "id": 6406713918,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/25",
+      "state": "open"
+    },
+    "03-C03": {
+      "number": 24,
+      "id": 6406713522,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/24",
+      "state": "open"
+    },
+    "03-C02": {
+      "number": 23,
+      "id": 6406713170,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/23",
+      "state": "open"
+    },
+    "03-C01": {
+      "number": 22,
+      "id": 6406712828,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/22",
+      "state": "open"
+    },
+    "02-I02": {
+      "number": 21,
+      "id": 6406712425,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/21",
+      "state": "open"
+    },
+    "02-I01": {
+      "number": 20,
+      "id": 6406711969,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/20",
+      "state": "open"
+    },
+    "02-P04": {
+      "number": 19,
+      "id": 6406711583,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/19",
+      "state": "open"
+    },
+    "02-P03": {
+      "number": 18,
+      "id": 6406711230,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/18",
+      "state": "open"
+    },
+    "02-P02": {
+      "number": 17,
+      "id": 6406710914,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/17",
+      "state": "open"
+    },
+    "02-P01": {
+      "number": 16,
+      "id": 6406710547,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/16",
+      "state": "open"
+    },
+    "02-C04": {
+      "number": 15,
+      "id": 6406710160,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/15",
+      "state": "open"
+    },
+    "02-C03": {
+      "number": 14,
+      "id": 6406709709,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/14",
+      "state": "open"
+    },
+    "02-C02": {
+      "number": 13,
+      "id": 6406709257,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/13",
+      "state": "open"
+    },
+    "02-C01": {
+      "number": 12,
+      "id": 6406708749,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/12",
+      "state": "open"
+    },
+    "01-I02": {
+      "number": 11,
+      "id": 6406708299,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/11",
+      "state": "open"
+    },
+    "01-I01": {
+      "number": 10,
+      "id": 6406707869,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/10",
+      "state": "open"
+    },
+    "01-P04": {
+      "number": 9,
+      "id": 6406707509,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/9",
+      "state": "open"
+    },
+    "01-P03": {
+      "number": 8,
+      "id": 6406707144,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/8",
+      "state": "open"
+    },
+    "01-P02": {
+      "number": 7,
+      "id": 6406706799,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/7",
+      "state": "open"
+    },
+    "01-P01": {
+      "number": 6,
+      "id": 6406706412,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/6",
+      "state": "open"
+    },
+    "01-C04": {
+      "number": 5,
+      "id": 6406705993,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/5",
+      "state": "open"
+    },
+    "01-C03": {
+      "number": 4,
+      "id": 6406705564,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/4",
+      "state": "open"
+    },
+    "01-C02": {
+      "number": 3,
+      "id": 6406705103,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/3",
+      "state": "open"
+    },
+    "01-C01": {
+      "number": 2,
+      "id": 6406704623,
+      "url": "https://github.com/Abdullah-SE-bit/Smart-Racing-Championship/issues/2",
+      "state": "open"
+    }
+  },
+  "audit": {
+    "status": "VERIFIED",
+    "tasks": 171,
+    "gates": 17,
+    "expected_edges": 582,
+    "edges_verified": 582,
+    "duplicates": 0,
+    "errors": [],
+    "unsupported": []
+  }
+}

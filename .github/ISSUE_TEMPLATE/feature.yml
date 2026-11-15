@@ -6,7 +6,7 @@ body:
     id: owner
     attributes:
       label: Responsible developer
-      description: Use Member 1, Member 2, or Member 3 until actual identities are agreed.
+      description: Abdullah (A), Taha (B), Shaheer (C), or joint owners; preserve the implementation-plan row.
     validations:
       required: true
   - type: textarea

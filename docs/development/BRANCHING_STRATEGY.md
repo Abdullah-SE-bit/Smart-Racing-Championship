@@ -7,6 +7,14 @@ non-author approval; **`game` has no approval requirement**. Both require PRs,
 block force pushes/deletion, and are intended to require the same four CI jobs
 after successful rollout. See [verified settings](GOVERNANCE_STATUS.md).
 
+For planned work, prefer `feature/01-c01-description` (or `feature/p01-c01-description`)
+so the phase validator can match the leading exact plan ID. Off-plan work may
+use `fix/`, `maintenance/`, `docs/`, `ci/`, `refactor/`, or `hotfix/`, with a clear
+scope/risk/test/interface explanation. This does not authorize disguised future
+features. Phase kickoff uses a dedicated docs/kickoff-p## branch. Accepted prior
+gate and explicit phase authorization are mandatory before application work;
+see [phase policy](PHASE_GATE_POLICY.md).
+
 Examples of future branch names: `feature/graph-model`, `feature/bfs-dfs`,
 `feature/dijkstra-astar`, `feature/racing-engine`, `feature/resource-planning`,
 `feature/event-system`, `feature/championship`, `feature/pygame-ui`, and

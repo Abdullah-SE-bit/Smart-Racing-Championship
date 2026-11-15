@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tomllib
 
 import yaml
@@ -41,6 +42,9 @@ def validate() -> None:
     required += [f"docs/development/{name}.md" for name in DEVELOPMENT_DOCS]
     required += [f"docs/development/handoffs/HANDOFF_MEMBER_{i}.md" for i in (1, 2, 3)]
     required += [".github/pull_request_template.md", "docs/development/validation.json"]
+    required += ["implementation_plan.md", "mandoff.md", "docs/development/issue_registry.json", "docs/development/phase_state.json"]
+    required += [f"docs/development/{name}.md" for name in ("ISSUE_REGISTRY", "TASK_DEPENDENCIES", "PHASE_GATE_POLICY", "CONCURRENCY_POLICY", "HANDOFF_POLICY")]
+    required += [f"docs/development/handoffs/HANDOFF_{name}.md" for name in ("ABDULLAH", "TAHA", "SHAHEER")]
     for name in required:
         if not (ROOT / name).is_file():
             raise ValueError(f"Missing required file: {name}")
@@ -102,6 +106,31 @@ def validate() -> None:
         if len(set(ids)) != len(ids):
             raise ValueError(f"Duplicate issue form field IDs: {kind}")
     yaml.safe_load((ROOT / ".github/ISSUE_TEMPLATE/config.yml").read_text())
+    for filename, expected_name in [("phase-gates.yml", "Phase Gate Validation"), ("issue-gate-audit.yml", "Issue Gate Audit")]:
+        policy = yaml.load((ROOT / ".github/workflows" / filename).read_text(), Loader=yaml.BaseLoader)
+        if "pull_request_target" in policy["on"] or any(value != "read" for value in policy["permissions"].values()):
+            raise ValueError("Phase policy workflows must be read-only and never use privileged PR execution")
+        if {job["name"] for job in policy["jobs"].values()} != {expected_name}:
+            raise ValueError("Stable phase check name changed")
+        for job in policy["jobs"].values():
+            for step in job["steps"]:
+                if "uses" in step and not re.fullmatch(r"[\w./-]+@[a-f0-9]{40}", step["uses"]):
+                    raise ValueError("Phase workflow actions must be SHA-pinned")
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from scripts.plan_backlog import parse_plan
+
+    plan = parse_plan(ROOT / "implementation_plan.md")
+    registry = json.loads((ROOT / "docs/development/issue_registry.json").read_text())
+    if registry["plan_sha256"] != plan["plan_sha256"]:
+        raise ValueError("Roadmap changed without a refreshed issue registry")
+    if set(registry["issues"]) != set(plan["dependencies"]):
+        raise ValueError("Issue registry does not cover every plan task and gate")
+    numbers = [entry["number"] for entry in registry["issues"].values()]
+    if len(numbers) != len(set(numbers)):
+        raise ValueError("Issue numbers must map to unique plan IDs")
+    if registry["audit"].get("status") != "VERIFIED":
+        raise ValueError("Native dependency audit is incomplete; inspect registry diagnostics")
     manifest = json.loads((ROOT / "docs/development/validation.json").read_text())
     if manifest["schema_version"] != 1 or not manifest["features"]:
         raise ValueError("Invalid validation manifest")
