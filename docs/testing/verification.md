@@ -14,7 +14,7 @@ ordering and overlapping expiry, resources, repeatable races on all three
 authored circuits, championship points, and headless screen rendering.
 
 The latest recorded local run used Python 3.12.16 on Windows and reported
-**86 passed**. Rerun the suite after further changes; the count and outcome may
+**87 passed**. Rerun the suite after further changes; the count and outcome may
 change. `pip check` reported no broken requirements. A separate check generated
 and validated 100 seeds; five seeded tracks were also raced in automated tests.
 Saved circuits with nonconsecutive IDs are exercised through selection,
@@ -25,6 +25,8 @@ Championship navigation visits the planner before each race and preserves the
 fixed circuit order and accumulated standings in the three-race workflow.
 Opponent tests cover low-fuel and fixed detours near future checkpoints,
 including main routes with service vertices between checkpoints.
+The experiment harness independently verifies minimum hop counts before timing;
+its reference is tested with directed, blocked and unreachable roads.
 
 The headless screen smoke tests do not replace a human playthrough. Before final
 submission, perform a complete manual quick race and championship on a Windows

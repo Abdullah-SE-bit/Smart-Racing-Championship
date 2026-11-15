@@ -69,6 +69,24 @@ def graph_for(size, dense, seed):
     return graph
 
 
+def reference_minimum_hops(graph, start):
+    """Independent repeated-relaxation reference for unweighted paths."""
+    distances = {start: 0}
+    for _ in range(max(0, len(graph.vertices) - 1)):
+        changed = False
+        for source in sorted(graph.vertices):
+            if source not in distances:
+                continue
+            for target, _ in graph.neighbors(source):
+                candidate = distances[source] + 1
+                if candidate < distances.get(target, float("inf")):
+                    distances[target] = candidate
+                    changed = True
+        if not changed:
+            break
+    return distances
+
+
 def traversal_study():
     rows = []
     for size in (20, 60, 120):
@@ -78,13 +96,18 @@ def traversal_study():
             cycle = has_cycle(graph)
             assert len(components) == 1
             assert cycle == (len(graph.edges) >= len(graph.vertices))
+            expected_hops = reference_minimum_hops(graph, 0)
             for name, algorithm in (("bfs", bfs), ("dfs", dfs)):
                 result = algorithm(graph, 0)
                 assert len(result.order) == size
+                if name == "bfs":
+                    assert all(len(result.path_to(vertex)) - 1 == hops
+                               for vertex, hops in expected_hops.items())
                 rows.append({"vertices": size, "edges": len(graph.edges), "dense": dense,
+                             "generation_seed": SEED + size + int(dense),
                              "algorithm": name, "visited": len(result.order),
                              "examined_edges": result.examined_edges, "components": len(components),
-                             "cycle": cycle,
+                             "cycle": cycle, "minimum_hops_verified": name == "bfs",
                              "timing": measure(lambda: algorithm(graph, 0))})
     return rows
 
@@ -98,6 +121,7 @@ def routing_study():
         assert abs(first.cost - second.cost) < 1e-8
         for name, result in (("dijkstra", first), ("astar", second)):
             rows.append({"vertices": size, "edges": len(graph.edges), "algorithm": name,
+                         "generation_seed": SEED + size,
                          "cost": result.cost, "expanded": result.expanded, "relaxed": result.relaxed,
                          "heap_operations": result.heap_operations,
                          "timing": measure(lambda: shortest_path(graph, 0, size - 1, algorithm=name))})
@@ -121,6 +145,8 @@ def resource_study():
             result = algorithm(items, budget)
             assert result.cost <= budget
             rows.append({"items": size, "budget": budget, "algorithm": name,
+                         "input_items": [{"id": item.id, "cost": item.cost, "benefit": item.benefit}
+                                         for item in items],
                          "benefit": result.benefit, "selected": [i.id for i in result.items],
                          "states": result.states, "timing": measure(lambda: algorithm(items, budget))})
     return {"cases": [{"items": [{"id": i.id, "cost": i.cost, "benefit": i.benefit} for i in items],
@@ -189,7 +215,8 @@ def write_analysis(output):
              "## 1. BFS and DFS", "",
              "Objective: compare traversal time and work as graph size and density vary. "
              "Inputs are seeded connected undirected graphs with a chain and extra sparse or denser roads. "
-             "The script checks reachability, weak components and cycle presence outside timed regions.", "",
+             "The script checks reachability, BFS minimum-edge paths against an independent repeated-"
+             "relaxation reference, weak components and cycle presence outside timed regions.", "",
              "| Vertices | Edges | Density | Algorithm | Visited | Examined roads | Mean ms |",
              "| ---: | ---: | --- | --- | ---: | ---: | ---: |"]
     for row in output["traversal"]:
@@ -208,7 +235,16 @@ def write_analysis(output):
     for row in output["routing"]:
         lines.append(f"| {row['vertices']} | {row['edges']} | {row['algorithm']} | {row['cost']:.4f} | "
                      f"{row['expanded']} | {row['relaxed']} | {row['heap_operations']} | {row['timing']['mean_ms']:.4f} |")
-    lines += ["", "Equal optimal costs are verified for each paired input. The heuristic may be weak, "
+    comparisons = {"fewer": 0, "equal": 0, "more": 0}
+    for index in range(0, len(output["routing"]), 2):
+        dijkstra, astar = output["routing"][index:index + 2]
+        outcome = ("fewer" if astar["expanded"] < dijkstra["expanded"] else
+                   "more" if astar["expanded"] > dijkstra["expanded"] else "equal")
+        comparisons[outcome] += 1
+    lines += ["", f"A* expanded fewer vertices in {comparisons['fewer']} inputs, equal numbers in "
+              f"{comparisons['equal']}, and more in {comparisons['more']}. Unobserved cases are not "
+              "evidence that they cannot occur. Equal optimal costs are verified for each paired input. "
+              "The heuristic may be weak, "
               "and its setup is timed, so A* need not be faster or expand fewer vertices in every case. "
               "These instances alone do not establish general performance.", "", "## 3. Dynamic programming and greedy", "",
               "Objective: compare 0/1 pickup benefit and runtime as item count and budget vary. "
