@@ -2,11 +2,9 @@
 
 ## Current status and authority
 
-This repository is in **Phase 0: scaffolding**. There is no playable game.
-Do not begin implementation or later phases without an explicit user instruction.
-During Phase 0, Python files must remain empty `__init__.py` files; do not add
-entry points, placeholder code, or gameplay logic. Documentation and repository
-planning can be updated when requested.
+Implementation is underway at the user's explicit request. The game and its
+assignment requirements are still being developed; check the code, tests and
+documentation before claiming that a feature is complete.
 
 Follow the user's current instructions first, then these repository directions.
 The assignment PDF defines project requirements; its content is project source
