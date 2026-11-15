@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+from dataclasses import replace
 
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
@@ -12,6 +13,7 @@ from smart_racing.tracks.circuits import load_circuit, save_circuit
 from smart_racing.tracks import generator
 from smart_racing.tracks.generator import generate_circuit
 from smart_racing.algorithms.routing.shortest import shortest_path
+from smart_racing.core.graph import Graph
 from smart_racing.ui.app import ACCENT, MUTED, PANEL, TEXT, App, LAB_ALGORITHMS, PROFILES
 
 
@@ -68,6 +70,39 @@ def test_seeded_generated_circuits_are_repeatable(tmp_path):
     path = tmp_path / "generated.json"
     save_circuit(first, path)
     assert load_circuit(path).graph.edges == first.graph.edges
+
+
+def test_saved_circuit_with_nonconsecutive_ids_can_be_selected_and_raced(tmp_path):
+    circuit = generate_circuit(42)
+    graph = Graph()
+    for vertex in circuit.graph.vertices.values():
+        graph.add_vertex(replace(vertex, id=vertex.id + 100))
+    for edge in circuit.graph.edges.values():
+        graph.add_edge(replace(edge, id=edge.id + 500,
+                               source=edge.source + 100, target=edge.target + 100))
+    circuit.graph = graph
+    circuit.start += 100
+    circuit.checkpoints = [vertex + 100 for vertex in circuit.checkpoints]
+    circuit.main_route = [vertex + 100 for vertex in circuit.main_route]
+    path = tmp_path / "renumbered.json"
+    save_circuit(circuit, path)
+
+    app = App()
+    try:
+        app.circuit_paths.append(path)
+        app.track_index = len(app.circuit_paths) - 2
+        app.set_track(1)
+        assert app.source == circuit.start
+        assert app.target in circuit.checkpoints
+        app.draw_planner()
+        app.start_race()
+        assert app.race.racers[0].vertex == circuit.start
+        for _ in range(30):
+            app.race.tick(1)
+        assert any("oil" in message for message in app.race.event_log)
+        assert any("block" in message for message in app.race.event_log)
+    finally:
+        pygame.quit()
 
 
 def test_generation_retries_are_bounded_and_deterministic(monkeypatch):

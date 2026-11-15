@@ -86,6 +86,8 @@ def validate_circuit(circuit: Circuit) -> list[str]:
         errors.append("multiple intersections are required")
     if not circuit.main_route or circuit.main_route[0] != circuit.start or circuit.main_route[-1] != circuit.start:
         errors.append("main route must begin and end at start")
+    elif any(vertex not in graph.vertices for vertex in circuit.main_route):
+        errors.append("main route contains a nonexistent vertex")
     elif any(not any(neighbor == target for neighbor, _ in graph.neighbors(source))
              for source, target in zip(circuit.main_route, circuit.main_route[1:])):
         errors.append("main route contains a missing or blocked road")

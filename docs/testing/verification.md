@@ -14,9 +14,11 @@ ordering and overlapping expiry, resources, repeatable races on all three
 authored circuits, championship points, and headless screen rendering.
 
 The latest recorded local run used Python 3.12.16 on Windows and reported
-**77 passed**. Rerun the suite after further changes; the count and outcome may
+**79 passed**. Rerun the suite after further changes; the count and outcome may
 change. `pip check` reported no broken requirements. A separate check generated
 and validated 100 seeds; five seeded tracks were also raced in automated tests.
+Saved circuits with nonconsecutive IDs are exercised through selection,
+planning, and scheduled race events.
 
 The headless screen smoke tests do not replace a human playthrough. Before final
 submission, perform a complete manual quick race and championship on a Windows

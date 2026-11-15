@@ -17,10 +17,16 @@ CIRCUITS = sorted(Path("data/circuits").glob("*.json"))
 
 def test_three_authored_circuits_have_required_topology():
     assert len(CIRCUITS) == 3
+    topologies = set()
     for path in CIRCUITS:
         circuit = load_circuit(path)
+        assert not validate_circuit(circuit)
         assert len(circuit.checkpoints) == 10
         assert sum(edge.shortcut for edge in circuit.graph.edges.values()) >= 2
+        assert len({edge.difficulty for edge in circuit.graph.edges.values()}) > 1
+        topologies.add(frozenset((min(edge.source, edge.target), max(edge.source, edge.target), edge.directed)
+                                 for edge in circuit.graph.edges.values()))
+    assert len(topologies) == 3
 
 
 def test_validator_rejects_single_ordered_lap_and_infeasible_fuel():
@@ -35,6 +41,12 @@ def test_validator_rejects_single_ordered_lap_and_infeasible_fuel():
     for edge in fuel_impossible.graph.edges.values():
         edge.fuel_cost = 101
     assert any("fuel plan" in error for error in validate_circuit(fuel_impossible))
+
+
+def test_validator_reports_unknown_main_route_vertex():
+    circuit = load_circuit(CIRCUITS[0])
+    circuit.main_route.insert(1, 99999)
+    assert "main route contains a nonexistent vertex" in validate_circuit(circuit)
 
 
 def test_event_order_cancellation_and_independent_expiration():

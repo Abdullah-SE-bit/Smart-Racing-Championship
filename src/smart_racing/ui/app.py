@@ -73,7 +73,8 @@ class App:
         self.recorded = False
         self.profile_index = 0
         self.route_algorithm = "dijkstra"
-        self.source, self.target = 0, 4
+        self.source = self.circuit.start
+        self.target = self.circuit.checkpoints[min(3, len(self.circuit.checkpoints) - 1)]
         self.ordered_plan = False
         self.lab_algorithm = "BFS"
         self.lab_step = 0.0
@@ -137,7 +138,8 @@ class App:
         self.track_index = (self.track_index + direction) % len(self.circuit_paths)
         self.circuit = load_circuit(self.circuit_paths[self.track_index])
         self._refuel_cache.clear()
-        self.source, self.target = self.circuit.start, (4, 3, 5)[self.track_index % 3]
+        self.source = self.circuit.start
+        self.target = self.circuit.checkpoints[min(3, len(self.circuit.checkpoints) - 1)]
 
     def start_race(self, championship=False, next_race=False):
         if championship and not next_race:
@@ -149,12 +151,16 @@ class App:
                          time_limit=self.limit_setting)
         graph = self.race.circuit.graph
         if len(graph.edges) > 8:
-            shortcut = next(edge.id for edge in graph.edges.values() if edge.shortcut)
-            fuel = next(vertex.id for vertex in graph.vertices.values() if vertex.kind == "fuel")
-            nitro = next(vertex.id for vertex in graph.vertices.values() if vertex.kind == "nitro")
-            self.race.schedule(Event(0, 12, 1, "block", 8, 9))
-            self.race.schedule(Event(1, 24, 4, "restriction", 5, 12))
-            self.race.schedule(Event(2, 7, 3, "oil", 4, 20))
+            # Circuit IDs are stable identifiers, not indexes into a sequence.
+            # Selecting from sorted actual IDs keeps the demo deterministic for
+            # authored, generated, and user-saved tracks alike.
+            roads = sorted(graph.edges)
+            shortcut = min(edge.id for edge in graph.edges.values() if edge.shortcut)
+            fuel = min(vertex.id for vertex in graph.vertices.values() if vertex.kind == "fuel")
+            nitro = min(vertex.id for vertex in graph.vertices.values() if vertex.kind == "nitro")
+            self.race.schedule(Event(0, 12, 1, "block", roads[8], 9))
+            self.race.schedule(Event(1, 24, 4, "restriction", roads[5], 12))
+            self.race.schedule(Event(2, 7, 3, "oil", roads[4], 20))
             self.race.schedule(Event(3, 10, 2, "shortcut_close", shortcut))
             self.race.schedule(Event(4, 18, 2, "shortcut_open", shortcut))
             self.race.schedule(Event(5, 20, 5, "fuel_off", fuel, 30))
@@ -361,7 +367,8 @@ class App:
             return
         self.validation_message = ""
         self._refuel_cache.clear()
-        self.source, self.target = 0, 4
+        self.source = self.circuit.start
+        self.target = self.circuit.checkpoints[min(3, len(self.circuit.checkpoints) - 1)]
 
     def draw_comparison(self):
         self.header("01 / Compare", "Route trade-offs", "Each preset optimizes its own normalized, weighted scalar cost.")

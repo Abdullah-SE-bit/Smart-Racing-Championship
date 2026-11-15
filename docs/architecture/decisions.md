@@ -5,6 +5,12 @@ including its current limitations; it is not a claim of assignment completion.
 
 ## Boundaries
 
+Saved-circuit vertex and road IDs are identifiers, not array positions. The
+planner initializes its endpoints from the selected circuit, while the default
+race events select from sorted existing road IDs. This keeps events deterministic
+for authored, generated, and saved tracks with nonconsecutive IDs. Validation
+reports unknown main-route vertices before accessing adjacency lists.
+
 - `core/graph.py` contains Pygame-independent vertices, edges, adjacency lists
   and non-negative cost profiles. Algorithms receive these objects and return
   plain results and traces. They do not import the presentation layer.
