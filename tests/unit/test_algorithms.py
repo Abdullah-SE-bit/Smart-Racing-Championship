@@ -301,6 +301,25 @@ def test_resource_validation_and_exact_ratio_ties():
     assert [item.id for item in selected.items] == [1, 2]
 
 
+def test_greedy_trace_keeps_running_totals_for_large_inputs():
+    items = [Pickup(i, 0 if i % 17 == 0 else i % 7 + 1,
+                    0 if i % 19 == 0 else i % 11 + 1) for i in range(3000)]
+    trace = []
+    selected = greedy(items, 1500, trace)
+    assert selected == greedy(items, 1500)
+    by_id = {item.id: item for item in items}
+    spent = benefit = 0
+    for step in trace:
+        item = by_id[step["item"]]
+        if item.benefit and spent + item.cost <= 1500:
+            spent += item.cost
+            benefit += item.benefit
+        assert step["cost"] == spent
+        assert step["value"] == benefit
+    assert len(trace) == len(items)
+    assert (selected.cost, selected.benefit) == (spent, benefit)
+
+
 def test_refuelling_plan_and_infeasible_route():
     time, purchases = refuel_plan([4, 6], [False, True], 5, capacity=10, max_purchase=5)
     assert time == 5 and purchases == [0, 5]

@@ -95,6 +95,9 @@ Generation-stage tests cover the workshop, a real rejected attempt and retry,
 and the separate invalid-track validation demonstration.
 The experiment harness independently verifies minimum hop counts before timing;
 its reference is tested with directed, blocked and unreachable roads.
+The greedy trace keeps running benefit and cost totals for 3,000 pickups, and
+its final selection is checked against the untraced implementation. The local
+suite passed 129 tests after this change; all measured studies were rerun.
 
 The headless screen smoke tests do not replace a human playthrough. Before final
 submission, perform a complete manual quick race and championship on a Windows

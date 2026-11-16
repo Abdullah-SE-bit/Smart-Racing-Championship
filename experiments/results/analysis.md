@@ -10,18 +10,18 @@ Objective: compare traversal time and work as graph size and density vary. Input
 
 | Vertices | Edges | Density | Algorithm | Visited | Examined roads | Mean ms |
 | ---: | ---: | --- | --- | ---: | ---: | ---: |
-| 20 | 31 | sparse | bfs | 20 | 62 | 0.0304 |
-| 20 | 31 | sparse | dfs | 20 | 62 | 0.0399 |
-| 20 | 34 | denser | bfs | 20 | 68 | 0.0911 |
-| 20 | 34 | denser | dfs | 20 | 68 | 0.1463 |
-| 60 | 116 | sparse | bfs | 60 | 232 | 0.1897 |
-| 60 | 116 | sparse | dfs | 60 | 232 | 0.1488 |
-| 60 | 249 | denser | bfs | 60 | 498 | 0.1731 |
-| 60 | 249 | denser | dfs | 60 | 498 | 0.5303 |
-| 120 | 240 | sparse | bfs | 120 | 480 | 0.6431 |
-| 120 | 240 | sparse | dfs | 120 | 480 | 0.4489 |
-| 120 | 953 | denser | bfs | 120 | 1906 | 0.9189 |
-| 120 | 953 | denser | dfs | 120 | 1906 | 0.8449 |
+| 20 | 31 | sparse | bfs | 20 | 62 | 0.0259 |
+| 20 | 31 | sparse | dfs | 20 | 62 | 0.0344 |
+| 20 | 34 | denser | bfs | 20 | 68 | 0.0264 |
+| 20 | 34 | denser | dfs | 20 | 68 | 0.0360 |
+| 60 | 116 | sparse | bfs | 60 | 232 | 0.0856 |
+| 60 | 116 | sparse | dfs | 60 | 232 | 0.1144 |
+| 60 | 249 | denser | bfs | 60 | 498 | 0.1514 |
+| 60 | 249 | denser | dfs | 60 | 498 | 0.2157 |
+| 120 | 240 | sparse | bfs | 120 | 480 | 0.2027 |
+| 120 | 240 | sparse | dfs | 120 | 480 | 0.2865 |
+| 120 | 953 | denser | bfs | 120 | 1906 | 0.5035 |
+| 120 | 953 | denser | dfs | 120 | 1906 | 0.8433 |
 
 Both traversals visit all vertices in these connected inputs. Examined road counts depend on adjacency entries, including both directions of undirected roads. The small sizes, trace collection and machine noise limit timing conclusions; theoretical time remains O(V+E).
 
@@ -31,12 +31,12 @@ Objective: compare optimal routing on identical seeded sparse graphs with non-ne
 
 | Vertices | Edges | Algorithm | Cost | Expanded | Relaxed | Heap operations | Mean ms |
 | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |
-| 20 | 31 | dijkstra | 1.5391 | 14 | 41 | 33 | 0.1437 |
-| 20 | 31 | astar | 1.5391 | 14 | 41 | 33 | 0.3520 |
-| 60 | 116 | dijkstra | 1.0050 | 24 | 104 | 77 | 0.5041 |
-| 60 | 116 | astar | 1.0050 | 23 | 97 | 75 | 0.3877 |
-| 120 | 240 | dijkstra | 1.2432 | 67 | 279 | 205 | 1.8794 |
-| 120 | 240 | astar | 1.2432 | 64 | 268 | 199 | 2.7466 |
+| 20 | 31 | dijkstra | 1.5391 | 14 | 41 | 33 | 0.1383 |
+| 20 | 31 | astar | 1.5391 | 14 | 41 | 33 | 0.1208 |
+| 60 | 116 | dijkstra | 1.0050 | 24 | 104 | 77 | 0.3402 |
+| 60 | 116 | astar | 1.0050 | 23 | 97 | 75 | 0.3296 |
+| 120 | 240 | dijkstra | 1.2432 | 67 | 279 | 205 | 0.8635 |
+| 120 | 240 | astar | 1.2432 | 64 | 268 | 199 | 1.3850 |
 
 A* expanded fewer vertices in 2 inputs, equal numbers in 1, and more in 0. Unobserved cases are not evidence that they cannot occur. Equal optimal costs are verified for each paired input. The heuristic may be weak, and its setup is timed, so A* need not be faster or expand fewer vertices in every case. These instances alone do not establish general performance.
 
@@ -46,12 +46,12 @@ Objective: compare 0/1 pickup benefit and runtime as item count and budget vary.
 
 | Items | Budget | Method | Benefit | DP states | Mean ms |
 | ---: | ---: | --- | ---: | ---: | ---: |
-| 10 | 30 | dp | 109 | 310 | 0.0946 |
-| 10 | 30 | greedy | 109 | 0 | 0.1197 |
-| 30 | 60 | dp | 252 | 1830 | 0.7288 |
-| 30 | 60 | greedy | 252 | 0 | 0.8144 |
-| 60 | 100 | dp | 551 | 6060 | 2.6805 |
-| 60 | 100 | greedy | 550 | 0 | 1.5662 |
+| 10 | 30 | dp | 109 | 310 | 0.0800 |
+| 10 | 30 | greedy | 109 | 0 | 0.0892 |
+| 30 | 60 | dp | 252 | 1830 | 0.4843 |
+| 30 | 60 | greedy | 252 | 0 | 0.4622 |
+| 60 | 100 | dp | 551 | 6060 | 2.0178 |
+| 60 | 100 | greedy | 550 | 0 | 1.5573 |
 
 Counterexamples (budget, DP benefit, greedy benefit): (10, 48, 30); (6, 16, 12); (8, 30, 20). The selected IDs and input cases are saved in the raw JSON. DP is pseudo-polynomial in budget; greedy is feasible but need not be optimal. These small instances do not establish the performance of larger multi-resource planners.
 
@@ -61,9 +61,9 @@ Objective: measure insertion/cancellation and extraction separately for seeded e
 
 | Events | Cancelled | Heap operations | Insert + cancel ms | Extraction ms |
 | ---: | ---: | ---: | ---: | ---: |
-| 50 | 5 | 100 | 0.2793 | 0.1114 |
-| 250 | 23 | 500 | 1.6300 | 0.7934 |
-| 1000 | 91 | 2000 | 7.4670 | 5.5967 |
+| 50 | 5 | 100 | 0.1874 | 0.0904 |
+| 250 | 23 | 500 | 1.8598 | 0.8939 |
+| 1000 | 91 | 2000 | 6.4063 | 5.0008 |
 
 Extraction timing excludes preparing the queue; insertion includes queue creation. Lazy cancellation keeps entries in memory until extraction, so the benchmark reports operations for cancelled entries as well.
 
@@ -73,65 +73,65 @@ Objective: compare the three manual sorts and heap top-k using the actual champi
 
 | Records | Input | Method | k | Mean ms |
 | ---: | --- | --- | ---: | ---: |
-| 50 | random | merge | - | 0.2655 |
-| 50 | random | quick | - | 0.1637 |
-| 50 | random | heap | - | 0.2960 |
-| 50 | random | top_k | 5 | 0.0580 |
-| 50 | random | top_k | 49 | 0.1339 |
-| 50 | sorted | merge | - | 0.1377 |
-| 50 | sorted | quick | - | 0.0991 |
-| 50 | sorted | heap | - | 0.2911 |
-| 50 | sorted | top_k | 5 | 0.0457 |
-| 50 | sorted | top_k | 49 | 0.1504 |
-| 50 | reverse | merge | - | 0.1538 |
-| 50 | reverse | quick | - | 0.1019 |
-| 50 | reverse | heap | - | 0.4620 |
-| 50 | reverse | top_k | 5 | 0.1451 |
-| 50 | reverse | top_k | 49 | 0.1954 |
-| 50 | duplicates | merge | - | 0.2028 |
-| 50 | duplicates | quick | - | 0.1773 |
-| 50 | duplicates | heap | - | 0.2325 |
-| 50 | duplicates | top_k | 5 | 0.0529 |
-| 50 | duplicates | top_k | 49 | 0.1327 |
-| 200 | random | merge | - | 1.7959 |
-| 200 | random | quick | - | 0.7614 |
-| 200 | random | heap | - | 1.7856 |
-| 200 | random | top_k | 5 | 0.1877 |
-| 200 | random | top_k | 199 | 1.1305 |
-| 200 | sorted | merge | - | 0.7185 |
-| 200 | sorted | quick | - | 0.5433 |
-| 200 | sorted | heap | - | 2.1007 |
-| 200 | sorted | top_k | 5 | 0.1378 |
-| 200 | sorted | top_k | 199 | 0.7650 |
-| 200 | reverse | merge | - | 0.7993 |
-| 200 | reverse | quick | - | 0.5646 |
-| 200 | reverse | heap | - | 1.8472 |
-| 200 | reverse | top_k | 5 | 0.1981 |
-| 200 | reverse | top_k | 199 | 0.7636 |
-| 200 | duplicates | merge | - | 1.4229 |
-| 200 | duplicates | quick | - | 2.0177 |
-| 200 | duplicates | heap | - | 1.3907 |
-| 200 | duplicates | top_k | 5 | 0.4676 |
-| 200 | duplicates | top_k | 199 | 1.0885 |
-| 500 | random | merge | - | 3.6522 |
-| 500 | random | quick | - | 3.6760 |
-| 500 | random | heap | - | 6.0924 |
-| 500 | random | top_k | 5 | 0.5331 |
-| 500 | random | top_k | 499 | 2.6301 |
-| 500 | sorted | merge | - | 2.1854 |
-| 500 | sorted | quick | - | 1.9621 |
-| 500 | sorted | heap | - | 5.7586 |
-| 500 | sorted | top_k | 5 | 0.3745 |
-| 500 | sorted | top_k | 499 | 2.9931 |
-| 500 | reverse | merge | - | 2.3866 |
-| 500 | reverse | quick | - | 2.2885 |
-| 500 | reverse | heap | - | 4.8228 |
-| 500 | reverse | top_k | 5 | 0.5223 |
-| 500 | reverse | top_k | 499 | 2.5275 |
-| 500 | duplicates | merge | - | 3.1151 |
-| 500 | duplicates | quick | - | 9.5047 |
-| 500 | duplicates | heap | - | 5.2749 |
-| 500 | duplicates | top_k | 5 | 0.4573 |
-| 500 | duplicates | top_k | 499 | 5.4194 |
+| 50 | random | merge | - | 0.1762 |
+| 50 | random | quick | - | 0.1147 |
+| 50 | random | heap | - | 0.2126 |
+| 50 | random | top_k | 5 | 0.0450 |
+| 50 | random | top_k | 49 | 0.1135 |
+| 50 | sorted | merge | - | 0.1818 |
+| 50 | sorted | quick | - | 0.3705 |
+| 50 | sorted | heap | - | 0.6143 |
+| 50 | sorted | top_k | 5 | 0.0887 |
+| 50 | sorted | top_k | 49 | 0.2305 |
+| 50 | reverse | merge | - | 0.1293 |
+| 50 | reverse | quick | - | 0.0870 |
+| 50 | reverse | heap | - | 0.1932 |
+| 50 | reverse | top_k | 5 | 0.0474 |
+| 50 | reverse | top_k | 49 | 0.1418 |
+| 50 | duplicates | merge | - | 0.1612 |
+| 50 | duplicates | quick | - | 0.1762 |
+| 50 | duplicates | heap | - | 0.6450 |
+| 50 | duplicates | top_k | 5 | 0.1173 |
+| 50 | duplicates | top_k | 49 | 0.2774 |
+| 200 | random | merge | - | 0.8621 |
+| 200 | random | quick | - | 1.1197 |
+| 200 | random | heap | - | 1.6706 |
+| 200 | random | top_k | 5 | 0.3190 |
+| 200 | random | top_k | 199 | 1.0526 |
+| 200 | sorted | merge | - | 1.4929 |
+| 200 | sorted | quick | - | 0.4423 |
+| 200 | sorted | heap | - | 2.3338 |
+| 200 | sorted | top_k | 5 | 0.2015 |
+| 200 | sorted | top_k | 199 | 0.6054 |
+| 200 | reverse | merge | - | 1.3821 |
+| 200 | reverse | quick | - | 0.5046 |
+| 200 | reverse | heap | - | 1.7789 |
+| 200 | reverse | top_k | 5 | 0.1594 |
+| 200 | reverse | top_k | 199 | 0.5998 |
+| 200 | duplicates | merge | - | 0.7600 |
+| 200 | duplicates | quick | - | 1.2000 |
+| 200 | duplicates | heap | - | 1.5750 |
+| 200 | duplicates | top_k | 5 | 0.3938 |
+| 200 | duplicates | top_k | 199 | 0.5935 |
+| 500 | random | merge | - | 3.0310 |
+| 500 | random | quick | - | 1.8949 |
+| 500 | random | heap | - | 4.3183 |
+| 500 | random | top_k | 5 | 0.4615 |
+| 500 | random | top_k | 499 | 2.8079 |
+| 500 | sorted | merge | - | 2.0280 |
+| 500 | sorted | quick | - | 1.2746 |
+| 500 | sorted | heap | - | 4.6860 |
+| 500 | sorted | top_k | 5 | 0.2881 |
+| 500 | sorted | top_k | 499 | 1.9305 |
+| 500 | reverse | merge | - | 1.7302 |
+| 500 | reverse | quick | - | 1.6841 |
+| 500 | reverse | heap | - | 3.7947 |
+| 500 | reverse | top_k | 5 | 0.6029 |
+| 500 | reverse | top_k | 499 | 2.0091 |
+| 500 | duplicates | merge | - | 2.7916 |
+| 500 | duplicates | quick | - | 6.7443 |
+| 500 | duplicates | heap | - | 4.1315 |
+| 500 | duplicates | top_k | 5 | 0.5257 |
+| 500 | duplicates | top_k | 499 | 1.9317 |
 
 Top-k uses bottom-up heap construction followed by k extractions: O(n + k log n), with O(n) storage. Full sorting and retrieval have different output sizes, so comparisons should consider k relative to n. These measurements include comparator and heap setup; comparison counters are not currently instrumented.
