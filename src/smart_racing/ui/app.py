@@ -1000,10 +1000,13 @@ class App:
         self.go("dashboard")
 
     def draw_dashboard(self):
-        self.header("04 / Championship", "Race results", "Positions and standings use the same deterministic ordering and tie-breaks.")
-        self.nav()
-        self.card((40, 220, 1200, 530))
-        self.label("RACE CLASSIFICATION", 75, 253, 14, ACCENT)
+        self.draw_pit_background()
+        self.label("RACE CONTROL  /  CLASSIFICATION", 48, 98, 14, (246, 125, 84))
+        self.label("RACE RESULTS", 45, 118, 42, (247, 242, 228))
+        self.label("The chequered flag is out. Here is how the field finished.", 48, 176, 16, (170, 182, 172))
+        self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
+        self.card((40, 220, 1200, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.label("RACE CLASSIFICATION", 75, 253, 14, (246, 125, 84))
         self.label("RACER", 170, 299, 14, MUTED)
         self.label("RESULT", 475, 299, 14, MUTED)
         self.label("FASTEST LAP", 700, 299, 14, MUTED)
@@ -1011,8 +1014,11 @@ class App:
         by_id = {entry.racer_id: entry for entry in self.entries}
         for index, racer in enumerate(self.race.results()):
             y = 342 + index * 65
-            pygame.draw.line(self.surface, (69, 85, 69), (75, y - 12), (1195, y - 12))
-            self.label(f"{index + 1:02}", 75, y, 24, CAR_COLORS[racer.id])
+            pygame.draw.rect(self.surface, (31, 44, 41) if index == 0 else (24, 37, 35),
+                             (75, y - 10, 1120, 53), border_radius=5)
+            if index == 0:
+                pygame.draw.rect(self.surface, (246, 125, 84), (75, y - 10, 4, 53), border_radius=2)
+            self.label(f"{index + 1:02}", 90, y, 24, CAR_COLORS[racer.id])
             self.label(racer.name, 170, y + 3, 20)
             self.label(f"{racer.finish_time:.1f}s" if racer.finished else "DNF", 475, y + 3, 18)
             self.label(f"{racer.fastest_lap:.1f}s" if math.isfinite(racer.fastest_lap) else "—", 700, y + 3, 18)
@@ -1022,26 +1028,29 @@ class App:
             label = "CHAMPION" if self.track_index + 1 == len(self.authored_paths) else "CHAMPIONSHIP LEADER"
             self.label(f"{label}   {lead.name}  /  {lead.total_points} PTS", 75, 640, 18, GOLD)
             title = "NEXT RACE" if self.track_index + 1 < len(self.authored_paths) else "FINISH CHAMPIONSHIP"
-            self.button((680, 625, 190, 56), "STANDINGS", lambda: self.go("standings"))
-            self.button((900, 625, 280, 56), title, self.next_championship_race, selected=True)
+            self.menu_button((680, 625, 190, 56), "STANDINGS", None, lambda: self.go("standings"))
+            self.menu_button((900, 625, 280, 56), title, None, self.next_championship_race, True)
         else:
-            self.button((900, 625, 280, 56), "RACE AGAIN", lambda: self.start_race(False), selected=True)
+            self.menu_button((900, 625, 280, 56), "RACE AGAIN", None, lambda: self.start_race(False), True)
 
     def draw_standings(self):
-        self.header("05 / Championship", "Championship standings", "Live top racers and the complete ranking share the same tie-break order.")
-        self.nav()
-        self.card((40, 220, 1200, 530))
+        self.draw_pit_background()
+        self.label("RACE CONTROL  /  CHAMPIONSHIP", 48, 98, 14, (246, 125, 84))
+        self.label("CHAMPIONSHIP STANDINGS", 45, 118, 42, (247, 242, 228))
+        self.label("Follow the title race and compare the full field.", 48, 176, 16, (170, 182, 172))
+        self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
+        self.card((40, 220, 1200, 530), (21, 33, 32), 12, (58, 73, 68))
         top = leaders(self.entries, min(self.top_k_count, len(self.entries)))
-        self.label(f"LIVE TOP {len(top)}", 75, 250, 14, ACCENT)
-        self.button((760, 236, 220, 42), f"SORT: {self.sort_method.upper()}", self.change_sort)
-        self.button((1000, 236, 195, 42), f"CHANGE K: {self.top_k_count}", self.change_top_k)
+        self.label(f"LIVE TOP {len(top)}", 75, 250, 14, (246, 125, 84))
+        self.menu_button((760, 236, 220, 42), f"SORT: {self.sort_method.upper()}", None, self.change_sort)
+        self.menu_button((1000, 236, 195, 42), f"CHANGE K: {self.top_k_count}", None, self.change_top_k)
         width = min(330, 1100 // max(1, len(top)) - 20)
         for index, entry in enumerate(top):
             x = 75 + index * (width + 20)
-            self.card((x, 285, width, 100), PANEL_LIGHT, 12)
+            self.card((x, 285, width, 100), (29, 43, 40), 8, (65, 79, 72))
             self.label(f"#{index + 1}  {entry.name}", x + 20, 300, 20, CAR_COLORS[entry.racer_id])
             self.label(f"{entry.total_points} POINTS  /  {entry.wins} WINS", x + 20, 340, 14, MUTED)
-        self.label("FULL STANDINGS", 75, 423, 14, ACCENT)
+        self.label("FULL STANDINGS", 75, 423, 14, (246, 125, 84))
         method = {"Merge": merge_sort, "Quick": quick_sort, "Heap": heap_sort}[self.sort_method]
         ranking = method(self.entries, key=ranking_key)
         agrees = all(sort(self.entries, key=ranking_key) == ranking for sort in (merge_sort, quick_sort, heap_sort))
@@ -1050,7 +1059,7 @@ class App:
                        75, 458 + index * 38, 18, CAR_COLORS[entry.racer_id])
         self.label("ALL THREE SORTS AGREE" if agrees else "SORT RESULTS DIFFER", 75, 625, 14, ACCENT if agrees else PINK)
         self.label("TOP-K HEAP: O(n + k log n)    /    FULL SORT: O(n log n)", 75, 652, 14, MUTED)
-        self.button((900, 625, 280, 56), "BACK TO RESULTS", lambda: self.go("dashboard"))
+        self.menu_button((900, 625, 280, 56), "BACK TO RESULTS", None, lambda: self.go("dashboard"))
 
     def change_top_k(self):
         self.top_k_count = self.top_k_count % len(self.entries) + 1
