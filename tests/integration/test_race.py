@@ -111,6 +111,40 @@ def test_refuelling_and_nitro_duration_are_consistent():
     assert human.nitro_remaining == 3
 
 
+def test_nitro_pickup_respects_capacity_and_is_consumed_on_collection():
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "nitro"),
+                   Vertex(2, 2, 0, "checkpoint", 1)):
+        graph.add_vertex(vertex)
+    graph.add_edge(Edge(0, 0, 1, 1, 1, 1))
+    graph.add_edge(Edge(1, 0, 2, 1, 1, 1))
+    racer = Racer(0, "Human", "human", 0, nitro=3)
+    race = Race(Circuit("Pickup", graph, 0, [2], [0, 2, 0]), racers=[racer])
+    assert race.choose(0, 1)
+    race.tick(1)
+    assert racer.nitro == 3 and race.service_active[1]
+    assert race.choose(0, 0)
+    race.tick(1)
+    racer.nitro = 2
+    assert race.choose(0, 1)
+    race.tick(1)
+    assert racer.nitro == 3 and not race.service_active[1]
+    assert 1 in race.collected_pickups
+
+
+@pytest.mark.parametrize("strategy", ["human", "main", "shortcut", "distance"])
+def test_refuelling_rules_are_shared_by_all_strategies(strategy):
+    circuit = load_circuit(CIRCUITS[0])
+    racer = Racer(9, "Driver", strategy, 11, fuel=99)
+    race = Race(circuit, racers=[racer])
+    race.service_active[11] = False
+    assert not race.refuel(9)
+    race.service_active[11] = True
+    assert race.refuel(9)
+    assert racer.fuel == 100 and racer.stop_remaining == 3
+    assert not race.refuel(9)
+
+
 def test_nitro_boost_charges_only_the_affected_road_portion():
     graph = Graph()
     graph.add_vertex(Vertex(0, 0, 0, "start"))
