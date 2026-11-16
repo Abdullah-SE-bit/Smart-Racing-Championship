@@ -748,7 +748,7 @@ class App:
         self.button((1055, 411, 160, 48), "NEXT", lambda: self.change_lab(1))
         self.button((885, 469, 157, 48), "PAUSE" if self.lab_playing else "PLAY", self.toggle_lab)
         self.button((1055, 469, 160, 48), "STEP +1", lambda: self.step_lab(1))
-        self.button((885, 527, 157, 48), "RESET", lambda: self.step_lab(-10000))
+        self.button((885, 527, 157, 48), "RESET", self.reset_lab)
         self.button((1055, 527, 160, 48), "STEP -1", lambda: self.step_lab(-1))
         self.button((885, 585, 330, 48), f"SPEED: {self.lab_speed / 3:g}x", self.change_lab_speed)
         self.label("Algorithms use plain data traces.", 885, 655, 14, MUTED)
@@ -768,6 +768,10 @@ class App:
     def step_lab(self, amount):
         self.lab_playing = False
         self.lab_step = max(0, self.lab_step + amount)
+
+    def reset_lab(self):
+        self.lab_playing = False
+        self.lab_step = 0
 
     def draw_race(self):
         race = self.race
