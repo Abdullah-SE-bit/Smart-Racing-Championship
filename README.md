@@ -70,6 +70,9 @@ each race in the fixed three-circuit season; results carry forward between races
 The planner can compare presets with an animated reveal of each computed route, switch to
 an ordered checkpoint plan, generate a seeded circuit, show an invalid candidate,
 inspect bounded endpoint alternatives, and save a circuit for later selection.
+The planner's Refuel Plan view lists the stations and fuel purchases for the
+selected route; press F at each station to use the game's automatic fill.
+The plan assumes a full starting tank and no nitro or later event changes.
 The circuit workshop shows the seed and the actual checkpoint, service, backbone,
 road, obstacle and validation stages; it can also demonstrate a rejected track.
 Generated circuits are available for quick races. Saved circuits are stored in

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from math import ceil, floor
 
 from smart_racing.algorithms.optimization.resources import Pickup, greedy, knapsack, refuel_plan
-from smart_racing.algorithms.routing.shortest import shortest_path
+from smart_racing.algorithms.routing.shortest import checkpoint_route
 from smart_racing.core.graph import CostProfile, Graph
 
 
@@ -39,12 +39,14 @@ def route_refuelling(graph: Graph, vertices: list[int], edges: list[int], fuel: 
 
 
 def pickup_suggestions(graph: Graph, start: int, target: int, fuel: float = 100,
-                       nitro: int = 1, budget: int = 10) -> list[PickupSuggestion]:
+                       nitro: int = 1, budget: int = 10,
+                       waypoints: list[int] | None = None) -> list[PickupSuggestion]:
     """Evaluate active nitro pickups independently against a distance budget.
 
     Recommendations are single-pickup alternatives, so a combined route never
     silently exceeds the fuel tank or nitro capacity. A pickup's cost is the
-    rounded-up extra road distance compared with the direct distance route.
+    rounded-up extra road distance compared with the distance route through
+    the same ordered waypoints. Without waypoints the target is an endpoint.
     """
     if fuel < 0 or nitro < 0 or budget < 0:
         raise ValueError("Invalid resource state")
@@ -52,22 +54,41 @@ def pickup_suggestions(graph: Graph, start: int, target: int, fuel: float = 100,
         return []
     profile = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0,
                           distance_reference=1)
-    baseline = shortest_path(graph, start, target, profile)
+    destinations = list(waypoints) if waypoints is not None else [target]
+    if not destinations or destinations[-1] != target:
+        raise ValueError("The last waypoint must be the target")
+    baseline = checkpoint_route(graph, start, destinations, profile)
     if not baseline.vertices:
         return []
     suggestions = []
     for vertex in graph.vertices.values():
         if vertex.kind != "nitro" or not vertex.active:
             continue
-        first = shortest_path(graph, start, vertex.id, profile)
-        second = shortest_path(graph, vertex.id, target, profile)
-        if not first.vertices or not second.vertices:
+        candidates = []
+        for index in range(len(destinations)):
+            candidate = checkpoint_route(graph, start,
+                                         destinations[:index] + [vertex.id] + destinations[index:], profile)
+            if candidate.vertices:
+                candidates.append(candidate)
+        if not candidates:
             continue
-        fuel_needed = sum(graph.edges[edge_id].fuel_cost * (1 + .1 * (graph.edges[edge_id].difficulty - 1))
-                          for edge_id in first.edges + second.edges)
-        if fuel_needed > fuel:
+        feasible = []
+        for candidate in candidates:
+            fuel_needed = sum(graph.edges[edge_id].fuel_cost * (1 + .1 * (graph.edges[edge_id].difficulty - 1))
+                              for edge_id in candidate.edges)
+            charges = nitro
+            collected = set()
+            for visited in candidate.vertices[1:]:
+                service = graph.vertices[visited]
+                if service.kind == "nitro" and service.active and visited not in collected and charges < 3:
+                    collected.add(visited)
+                    charges += 1
+            if fuel_needed <= fuel and vertex.id in collected:
+                feasible.append((candidate.cost, fuel_needed, candidate.vertices, candidate.edges))
+        if not feasible:
             continue
-        detour = max(0, ceil(first.cost + second.cost - baseline.cost - 1e-9))
+        distance, fuel_needed, _, _ = min(feasible)
+        detour = max(0, ceil(distance - baseline.cost - 1e-9))
         # A separate one-item choice avoids treating independent alternative
         # routes as if their distances or fuel costs were additive.
         item = Pickup(vertex.id, detour, 1)

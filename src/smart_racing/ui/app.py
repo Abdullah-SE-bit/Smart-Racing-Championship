@@ -91,6 +91,8 @@ class App:
         self.sort_method = "Merge"
         self.validation_message = ""
         self._refuel_cache = {}
+        self._pickup_cache = {}
+        self.refuel_page = 0
         self.alternative_paths = []
         self.alternative_index = 0
         self.alternative_truncated = False
@@ -347,6 +349,7 @@ class App:
         unreachable = set(self.circuit.checkpoints) - set(breadth.parents)
         self.draw_map((60, 242, 760, 480), self.circuit, route.edges, route.vertices, unreachable=unreachable)
         self.button((615, 658, 205, 42), "ALTERNATIVES", self.open_alternatives)
+        self.button((615, 606, 205, 42), "REFUEL PLAN", self.open_refuel_plan)
         self.label(f"CHECKPOINTS {len(self.circuit.checkpoints) - len(unreachable)}/{len(self.circuit.checkpoints)} REACHABLE   "
                    f"DFS {len(depth.order)}   "
                    f"Components: {len(weak_components(graph))}   Cycles: {'yes' if has_cycle(graph) else 'no'}   "
@@ -363,12 +366,17 @@ class App:
         race_label = (f"START RACE {self.track_index + 1} / {len(self.authored_paths)}"
                       if self.pending_championship else "START QUICK RACE")
         self.button((885, 604, 330, 48), race_label, self.start_planned_race)
-        suggestions = pickup_suggestions(self.circuit.graph, self.source, self.target)
+        destinations = self.ordered_destinations() if self.ordered_plan else [self.target]
+        pickup_key = (self.source, tuple(destinations), self.resource_graph_signature())
+        if pickup_key not in self._pickup_cache:
+            self._pickup_cache = {pickup_key: pickup_suggestions(
+                self.circuit.graph, self.source, destinations[-1], waypoints=destinations)}
+        suggestions = self._pickup_cache[pickup_key]
         selected = [item for item in suggestions if item.dp_selected]
         recommendation = (f"PICKUP {selected[0].vertex} / DP {selected[0].benefit} / GREEDY {int(selected[0].greedy_selected)}"
                           if selected else "NITRO: no feasible pickup within budget")
         self.label((self.validation_message or recommendation)[:42], 885, 675, 14, GOLD)
-        route_key = (tuple(route.vertices), tuple(route.edges))
+        route_key = (tuple(route.vertices), tuple(route.edges), self.resource_graph_signature())
         if route.vertices and route_key not in self._refuel_cache:
             self._refuel_cache[route_key] = route_refuelling(self.circuit.graph, route.vertices, route.edges)
         refuelling = self._refuel_cache.get(route_key)
@@ -382,14 +390,70 @@ class App:
     def planned_route(self, profile):
         if not self.ordered_plan:
             return shortest_path(self.circuit.graph, self.source, self.target, profile, self.route_algorithm)
+        return checkpoint_route(self.circuit.graph, self.source, self.ordered_destinations(),
+                                profile, self.route_algorithm)
+
+    def ordered_destinations(self):
         checkpoints = self.circuit.checkpoints
         if self.source in checkpoints:
             checkpoints = checkpoints[checkpoints.index(self.source) + 1:]
-        return checkpoint_route(self.circuit.graph, self.source, checkpoints + [self.circuit.start],
-                                profile, self.route_algorithm)
+        return checkpoints + [self.circuit.start]
 
     def toggle_ordered_plan(self):
         self.ordered_plan = not self.ordered_plan
+
+    def open_refuel_plan(self):
+        self.refuel_page = 0
+        self.go("refuel")
+
+    def resource_graph_signature(self):
+        graph = self.circuit.graph
+        return (id(graph), tuple((v.id, v.kind, v.active) for v in graph.vertices.values()),
+                tuple((e.id, e.source, e.target, e.directed, e.status, e.distance,
+                       e.fuel_cost, e.difficulty) for e in graph.edges.values()))
+
+    def refuel_stops(self):
+        """Return the selected route and its minimum discrete fuel purchases."""
+        route = self.planned_route(PROFILES[list(PROFILES)[self.profile_index]])
+        if not route.vertices:
+            return route, None
+        key = (tuple(route.vertices), tuple(route.edges), self.resource_graph_signature())
+        if key not in self._refuel_cache:
+            self._refuel_cache[key] = route_refuelling(self.circuit.graph, route.vertices, route.edges)
+        plan = self._refuel_cache[key]
+        if plan is None:
+            return route, None
+        return route, [(vertex, amount / 10) for vertex, amount in zip(route.vertices, plan[1]) if amount]
+
+    def draw_refuel_plan(self):
+        self.header("01 / Resources", "Refuelling plan",
+                    "Minimum stops for the selected route, starting with a full tank.")
+        self.nav()
+        self.card((40, 220, 1200, 530))
+        route, stops = self.refuel_stops()
+        if not route.vertices:
+            self.label("The selected destination is unreachable.", 75, 270, 20, GOLD)
+        elif stops is None:
+            self.label("No feasible fuel plan exists for this route.", 75, 270, 20, GOLD)
+        elif not stops:
+            self.label("No refuelling stops are required for this route.", 75, 270, 20, ACCENT)
+        else:
+            page_size = 6
+            pages = (len(stops) + page_size - 1) // page_size
+            self.refuel_page = min(self.refuel_page, pages - 1)
+            self.label(f"{len(stops)} STOP(S)  /  PAGE {self.refuel_page + 1} OF {pages}", 75, 260, 14, ACCENT)
+            self.label("STATION VERTEX", 75, 300, 14, MUTED)
+            self.label("PLANNED FUEL", 400, 300, 14, MUTED)
+            for index, (vertex, amount) in enumerate(stops[self.refuel_page * page_size:(self.refuel_page + 1) * page_size]):
+                self.label(f"{self.refuel_page * page_size + index + 1:02}   {vertex}", 75, 335 + index * 39, 18)
+                self.label(f"{amount:.1f} units", 400, 335 + index * 39, 18)
+            if self.refuel_page:
+                self.button((75, 590, 180, 45), "PREVIOUS", lambda: setattr(self, "refuel_page", self.refuel_page - 1))
+            if self.refuel_page + 1 < pages:
+                self.button((275, 590, 180, 45), "NEXT", lambda: setattr(self, "refuel_page", self.refuel_page + 1))
+        self.label("At each listed station press F; the game adds up to 40 units.", 75, 655, 16, MUTED)
+        self.label("The plan assumes no nitro use or changes to roads or stations.", 75, 680, 16, MUTED)
+        self.button((900, 665, 280, 50), "BACK TO PLANNER", lambda: self.go("planner"))
 
     def open_alternatives(self):
         """Search a bounded set of simple routes between the selected vertices."""
@@ -871,7 +935,7 @@ class App:
             self.buttons = []
             self.background()
             {"menu": self.draw_menu, "settings": self.draw_settings, "planner": self.draw_planner,
-             "alternatives": self.draw_alternatives, "generation": self.draw_generation,
+             "alternatives": self.draw_alternatives, "generation": self.draw_generation, "refuel": self.draw_refuel_plan,
              "compare": self.draw_comparison, "lab": self.draw_lab,
              "race": self.draw_race, "dashboard": self.draw_dashboard,
              "standings": self.draw_standings}[self.screen]()
