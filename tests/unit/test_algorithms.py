@@ -188,6 +188,8 @@ def test_random_astar_matches_dijkstra():
 
 def test_kruskal_rejects_disconnected_graph():
     graph = sample_graph()
+    with pytest.raises(ValueError, match="undirected"):
+        kruskal(graph)
     graph.edges[3].directed = False
     with pytest.raises(ValueError, match="disconnected"):
         kruskal(graph)

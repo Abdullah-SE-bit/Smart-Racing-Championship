@@ -16,6 +16,17 @@ workshop reveals those records, including validation rejection and retry reasons
 without adding presentation dependencies to the generator. The invalid-track
 demonstration validates a copy with its shortcut flags removed.
 
+The generator builds an undirected complete candidate graph over its non-dead-end
+vertices. Kruskal rejects directed candidates and raises a disconnected-graph
+error if open edges cannot join every vertex; it does not silently accept a
+forest as a circuit backbone. Backtracking rejects incompatible checkpoint
+orders, services less than 120 coordinate units apart, and obstacle roads that
+share endpoints or are bridges. These checks only reject placements that violate
+the chosen constraints. Candidate generation or validation failures retry with
+the same seed and a deterministic attempt index, up to five attempts by default.
+Backtracking can still take exponential time in its candidate count; the fixed
+candidate sets and retry limit bound work in the current generator.
+
 - `core/graph.py` contains Pygame-independent vertices, edges, adjacency lists
   and non-negative cost profiles. Algorithms receive these objects and return
   plain results and traces. They do not import the presentation layer.
