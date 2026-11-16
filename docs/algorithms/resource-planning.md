@@ -37,3 +37,9 @@ starting fuel rounds down, so discretization is conservative. Purchases are
 reconstructed with the plan. The engine fills by up to 40 units rather than
 offering smaller purchase amounts; this uses the same stop time and can leave
 more fuel than the minimum plan, without exceeding tank capacity.
+
+The unit suite checks the refuelling DP against exhaustive purchase sequences
+on small three-segment routes, including inactive stations and infeasible
+routes. It checks the knapsack result against exhaustive item subsets and the
+greedy implementation against the assignment example and two additional
+counterexamples. The Lab and planner use the same selection functions.

@@ -1,4 +1,4 @@
-from itertools import combinations
+from itertools import combinations, product
 from math import inf
 from random import Random
 
@@ -146,6 +146,36 @@ def test_refuelling_plan_and_infeasible_route():
     assert time == 5 and purchases == [0, 5]
     assert refuel_plan([11], [True], 0, capacity=10) is None
     assert refuel_plan([1], [False], 0) is None
+
+
+def test_refuelling_dp_matches_exhaustive_small_routes():
+    capacity, purchase_limit, stop_time = 4, 2, 3
+    for requirements in product(range(4), repeat=3):
+        for available in product((False, True), repeat=3):
+            for initial in range(capacity + 1):
+                feasible = []
+                for purchases in product(range(purchase_limit + 1), repeat=3):
+                    fuel = initial
+                    for required, station, amount in zip(requirements, available, purchases):
+                        if (amount and not station) or fuel + amount > capacity:
+                            break
+                        fuel += amount - required
+                        if fuel < 0:
+                            break
+                    else:
+                        feasible.append(sum(stop_time for amount in purchases if amount))
+                result = refuel_plan(list(requirements), list(available), initial,
+                                     capacity, purchase_limit, stop_time)
+                if not feasible:
+                    assert result is None
+                else:
+                    assert result is not None and result[0] == min(feasible)
+                    fuel = initial
+                    for required, station, amount in zip(requirements, available, result[1]):
+                        assert 0 <= amount <= purchase_limit and (station or amount == 0)
+                        assert fuel + amount <= capacity
+                        fuel += amount - required
+                        assert fuel >= 0
 
 
 def test_route_refuelling_uses_conservative_discrete_fuel():
