@@ -40,3 +40,36 @@ jobs:
           name: interface-previews
           path: output/previews/*.png
           if-no-files-found: error
+
+  package-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install packaging dependencies
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\python.exe -m pip install -e ".[packaging]"
+      - name: Build Windows executable
+        shell: pwsh
+        run: .\scripts\build.ps1
+      - name: Run packaged application smoke test
+        shell: pwsh
+        run: |
+          $env:SDL_VIDEODRIVER = "dummy"
+          $env:SDL_AUDIODRIVER = "dummy"
+          $executable = Join-Path $PWD "dist/SmartRacingChampionship.exe"
+          $process = Start-Process -FilePath $executable -ArgumentList "--smoke-test" -WindowStyle Hidden -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            $process.Kill()
+            throw "Packaged application smoke test timed out."
+          }
+          $process.Refresh()
+          if ($process.ExitCode -ne 0) {
+            throw "Packaged application smoke test exited with code $($process.ExitCode)."
+          }
+          Write-Host "Packaged application smoke test passed."
