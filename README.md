@@ -83,6 +83,8 @@ Windows CI also renders screen previews as the `interface-previews` workflow
 artifact. To regenerate them locally, run
 `.\.venv\Scripts\python.exe scripts/capture_previews.py`; the images are written
 to `output/previews/`.
+CI also builds the Windows executable and runs its headless smoke test on a
+clean Windows runner.
 Run the current automated tests with `.\.venv\Scripts\python.exe -m pytest`.
 
 To build a Windows executable after installing the optional packaging tools, run
