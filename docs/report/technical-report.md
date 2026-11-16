@@ -41,6 +41,29 @@ charge. Nitro lasts four simulation seconds, increases speed by 1.5 and doubles
 fuel use for the affected portion. The score table and total championship
 tie-break order follow the assignment. Unfinished racers receive no points.
 
+## Route-cost normalization
+
+For an edge e, the optimized cost is
+`wd * distance/100 + wt * effectiveTime/10 + wf * adjustedFuel/10 +
+wr * (difficulty - 1)/4 + wo * obstacle/1`. Effective time is base time
+multiplied by 1.5 when the edge is restricted; adjusted fuel is base fuel
+multiplied by `1 + 0.1 * (difficulty - 1)`. The reference values are fixed
+scales for the circuit data, so all five terms are non-negative before
+weighting. The displayed cost is the same sum optimized by the router.
+
+| Preset | Distance | Time | Fuel | Difficulty | Obstacle |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Balanced | 1 | 1 | 1 | 1 | 1 |
+| Speed | 0.2 | 3 | 0.2 | 0.2 | 0.3 |
+| Economy | 0.3 | 0.2 | 3 | 0.3 | 0.2 |
+| Safety | 0.3 | 0.3 | 0.3 | 3 | 3 |
+
+The speed, economy and safety profiles prioritize their named objective;
+balanced weights give every normalized term the same multiplier. These are
+design choices, not measurements of the relative value of different units.
+Changing reference values or weights can change the selected route, and one
+scalar score cannot represent all possible trade-offs.
+
 ## Algorithm design and integration
 
 | Algorithm | Current role | Time / space |
@@ -210,6 +233,16 @@ Finalize and inspect the executable, report and extracted
 submission ZIP on an allowed machine.
 Add the actual group names, registration numbers and section. Do not treat
 unfinished features or unverified packaging as complete.
+
+## Conclusion
+
+The prototype connects graph search, route optimization, resource planning,
+event scheduling, track generation and championship ranking to a playable
+racing workflow. The automated checks and five measured studies provide
+evidence for the tested cases and show how the algorithms behave on the
+recorded inputs. They do not establish correctness for every possible circuit
+or replace a full human playthrough. Final requirement review, group details,
+packaged-game verification and the demo and viva remain before submission.
 
 ## Acknowledgements
 
