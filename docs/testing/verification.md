@@ -55,6 +55,10 @@ The indexed routing heap update passed **126 tests** locally, including seeded
 heap operations, 100 parallel roads with repeated key decreases, and the
 independent Bellman-Ford routing comparison. All five recorded studies were
 rerun on the documented local environment after the routing change.
+The Lab verification update passed **128 tests** locally. All selectable Lab
+modes were rendered and stepped on an authored circuit and a mixed-direction
+generated circuit, including the no-feasible-pickup case where applicable.
+Reset was also checked after a step count greater than 10,000.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

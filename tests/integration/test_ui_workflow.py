@@ -417,6 +417,44 @@ def test_race_hud_uses_actual_checkpoint_count_and_shows_feedback():
         pygame.quit()
 
 
+@pytest.mark.parametrize("generated", [False, True])
+def test_every_algorithm_lab_mode_renders_and_steps_on_real_tracks(generated, monkeypatch):
+    app = App()
+    try:
+        if generated:
+            app.circuit = generate_circuit(42)
+            app.source = app.circuit.start
+            app.target = app.circuit.checkpoints[3]
+        for algorithm in LAB_ALGORITHMS:
+            app.lab_algorithm = algorithm
+            trace, description = app.lab_result()
+            assert description
+            if not trace:
+                assert algorithm in {"Knapsack", "Greedy"}
+                assert "No feasible pickup" in description
+            app.lab_step = 0
+            app.lab_playing = True
+            app.step_lab(1)
+            assert not app.lab_playing and app.lab_step == 1
+            app.toggle_lab()
+            assert app.lab_playing
+            app.lab_step = len(trace) + 5
+            labels = []
+            with monkeypatch.context() as context:
+                context.setattr(app, "label", lambda text, *args, **kwargs: labels.append(str(text)))
+                app.buttons = []
+                app.draw_lab()
+            assert f"STEP  {len(trace)} / {len(trace)}" in labels
+            app.lab_step = 50000
+            app.reset_lab()
+            assert app.lab_step == 0 and not app.lab_playing
+        previous_speed = app.lab_speed
+        app.change_lab_speed()
+        assert app.lab_speed != previous_speed
+    finally:
+        pygame.quit()
+
+
 def test_algorithm_lab_uses_current_track_and_championship_data():
     app = App()
     try:
