@@ -15,7 +15,9 @@ The greedy alternative considers positive-benefit zero-cost items first, then
 items by descending exact benefit/cost ratio and ascending ID for ties. Zero
 benefit items are skipped. This is feasible but not guaranteed optimal. The
 assignment's example and two additional counterexamples are recorded in the
-study results and checked against exhaustive search.
+study results and checked against exhaustive search. The selected benefit is
+maintained incrementally, so recording each trace step takes constant work and
+sorting dominates the O(m log m) running time, including when tracing is enabled.
 
 The planner presents independent single-pickup route alternatives. It checks
 the route's estimated difficulty-adjusted fuel and the three-charge nitro cap

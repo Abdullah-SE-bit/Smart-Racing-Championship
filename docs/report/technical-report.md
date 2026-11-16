@@ -140,7 +140,9 @@ for an ordered lap respects its checkpoint sequence and nitro capacity.
 **Greedy pickup choice.** Process positive-benefit zero-cost items first, then
 consider the remaining items in descending exact benefit-to-cost ratio with ID
 ties. Select an item only if it fits the remaining scalar detour budget. The
-result is feasible but not always optimal: the supplied budget-10 case produces
+selected benefit is updated incrementally, including in Lab traces, so the
+sorting step dominates the O(m log m) time. The result is feasible but not
+always optimal: the supplied budget-10 case produces
 benefit 30 versus the DP optimum of 48. The study includes two further checked
 counterexamples.
 

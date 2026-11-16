@@ -68,14 +68,16 @@ def greedy(items: list[Pickup], budget: int, trace: list[dict] | None = None) ->
     ))
     chosen = []
     spent = 0
+    benefit = 0
     for item in ordered:
         if item.benefit and spent + item.cost <= budget:
             chosen.append(item)
             spent += item.cost
+            benefit += item.benefit
         if trace is not None:
             trace.append({"action": "consider pickup", "item": item.id, "cost": spent,
-                          "value": sum(p.benefit for p in chosen)})
-    return Selection(chosen, sum(item.benefit for item in chosen), spent)
+                          "value": benefit})
+    return Selection(chosen, benefit, spent)
 
 
 def refuel_plan(distances: list[int], available: list[bool], initial_fuel: int,
