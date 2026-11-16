@@ -71,6 +71,28 @@ def test_shortest_paths_blocked_edges_zero_cost_and_waypoints():
     assert shortest_path(graph, 0, 2, CostProfile(0, 0, 0, 0, 0), "astar").cost == 0
 
 
+@pytest.mark.parametrize("algorithm", ["dijkstra", "astar"])
+def test_equal_cost_ties_and_replanning_after_road_updates(algorithm):
+    graph = Graph()
+    for vertex in range(4):
+        graph.add_vertex(Vertex(vertex, vertex, 0))
+    for edge in (Edge(0, 0, 1, 1, 1, 1), Edge(1, 1, 3, 1, 1, 1),
+                 Edge(2, 0, 2, 1, 1, 1), Edge(3, 2, 3, 1, 1, 1)):
+        graph.add_edge(edge)
+    profile = CostProfile(distance=0, time=1, fuel=0, difficulty=0, obstacle=0, time_reference=1)
+    first = shortest_path(graph, 0, 3, profile, algorithm)
+    assert first.vertices in ([0, 1, 3], [0, 2, 3]) and first.cost == 2
+    assert shortest_path(graph, 0, 3, profile, algorithm).vertices == first.vertices
+    assert first.expanded > 0 and first.relaxed > 0 and first.heap_operations > 0
+    graph.edges[1].status = "restricted"
+    assert shortest_path(graph, 0, 3, profile, algorithm).vertices == [0, 2, 3]
+    graph.edges[3].status = "blocked"
+    rerouted = shortest_path(graph, 0, 3, profile, algorithm)
+    assert rerouted.vertices == [0, 1, 3] and rerouted.cost == 2.5
+    graph.edges[1].status = "blocked"
+    assert shortest_path(graph, 0, 3, profile, algorithm).vertices == []
+
+
 def test_heap_handles_duplicates_and_empty():
     heap = MinHeap()
     for value in [4, 1, 2, 1, 9, 0]:
@@ -78,6 +100,8 @@ def test_heap_handles_duplicates_and_empty():
     assert [heap.pop() for _ in range(6)] == [0, 1, 1, 2, 4, 9]
     with pytest.raises(IndexError):
         heap.pop()
+    with pytest.raises(IndexError):
+        heap.peek()
 
 
 def test_knapsack_matches_exhaustive_and_greedy_counterexample():
@@ -213,3 +237,9 @@ def test_championship_sorts_and_top_k_use_all_tie_breakers():
     for sort in (merge_sort, quick_sort, heap_sort):
         assert [entry.racer_id for entry in sort(entries, key=ranking_key)] == expected
     assert [entry.racer_id for entry in top_k(entries, 3, key=ranking_key)] == expected[:3]
+
+
+def test_merge_and_quick_sort_preserve_equal_key_input_order():
+    values = [(1, "first"), (0, "lower"), (1, "second"), (1, "third")]
+    for method in (merge_sort, quick_sort):
+        assert method(values, key=lambda item: item[0]) == [values[1], values[0], values[2], values[3]]

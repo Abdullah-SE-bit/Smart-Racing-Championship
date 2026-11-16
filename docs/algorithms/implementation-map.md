@@ -23,6 +23,13 @@ extractions; bottom-up heap construction is included in elapsed time but is not
 counted as insertions. Experiment timing conventions are in the generated
 `experiments/results/analysis.md`.
 
+Merge Sort keeps the left entry first on equal keys, and this Quick Sort builds
+stable lower/equal/greater partitions around the middle-element pivot; both
+preserve input order for equal keys. Heap Sort can reorder equal keys. In the
+championship, racer ID is the final tie-breaker, so distinct racers have distinct
+total keys and every method produces the same order. Quick Sort averages
+O(n log n) work but has O(n^2) worst-case work and uses partition lists.
+
 The explorer's alternatives view uses the shared DFS-style simple-path search.
 It displays up to five routes other than the selected optimum and bounds the
 search to 10,000 states and 16 vertices per path. These limits keep interactive
