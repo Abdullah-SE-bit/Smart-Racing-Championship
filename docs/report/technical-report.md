@@ -101,7 +101,9 @@ for each arrival fuel. A state records everything needed for later transitions,
 so discarding a slower history with the same fuel preserves an optimal plan.
 Fuel is discretized in tenths with conservative rounding; the race engine fills
 up to 40 units at the same fixed stop time. This can leave more fuel than the
-minimum DP purchase without invalidating the plan.
+minimum DP purchase without invalidating the plan. The planner displays the
+station vertices and planned quantities for the selected route; pickup advice
+for an ordered lap respects its checkpoint sequence and nitro capacity.
 
 **Greedy pickup choice.** Process positive-benefit zero-cost items first, then
 consider the remaining items in descending exact benefit-to-cost ratio with ID
@@ -201,9 +203,10 @@ The fifth study records measured timings for small k and for k close to n.
 The prototype needs further review against all assignment requirements, broader
 generation and validation constraints, and human end-to-end play testing. A
 clean Windows CI runner built the executable and successfully launched its
-headless smoke test. The local host blocked Python and the executable with
-Application Control, so local execution and a human playthrough remain
-unverified. Finalize and inspect the executable, report and extracted
+headless smoke test. The local host blocked the virtual-environment Python and
+the packaged executable with Application Control. A base Python runtime did
+launch the game locally, but a complete human playthrough remains unverified.
+Finalize and inspect the executable, report and extracted
 submission ZIP on an allowed machine.
 Add the actual group names, registration numbers and section. Do not treat
 unfinished features or unverified packaging as complete.

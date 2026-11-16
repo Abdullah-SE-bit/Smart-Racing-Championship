@@ -21,6 +21,13 @@ The planner presents independent single-pickup route alternatives. It checks
 the route's estimated difficulty-adjusted fuel and the three-charge nitro cap
 before recommending a pickup. This avoids treating several independent detours
 as one combined route without verifying their combined feasibility.
+In ordered-lap mode, each candidate is inserted into a leg of the ordered
+checkpoint route; the shared checkpoint router prevents a later checkpoint from
+being passed early. Candidate evaluation accounts for other active pickups
+encountered first and does not recommend a pickup that would arrive after nitro
+capacity is full. Endpoint mode instead evaluates the chosen start and target;
+it does not claim to plan a complete ordered lap. Recommendations assume no
+nitro is spent and no road or service changes occur while following the route.
 
 ## Discrete refuelling
 
@@ -37,6 +44,10 @@ starting fuel rounds down, so discretization is conservative. Purchases are
 reconstructed with the plan. The engine fills by up to 40 units rather than
 offering smaller purchase amounts; this uses the same stop time and can leave
 more fuel than the minimum plan, without exceeding tank capacity.
+The refuelling screen lists each planned station vertex and the quantity in the
+reconstructed plan. It tells the player to press F, which applies the game's
+actual automatic fill rule. The displayed route starts with a full tank and
+assumes no nitro use, road changes or service changes.
 
 The unit suite checks the refuelling DP against exhaustive purchase sequences
 on small three-segment routes, including inactive stations and infeasible

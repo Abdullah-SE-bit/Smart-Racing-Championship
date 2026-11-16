@@ -17,6 +17,10 @@ The latest recorded local run used Python 3.12.16 on Windows and reported
 **90 passed**. Rerun the suite after further changes; the count and outcome may
 change. `pip check` reported no broken requirements. A separate check generated
 and validated 100 seeds; five seeded tracks were also raced in automated tests.
+The resource-planning changes were subsequently checked locally with Python
+3.12.16: **111 passed**, including ordered pickup recommendations, nitro
+capacity and the reconstructed refuelling screen. This run used the existing
+virtual environment's packages with an allowed base Python executable.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

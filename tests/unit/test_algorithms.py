@@ -11,7 +11,7 @@ from smart_racing.algorithms.routing.shortest import checkpoint_route, shortest_
 from smart_racing.algorithms.sorting.rankings import heap_sort, merge_sort, quick_sort, top_k
 from smart_racing.algorithms.structures.heap import MinHeap
 from smart_racing.core.graph import CostProfile, Edge, Graph, Vertex
-from smart_racing.resources.planner import route_refuelling
+from smart_racing.resources.planner import pickup_suggestions, route_refuelling
 from smart_racing.championship.standings import ChampionshipEntry, ranking_key
 
 
@@ -176,6 +176,36 @@ def test_refuelling_dp_matches_exhaustive_small_routes():
                         assert fuel + amount <= capacity
                         fuel += amount - required
                         assert fuel >= 0
+
+
+def test_ordered_pickup_suggestions_do_not_pass_later_checkpoints_early():
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "checkpoint", 1),
+                   Vertex(2, 2, 0, "checkpoint", 2), Vertex(3, 3, 0, "nitro"),
+                   Vertex(4, 1, 1, "nitro")):
+        graph.add_vertex(vertex)
+    for edge in (Edge(0, 0, 1, 1, 1, 1, directed=True),
+                 Edge(1, 1, 2, 1, 1, 1, directed=True),
+                 Edge(2, 0, 2, 1, 1, 1, directed=True),
+                 Edge(3, 2, 3, 1, 1, 1, directed=True),
+                 Edge(4, 3, 1, 1, 1, 1, directed=True),
+                 Edge(5, 1, 4, 1, 1, 1, directed=True),
+                 Edge(6, 4, 2, 1, 1, 1, directed=True)):
+        graph.add_edge(edge)
+    suggestions = pickup_suggestions(graph, 0, 2, waypoints=[1, 2])
+    assert [suggestion.vertex for suggestion in suggestions] == [4]
+    assert suggestions[0].dp_selected
+
+
+def test_pickup_suggestions_account_for_other_pickups_filling_nitro_capacity():
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "nitro"),
+                   Vertex(2, 2, 0, "nitro"), Vertex(3, 3, 0, "finish")):
+        graph.add_vertex(vertex)
+    for index in range(3):
+        graph.add_edge(Edge(index, index, index + 1, 1, 1, 1, directed=True))
+    suggestions = pickup_suggestions(graph, 0, 3, nitro=2)
+    assert [suggestion.vertex for suggestion in suggestions] == [1]
 
 
 def test_route_refuelling_uses_conservative_discrete_fuel():

@@ -32,6 +32,8 @@ def main():
         capture("02-settings", app.draw_settings)
         app.open_quick_planner()
         capture("03-planner", app.draw_planner)
+        app.open_refuel_plan()
+        capture("03b-refuel-plan", app.draw_refuel_plan)
         app.open_alternatives()
         capture("04-alternatives", app.draw_alternatives)
         app.go("compare")

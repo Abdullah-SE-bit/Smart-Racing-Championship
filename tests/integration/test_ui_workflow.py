@@ -12,7 +12,7 @@ import pytest
 from smart_racing.tracks.circuits import load_circuit, save_circuit
 from smart_racing.tracks import generator
 from smart_racing.tracks.generator import generate_circuit
-from smart_racing.algorithms.routing.shortest import shortest_path
+from smart_racing.algorithms.routing.shortest import Route, shortest_path
 from smart_racing.championship.standings import leaders, standings
 from smart_racing.core.graph import Edge, Graph, Vertex
 from smart_racing.ui.app import ACCENT, MUTED, PANEL, TEXT, App, LAB_ALGORITHMS, PROFILES
@@ -372,6 +372,29 @@ def test_algorithm_lab_uses_current_track_and_championship_data():
         next(iter(app.circuit.graph.edges.values())).directed = True
         trace, description = app.lab_result()
         assert not trace and "undirected" in description
+    finally:
+        pygame.quit()
+
+
+def test_refuel_screen_shows_actual_stop_and_planned_fuel(monkeypatch):
+    app = App()
+    try:
+        graph = Graph()
+        for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "fuel"),
+                       Vertex(2, 2, 0, "finish")):
+            graph.add_vertex(vertex)
+        graph.add_edge(Edge(0, 0, 1, 1, 1, 70))
+        graph.add_edge(Edge(1, 1, 2, 1, 1, 70))
+        app.circuit.graph = graph
+        monkeypatch.setattr(app, "planned_route", lambda profile: Route(vertices=[0, 1, 2], edges=[0, 1], cost=2))
+        labels = []
+        monkeypatch.setattr(app, "label", lambda text, *args, **kwargs: labels.append(str(text)))
+        app.open_refuel_plan()
+        app.draw_refuel_plan()
+        assert app.screen == "refuel"
+        assert "01   1" in labels
+        assert "40.0 units" in labels
+        assert any("press F" in label for label in labels)
     finally:
         pygame.quit()
 
