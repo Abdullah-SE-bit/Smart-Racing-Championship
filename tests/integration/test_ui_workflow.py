@@ -376,6 +376,39 @@ def test_algorithm_lab_uses_current_track_and_championship_data():
         pygame.quit()
 
 
+def test_keyboard_navigation_and_planner_vertex_selection():
+    app = App()
+    try:
+        app.draw_menu()
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_TAB, mod=0))
+        assert app.keyboard_focus and app.focused_button == 0
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, mod=0))
+        assert app.screen == "planner" and app.pending_championship
+        before = app.target
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RIGHT, mod=0))
+        assert app.target != before
+        before = app.source
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RIGHT, mod=pygame.KMOD_SHIFT))
+        assert app.source != before
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE, mod=0))
+        assert app.screen == "menu"
+    finally:
+        pygame.quit()
+
+
+def test_resized_window_maps_mouse_to_logical_controls():
+    app = App()
+    try:
+        app.window = pygame.display.set_mode((960, 600), pygame.RESIZABLE)
+        assert app.logical_position((75, 360)) == pytest.approx((100, 480))
+        app.draw_menu()
+        app.present()
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(75, 360)))
+        assert app.screen == "race" and not app.championship
+    finally:
+        pygame.quit()
+
+
 def test_module_entry_point_runs_headless_smoke_check():
     env = os.environ.copy()
     env["SDL_VIDEODRIVER"] = "dummy"

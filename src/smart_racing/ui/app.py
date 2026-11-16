@@ -48,7 +48,8 @@ class App:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Smart Racing Championship")
-        self.surface = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.window = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+        self.surface = pygame.Surface((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
         self.fonts = {size: pygame.font.SysFont("segoeui", size, bold=bold)
                       for size, bold in [(14, False), (16, False), (18, False), (20, True),
@@ -66,6 +67,8 @@ class App:
         self.previous_frame = None
         self.simulation_clock = SimulationClock()
         self.buttons = []
+        self.focused_button = 0
+        self.keyboard_focus = False
         self.race = None
         self.selected_road = 0
         self.championship = False
@@ -103,9 +106,11 @@ class App:
 
     def button(self, rect, title, action, selected=False, subtitle=None):
         rect = pygame.Rect(rect)
-        hover = rect.collidepoint(pygame.mouse.get_pos())
+        hover = rect.collidepoint(self.logical_position(pygame.mouse.get_pos()))
         color = (67, 78, 52) if selected else ((56, 75, 61) if hover else PANEL_LIGHT)
         self.card(rect, color, 12, ACCENT if selected else (70, 89, 72))
+        if self.keyboard_focus and self.focused_button == len(self.buttons):
+            pygame.draw.rect(self.surface, GOLD, rect, width=2, border_radius=12)
         self.label(title, rect.x + 15, rect.y + (8 if subtitle else 11), 18, ACCENT if selected else TEXT)
         if subtitle:
             self.label(subtitle, rect.x + 15, rect.y + 34, 14, MUTED)
@@ -137,8 +142,32 @@ class App:
             self.transition_remaining = .22
         else:
             self.transition_remaining = 0
+        if screen != self.screen:
+            self.buttons = []
+            self.focused_button = 0
         self.screen = screen
         self.lab_step = 0
+
+    def viewport(self):
+        width, height = self.window.get_size()
+        scale = min(max(width, 1) / WIDTH, max(height, 1) / HEIGHT)
+        viewport_width = max(1, round(WIDTH * scale))
+        viewport_height = max(1, round(HEIGHT * scale))
+        return ((width - viewport_width) // 2, (height - viewport_height) // 2,
+                viewport_width, viewport_height)
+
+    def logical_position(self, position):
+        left, top, width, height = self.viewport()
+        return ((position[0] - left) * WIDTH / width,
+                (position[1] - top) * HEIGHT / height)
+
+    def present(self):
+        left, top, width, height = self.viewport()
+        self.window.fill(BACKGROUND)
+        frame = self.surface if (width, height) == (WIDTH, HEIGHT) else pygame.transform.smoothscale(
+            self.surface, (width, height))
+        self.window.blit(frame, (left, top))
+        pygame.display.flip()
 
     def set_track(self, direction):
         self.track_index = (self.track_index + direction) % len(self.circuit_paths)
@@ -424,9 +453,11 @@ class App:
                                       "N                Activate nitro (one charge)",
                                       "F                Refuel at an available station",
                                       "SPACE       Pause / resume the simulation",
-                                      "ESC            Return to the main menu")):
+                                      "ESC            Return to the main menu",
+                                      "TAB / ENTER  Navigate and activate buttons")):
             self.label(text, 70, 300 + index * 50, 18)
         self.label("Pass checkpoints in order and return to the start to complete a lap.", 70, 650, 16, MUTED)
+        self.label("Planner: arrow keys choose destination; Shift + arrows choose start.", 70, 680, 16, MUTED)
         self.card((760, 220, 480, 530))
         self.label("RACE SETTINGS", 790, 250, 14, ACCENT)
         self.label("Laps per race", 790, 305, 20)
@@ -772,23 +803,48 @@ class App:
     def event(self, event):
         if event.type == pygame.QUIT:
             self.running = False
+        if event.type == pygame.VIDEORESIZE:
+            self.window = pygame.display.set_mode(event.size, pygame.RESIZABLE)
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.keyboard_focus = False
+            position = self.logical_position(event.pos)
             for rect, action in reversed(self.buttons):
-                if rect.collidepoint(event.pos):
+                if rect.collidepoint(position):
                     action()
                     return
             if self.screen == "planner":
-                for vertex, position in self.map_positions((60, 242, 760, 480), self.circuit).items():
-                    if math.dist(position, event.pos) <= 14:
+                for vertex, point in self.map_positions((60, 242, 760, 480), self.circuit).items():
+                    if math.dist(point, position) <= 14:
                         self.source, self.target = self.target, vertex
                         break
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.go("menu")
+            elif event.key == pygame.K_TAB and self.buttons:
+                direction = -1 if getattr(event, "mod", 0) & pygame.KMOD_SHIFT else 1
+                if self.keyboard_focus:
+                    self.focused_button = (self.focused_button + direction) % len(self.buttons)
+                else:
+                    self.focused_button = 0 if direction > 0 else len(self.buttons) - 1
+                self.keyboard_focus = True
+            elif event.key == pygame.K_RETURN and self.keyboard_focus and self.buttons:
+                self.buttons[self.focused_button % len(self.buttons)][1]()
+            elif self.screen == "planner" and event.key in {pygame.K_LEFT, pygame.K_RIGHT}:
+                self.keyboard_focus = False
+                vertices = sorted(self.circuit.graph.vertices)
+                source = bool(getattr(event, "mod", 0) & pygame.KMOD_SHIFT)
+                current = self.source if source else self.target
+                selected = vertices[(vertices.index(current) + (1 if event.key == pygame.K_RIGHT else -1)) % len(vertices)]
+                if source:
+                    self.source = selected
+                else:
+                    self.target = selected
             elif self.screen == "race":
                 if event.key == pygame.K_LEFT:
+                    self.keyboard_focus = False
                     self.selected_road -= 1
                 elif event.key == pygame.K_RIGHT:
+                    self.keyboard_focus = False
                     self.selected_road += 1
                 elif event.key == pygame.K_n:
                     self.race.activate_nitro(0)
@@ -824,7 +880,7 @@ class App:
                 previous = self.previous_frame.copy()
                 previous.set_alpha(round(255 * (self.transition_remaining / .22) ** 2))
                 self.surface.blit(previous, (0, 0))
-            pygame.display.flip()
+            self.present()
         pygame.quit()
 
 
