@@ -30,7 +30,7 @@ shared functions and their actual game, Lab and experiment call sites.
 | Required family | Main source | Example evidence |
 | --- | --- | --- |
 | BFS and DFS | `algorithms/graph/traversal.py` | Traversal, bounded-path, mixed-cycle and weak-component unit tests. |
-| Dijkstra and A-star | `algorithms/routing/shortest.py` | Routing tests include closures, equal costs, zero weights and random A-star/Dijkstra agreement. |
+| Dijkstra and A-star | `algorithms/routing/shortest.py` | Routing tests include closures, equal costs and zero weights; both algorithms are compared against an independent Bellman-Ford reference on seeded mixed graphs. |
 | Dynamic programming and greedy | `algorithms/optimization/resources.py`, `resources/planner.py` | Knapsack and refuelling tests compare against exhaustive small cases; greedy counterexamples are checked. |
 | Backtracking and Kruskal | `tracks/generator.py`, `algorithms/generation/mst.py` | Seeded generation, rejection, connectivity and mixed-direction Lab tests. |
 | Heap and event priority queue | `algorithms/structures/heap.py`, `events/queue.py` | Heap ordering, cancellation, simultaneous events and expiry tests. |

@@ -122,6 +122,70 @@ def test_shortest_paths_blocked_edges_zero_cost_and_waypoints():
     assert shortest_path(graph, 0, 2, CostProfile(0, 0, 0, 0, 0), "astar").cost == 0
 
 
+def test_routing_matches_independent_bellman_ford_on_mixed_graphs():
+    """Compare costs and edge paths against a separate relaxation algorithm."""
+    def reference(graph, start):
+        distances = {vertex: inf for vertex in graph.vertices}
+        distances[start] = 0
+        for _ in range(len(graph.vertices) - 1):
+            updated = False
+            for road in graph.edges.values():
+                if road.status == "blocked":
+                    continue
+                directions = [(road.source, road.target)]
+                if not road.directed:
+                    directions.append((road.target, road.source))
+                for source, target in directions:
+                    candidate = distances[source] + road.distance
+                    if candidate < distances[target]:
+                        distances[target] = candidate
+                        updated = True
+            if not updated:
+                break
+        return distances
+
+    profile = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0,
+                          distance_reference=1)
+    rng = Random(20261205)
+    covered = set()
+    for _ in range(160):
+        graph = Graph()
+        for vertex in range(4):
+            graph.add_vertex(Vertex(vertex, rng.randrange(10), rng.randrange(10)))
+        for road_id in range(rng.randrange(12)):
+            graph.add_edge(Edge(road_id, rng.randrange(4), rng.randrange(4), rng.randrange(6), 1, 1,
+                                status="blocked" if rng.randrange(5) == 0 else "open",
+                                directed=bool(rng.randrange(2))))
+        pairs = set()
+        for road in graph.edges.values():
+            covered.add("directed" if road.directed else "undirected")
+            if road.status == "blocked":
+                covered.add("blocked")
+            if road.distance == 0:
+                covered.add("zero")
+            endpoints = frozenset((road.source, road.target))
+            if endpoints in pairs:
+                covered.add("parallel")
+            pairs.add(endpoints)
+        for start in graph.vertices:
+            distances = reference(graph, start)
+            for target in graph.vertices:
+                for algorithm in ("dijkstra", "astar"):
+                    route = shortest_path(graph, start, target, profile, algorithm)
+                    assert route.cost == distances[target]
+                    if route.cost == inf:
+                        covered.add("unreachable")
+                        assert not route.vertices and not route.edges
+                        continue
+                    assert route.vertices[0] == start and route.vertices[-1] == target
+                    assert len(route.edges) + 1 == len(route.vertices)
+                    for source, destination, road_id in zip(route.vertices, route.vertices[1:], route.edges):
+                        assert any(neighbor == destination and road.id == road_id
+                                   for neighbor, road in graph.neighbors(source))
+                    assert sum(graph.edges[road].distance for road in route.edges) == route.cost
+    assert covered == {"directed", "undirected", "blocked", "zero", "parallel", "unreachable"}
+
+
 @pytest.mark.parametrize("algorithm", ["dijkstra", "astar"])
 def test_equal_cost_ties_and_replanning_after_road_updates(algorithm):
     graph = Graph()
