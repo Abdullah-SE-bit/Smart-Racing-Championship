@@ -116,3 +116,5 @@ Read [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for the full package map,
 [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the GitHub workflow. Issues can
 be split or combined as needed; they track the project and do not impose phase
 gates. Record important architecture and rule choices in `docs/architecture/`.
+The [demo and viva guide](docs/demo-and-viva.md) provides a rehearsal checklist
+and prompts for explaining the implementation.
