@@ -1,13 +1,13 @@
 # Smart Racing Championship
 
-A planned 2D top-down racing game for a Design and Analysis of Algorithms
+A 2D top-down racing game for a Design and Analysis of Algorithms
 course. Players plan routes, manage fuel and nitro, and respond to changing
 roads while racing deterministic opponents. The project combines a polished,
 animated Pygame interface with algorithms that have real roles in gameplay.
 
-**Current status: implementation in progress.** A playable prototype, initial
-algorithms, circuits, and tests are being built; the complete assignment and
-bonus work are not yet finished.
+**Current status: implementation and verification in progress.** A playable
+prototype, algorithms, circuits, bonus features and automated tests are present.
+Full assignment verification, the final package and group demonstration remain.
 
 ## Project scope
 
@@ -124,3 +124,5 @@ be split or combined as needed; they track the project and do not impose phase
 gates. Record important architecture and rule choices in `docs/architecture/`.
 The [demo and viva guide](docs/demo-and-viva.md) provides a rehearsal checklist
 and prompts for explaining the implementation.
+The [requirements evidence map](docs/requirements-evidence.md) connects the
+assignment to source, tests, recorded results and remaining verification.
