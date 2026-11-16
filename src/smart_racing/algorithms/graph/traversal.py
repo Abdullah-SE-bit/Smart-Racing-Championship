@@ -184,25 +184,26 @@ def ordered_lap_paths(graph: Graph, start: int, checkpoints: list[int], limit: i
 
 
 def weak_components(graph: Graph) -> list[list[int]]:
-    """Components ignoring direction, while excluding blocked roads."""
-    adjacency = {vertex: set() for vertex in graph.vertices}
+    """Find weak components in O(V+E), excluding blocked roads."""
+    adjacency = {vertex: [] for vertex in graph.vertices}
     for edge in graph.edges.values():
         if edge.status != "blocked":
-            adjacency[edge.source].add(edge.target)
-            adjacency[edge.target].add(edge.source)
-    remaining = set(graph.vertices)
+            adjacency[edge.source].append(edge.target)
+            adjacency[edge.target].append(edge.source)
+    visited = set()
     components = []
-    while remaining:
-        start = min(remaining)
+    for start in graph.vertices:
+        if start in visited:
+            continue
         stack = [start]
-        remaining.remove(start)
+        visited.add(start)
         component = []
         while stack:
             vertex = stack.pop()
             component.append(vertex)
-            for neighbor in sorted(adjacency[vertex], reverse=True):
-                if neighbor in remaining:
-                    remaining.remove(neighbor)
+            for neighbor in reversed(adjacency[vertex]):
+                if neighbor not in visited:
+                    visited.add(neighbor)
                     stack.append(neighbor)
         components.append(component)
     return components
