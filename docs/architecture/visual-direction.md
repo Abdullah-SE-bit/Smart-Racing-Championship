@@ -4,7 +4,10 @@ The screens use a motorsport broadcast palette inspired by Drive to Survive:
 carbon black and graphite surfaces, cool white type and racing red primary
 actions. The menu's featured circuit is drawn from the selected track's
 stored main route and roads; the moving markers are decorative and never feed
-the race engine. Reduced motion holds these markers still. Settings groups
+the race engine. Original generated pit-lane artwork sits behind the menu and
+appears more subtly behind other screens. Buttons use clipped corners and a
+moving highlight; the backdrop pans slowly. Reduced motion holds the backdrop
+and buttons still along with the circuit markers. Settings groups
 keyboard inputs and race options into separate panels. The planner keeps its
 map selection unobstructed by placing its resource and alternative-route
 actions below the map. The race view uses wider road geometry and top-down car

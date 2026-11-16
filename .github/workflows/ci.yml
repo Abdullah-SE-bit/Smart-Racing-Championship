@@ -104,6 +104,7 @@ jobs:
             "source/pyproject.toml", "source/src/smart_racing/__main__.py",
             "source/data/circuits/circuit_1.json", "source/data/circuits/circuit_2.json",
             "source/data/circuits/circuit_3.json", "source/assets/fonts/.gitkeep",
+            "source/assets/images/pit-lane-night.png",
             "source/docs/assignment-specification.md", "source/experiments/results/analysis.md",
             "source/experiments/results/studies.json"
           )

@@ -47,6 +47,35 @@ def test_menu_track_selection_navigation_and_reduced_motion():
         pygame.quit()
 
 
+def test_backdrop_and_button_motion_respect_reduced_motion(monkeypatch):
+    app = App()
+    try:
+        assert app.pit_backdrop.get_width() >= 1280
+        assert app.pit_backdrop.get_height() >= 800
+        monkeypatch.setattr(pygame.mouse, "get_pos", lambda: (-100, -100))
+
+        def backdrop_at(time):
+            app.time = time
+            app.draw_pit_background()
+            return pygame.image.tostring(app.surface, "RGB")
+
+        def button_at(time):
+            app.time = time
+            app.surface.fill((0, 0, 0))
+            app.buttons = []
+            app.menu_button((48, 319, 420, 65), "CHAMPIONSHIP", None, lambda: None, True)
+            return pygame.image.tostring(app.surface.subsurface((48, 319, 420, 65)), "RGB")
+
+        app.reduced_motion = False
+        assert backdrop_at(0) != backdrop_at(5)
+        assert button_at(0) != button_at(1)
+        app.reduced_motion = True
+        assert backdrop_at(0) == backdrop_at(5)
+        assert button_at(0) == button_at(1)
+    finally:
+        pygame.quit()
+
+
 def test_settings_screen_changes_options_and_returns_to_menu():
     app = App()
     try:
