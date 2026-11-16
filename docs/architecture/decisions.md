@@ -56,6 +56,11 @@ candidate sets and retry limit bound work in the current generator.
   `1 + 0.1 * (difficulty - 1)`. A station supplies up to 40 units once per
   visit and takes three seconds. Human players press F; opponents stop below
   25 units at active stations.
+- Below 25 units, the main-route and shortcut opponents consider reachable
+  active fuel stations in ascending vertex ID order, excluding routes through
+  later checkpoints. The distance opponent checks for a reachable active
+  station along its current shortest route to the next checkpoint. All three
+  refuel on arrival and then resume their respective routing policies.
 - The initial nitro allocation is one charge, capacity three. A charge lasts
   four simulation seconds, multiplies speed by 1.5 and doubles fuel for the
   boosted portion. Pickup vertices are consumed after collection. Resource

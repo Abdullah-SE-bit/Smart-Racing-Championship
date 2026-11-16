@@ -287,6 +287,49 @@ def test_low_fuel_station_detour_does_not_cross_future_checkpoint(strategy):
     assert race._ai_target(racer) == 1
 
 
+@pytest.mark.parametrize("strategy", ["main", "shortcut"])
+def test_low_fuel_opponent_uses_first_eligible_station_by_stable_id(strategy):
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "checkpoint", 1),
+                   Vertex(2, 2, 0, "checkpoint", 2), Vertex(5, 0, 1, "fuel"),
+                   Vertex(9, 0, 2, "fuel")):
+        graph.add_vertex(vertex)
+    for edge in (Edge(0, 0, 1, 1, 1, 1), Edge(1, 1, 2, 1, 1, 1),
+                 Edge(2, 2, 0, 1, 1, 1), Edge(3, 0, 5, 1, 1, 1),
+                 Edge(4, 0, 9, 1, 1, 1)):
+        graph.add_edge(edge)
+    racer = Racer(1, "Opponent", strategy, 0, fuel=20)
+    race = Race(Circuit("Stations", graph, 0, [1, 2], [0, 1, 2, 0]), racers=[racer])
+    assert race._ai_target(racer) == 5
+    race.tick(1)
+    assert racer.vertex == 5 and racer.stop_remaining == 3
+    assert racer.fuel == pytest.approx(59)
+
+
+def test_seed_and_events_reproduce_opponent_decisions_each_tick():
+    def replay():
+        circuit = generate_circuit(42)
+        race = Race(circuit)
+        road = sorted(circuit.graph.edges)[8]
+        race.schedule(Event(1, 2, 1, "block", road, 3))
+        snapshots = []
+        for _ in range(150):
+            human = race.racers[0]
+            if human.edge_id is None and not human.finished and not human.dnf:
+                future = set(circuit.checkpoints[human.next_checkpoint + 1:])
+                route = shortest_path(circuit.graph, human.vertex, race._destination(human),
+                                      avoid_vertices=future)
+                if len(route.vertices) > 1:
+                    race.choose(human.id, route.vertices[1])
+            race.tick(.1)
+            snapshots.append([(racer.vertex, racer.edge_id, racer.edge_target, racer.edge_progress,
+                               racer.fuel, racer.next_checkpoint, racer.laps, racer.status)
+                              for racer in race.racers])
+        return snapshots, race.event_log
+
+    assert replay() == replay()
+
+
 def test_race_ties_and_unfinished_order_use_the_required_keys():
     race = Race(load_circuit(CIRCUITS[0]))
     first, second, third, fourth = race.racers
