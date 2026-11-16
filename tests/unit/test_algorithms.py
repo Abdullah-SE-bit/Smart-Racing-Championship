@@ -77,6 +77,20 @@ def test_mixed_cycle_detection_matches_exhaustive_small_graphs():
         assert has_cycle(graph) == exhaustive(graph)
 
 
+def test_weak_components_handle_isolated_vertices_and_mixed_roads():
+    graph = Graph()
+    for vertex in range(2000):
+        graph.add_vertex(Vertex(vertex, vertex, 0))
+    graph.add_edge(Edge(0, 2, 0, 1, 1, 1, directed=True))
+    graph.add_edge(Edge(1, 0, 2, 1, 1, 1))
+    graph.add_edge(Edge(2, 2, 3, 1, 1, 1, status="blocked"))
+    components = weak_components(graph)
+    assert components[0] == [0, 2]
+    assert len(components) == 1999
+    assert [1] in components and [3] in components
+    assert components == weak_components(graph)
+
+
 def test_bounded_alternative_paths_report_limits_and_avoid_parallel_duplicates():
     graph = sample_graph()
     graph.add_edge(Edge(9, 0, 1, 2, 2, 2))

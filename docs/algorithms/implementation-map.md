@@ -54,3 +54,6 @@ component closes a cycle. The remaining directed roads form a component graph,
 on which a directed DFS detects cycles. This handles parallel directed and
 undirected roads without counting the reverse traversal of a single undirected
 road as a cycle. Both passes take O(V+E) time and O(V+E) auxiliary space.
+Weak-component analysis builds an undirected adjacency view of open roads and
+visits vertices and neighbors in stable insertion order. It also uses O(V+E)
+time and O(V+E) auxiliary space, including the temporary adjacency view.

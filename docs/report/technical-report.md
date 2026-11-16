@@ -69,7 +69,7 @@ scalar score cannot represent all possible trade-offs.
 | Algorithm | Current role | Time / space |
 | --- | --- | --- |
 | BFS | Reachability and minimum-edge paths in exploration | O(V+E) / O(V) auxiliary |
-| DFS | Traversal, with cycle, weak-component, dead-end and bounded path helpers | O(V+E) traversal / O(V); path enumeration can be exponential |
+| DFS | Traversal, with cycle, weak-component, dead-end and bounded path helpers | O(V+E) traversal / O(V); component view uses O(V+E) space; path enumeration can be exponential |
 | Dijkstra | Non-negative route optimization and opponent routing | O((V+E) log V) with a binary heap |
 | A* | Heuristic route search and comparison | Worst case comparable to Dijkstra; depends on heuristic |
 | Dynamic programming | 0/1 pickup choices and discrete fixed-route refuelling | O(mB) for knapsack with reconstruction; direct refuelling O(mC²) |
@@ -101,6 +101,8 @@ undirected components and cycles. A directed road inside one component closes
 a cycle; directed roads between components are then checked with directed DFS.
 This avoids mistaking the reversal of one two-way road for a cycle and takes
 O(V+E) time and space.
+Weak components similarly build an undirected view of open roads and visit it
+in O(V+E) time and space; the directed state of each original road is unchanged.
 
 **Dijkstra.** Set the start distance to zero, push it into a min-heap, and
 repeatedly extract the least tentative distance. For each legal outgoing road,
