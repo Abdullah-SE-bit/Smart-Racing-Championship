@@ -106,6 +106,29 @@ def test_race_presentation_does_not_advance_simulation():
         pygame.quit()
 
 
+def test_race_hud_resource_and_checkpoint_indicators_follow_state():
+    app = App()
+    try:
+        app.start_race()
+        human = app.race.racers[0]
+        human.nitro = 1
+        human.next_checkpoint = 2
+        app.buttons = []
+        app.draw_race()
+        assert app.surface.get_at((1155, 364))[:3] == (246, 125, 84)
+        assert app.surface.get_at((1176, 364))[:3] == (52, 66, 61)
+        assert app.surface.get_at((890, 419))[:3] == (215, 224, 128)
+        assert app.surface.get_at((958, 419))[:3] == (52, 66, 61)
+        human.nitro = 3
+        human.next_checkpoint = len(app.circuit.checkpoints)
+        app.buttons = []
+        app.draw_race()
+        assert app.surface.get_at((1197, 364))[:3] == (246, 125, 84)
+        assert app.surface.get_at((958, 419))[:3] == (215, 224, 128)
+    finally:
+        pygame.quit()
+
+
 def test_lab_playback_controls_show_real_trace_progress():
     app = App()
     try:

@@ -943,8 +943,16 @@ class App:
         pygame.draw.rect(self.surface, (52, 66, 61), (885, 330, 325, 8), border_radius=4)
         pygame.draw.rect(self.surface, (244, 103, 64) if human.fuel > 25 else PINK, (885, 330, int(325 * max(human.fuel, 0) / 100), 8), border_radius=4)
         self.label(f"NITRO {human.nitro}/3  [N] BOOST  [F] REFUEL", 885, 353, 16, (246, 125, 84))
+        for charge in range(3):
+            color = (246, 125, 84) if charge < human.nitro else (52, 66, 61)
+            pygame.draw.rect(self.surface, color, (1148 + charge * 21, 360, 16, 8), border_radius=2)
         checkpoint_count = len(race.circuit.checkpoints)
         self.label(f"NEXT CHECKPOINT   {human.next_checkpoint + 1 if human.next_checkpoint < checkpoint_count else 'FINISH'}", 885, 391, 16, MUTED)
+        for checkpoint in range(checkpoint_count):
+            left = 885 + round(checkpoint * 325 / checkpoint_count)
+            right = 885 + round((checkpoint + 1) * 325 / checkpoint_count) - 3
+            color = (215, 224, 128) if checkpoint < human.next_checkpoint else (52, 66, 61)
+            pygame.draw.rect(self.surface, color, (left, 417, max(1, right - left), 4), border_radius=2)
         if options:
             target, edge = options[self.selected_road]
             self.label(f"ROAD {edge.id} → {target}   {'SHORTCUT' if edge.shortcut else ''}", 885, 440, 20, ACCENT)
@@ -959,6 +967,8 @@ class App:
             self.label(human.status.upper()[:25], 885, 440, 20, ACCENT)
         self.label("LIVE POSITIONS", 885, 529, 14, MUTED)
         for index, racer in enumerate(race.results()):
+            if racer.id == human.id:
+                pygame.draw.rect(self.surface, (35, 50, 45), (879, 554 + 27 * index, 335, 24), border_radius=4)
             self.label(f"{index + 1:02}   {racer.name:<8}   CP {min(racer.next_checkpoint, checkpoint_count):02}",
                        885, 558 + 27 * index, 16, CAR_COLORS[racer.id])
         if race.event_log:
