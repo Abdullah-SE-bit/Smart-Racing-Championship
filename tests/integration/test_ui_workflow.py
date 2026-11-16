@@ -15,7 +15,7 @@ from smart_racing.tracks.generator import generate_circuit
 from smart_racing.algorithms.routing.shortest import Route, shortest_path
 from smart_racing.championship.standings import leaders, standings
 from smart_racing.core.graph import Edge, Graph, Vertex
-from smart_racing.ui.app import ACCENT, MUTED, PANEL, PLANNER_MAP, TEXT, App, LAB_ALGORITHMS, PROFILES
+from smart_racing.ui.app import ACCENT, EMPHASIS, GAUGE_TRACK, MUTED, PANEL, PLANNER_MAP, PRIMARY, TEXT, App, LAB_ALGORITHMS, PROFILES
 
 
 def test_menu_track_selection_navigation_and_reduced_motion():
@@ -115,16 +115,16 @@ def test_race_hud_resource_and_checkpoint_indicators_follow_state():
         human.next_checkpoint = 2
         app.buttons = []
         app.draw_race()
-        assert app.surface.get_at((1155, 364))[:3] == (246, 125, 84)
-        assert app.surface.get_at((1176, 364))[:3] == (52, 66, 61)
-        assert app.surface.get_at((890, 419))[:3] == (215, 224, 128)
-        assert app.surface.get_at((958, 419))[:3] == (52, 66, 61)
+        assert app.surface.get_at((1155, 364))[:3] == EMPHASIS
+        assert app.surface.get_at((1176, 364))[:3] == GAUGE_TRACK
+        assert app.surface.get_at((890, 419))[:3] == ACCENT
+        assert app.surface.get_at((958, 419))[:3] == GAUGE_TRACK
         human.nitro = 3
         human.next_checkpoint = len(app.circuit.checkpoints)
         app.buttons = []
         app.draw_race()
-        assert app.surface.get_at((1197, 364))[:3] == (246, 125, 84)
-        assert app.surface.get_at((958, 419))[:3] == (215, 224, 128)
+        assert app.surface.get_at((1197, 364))[:3] == EMPHASIS
+        assert app.surface.get_at((958, 419))[:3] == ACCENT
     finally:
         pygame.quit()
 
@@ -722,9 +722,10 @@ def test_reduced_motion_and_text_contrast():
         channels = [value / 12.92 if value <= .04045 else ((value + .055) / 1.055) ** 2.4 for value in channels]
         return .2126 * channels[0] + .7152 * channels[1] + .0722 * channels[2]
 
-    for color in (TEXT, MUTED, ACCENT):
+    for color in (TEXT, MUTED, ACCENT, EMPHASIS):
         ratio = (luminance(color) + .05) / (luminance(PANEL) + .05)
         assert ratio >= 4.5
+    assert (luminance(TEXT) + .05) / (luminance(PRIMARY) + .05) >= 4.5
     app = App()
     try:
         app.go("settings")
