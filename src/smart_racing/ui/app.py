@@ -24,6 +24,7 @@ from smart_racing.tracks.generator import _assign_checkpoints, _ring_compatible,
 
 
 WIDTH, HEIGHT = 1280, 800
+PLANNER_MAP = (60, 242, 760, 400)
 BACKGROUND = (17, 31, 27)
 PANEL = (28, 44, 37)
 PANEL_LIGHT = (40, 57, 47)
@@ -437,36 +438,42 @@ class App:
         return positions
 
     def draw_planner(self):
-        self.header("01 / Explore", "Track explorer", "Compare routes and select start and destination vertices on the map.")
-        self.nav()
-        self.card((40, 220, 800, 530))
-        self.button((630, 160, 180, 42), "COMPARE", lambda: self.go("compare"))
-        self.button((820, 160, 190, 42), "ORDERED: ON" if self.ordered_plan else "ORDERED: OFF", self.toggle_ordered_plan)
+        self.draw_pit_background()
+        self.label("RACE CONTROL  /  ROUTE PLANNER", 48, 98, 14, (246, 125, 84))
+        self.label("TRACK EXPLORER", 45, 118, 42, (247, 242, 228))
+        self.label("Select vertices on the map or use the arrow keys.", 48, 176, 16, (170, 182, 172))
+        self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
+        self.card((40, 220, 800, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.menu_button((630, 160, 180, 42), "COMPARE", None, lambda: self.go("compare"))
+        self.menu_button((820, 160, 190, 42), "ORDERED: ON" if self.ordered_plan else "ORDERED: OFF", None, self.toggle_ordered_plan)
         profile_name = list(PROFILES)[self.profile_index]
         route = self.planned_route(PROFILES[profile_name])
         graph = self.circuit.graph
         breadth = bfs(graph, self.source)
         depth = dfs(graph, self.source)
         unreachable = set(self.circuit.checkpoints) - set(breadth.parents)
-        self.draw_map((60, 242, 760, 480), self.circuit, route.edges, route.vertices, unreachable=unreachable)
-        self.button((615, 658, 205, 42), "ALTERNATIVES", self.open_alternatives)
-        self.button((615, 606, 205, 42), "REFUEL PLAN", self.open_refuel_plan)
+        self.draw_map(PLANNER_MAP, self.circuit, route.edges, route.vertices, unreachable=unreachable)
+        self.menu_button((75, 662, 205, 42), "REFUEL PLAN", None, self.open_refuel_plan)
+        self.menu_button((292, 662, 205, 42), "ALTERNATIVES", None, self.open_alternatives)
         self.label(f"CHECKPOINTS {len(self.circuit.checkpoints) - len(unreachable)}/{len(self.circuit.checkpoints)} REACHABLE   "
                    f"DFS {len(depth.order)}   "
                    f"Components: {len(weak_components(graph))}   Cycles: {'yes' if has_cycle(graph) else 'no'}   "
                    f"Dead ends: {len(dead_ends(graph, self.circuit.start))}", 75, 715, 14, MUTED)
-        self.card((860, 220, 380, 530))
-        self.label("ROUTE INTELLIGENCE", 885, 246, 14, ACCENT)
-        self.label(self.circuit.name, 885, 275, 24)
-        self.label(f"From {self.source}   →   {'ordered lap' if self.ordered_plan else f'To {self.target}'}", 885, 322, 18)
-        self.label(f"Optimized cost   {route.cost:.3f}" if route.vertices else "Destination unreachable", 885, 358, 18, GOLD)
-        self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", 885, 391, 14, MUTED)
-        self.button((885, 430, 330, 48), f"PRESET: {profile_name.upper()}", self.cycle_profile)
-        self.button((885, 488, 330, 48), f"ALGORITHM: {self.route_algorithm.upper()}", self.toggle_route_algorithm)
-        self.button((885, 546, 330, 48), "FIXED SEASON ORDER" if self.pending_championship else "GENERATE CIRCUIT", self.generate)
+        self.card((860, 220, 380, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.label("ROUTE INTELLIGENCE", 885, 246, 14, (246, 125, 84))
+        circuit_name = self.circuit.name
+        while self.fonts[24].size(circuit_name)[0] > 330 and len(circuit_name) > 1:
+            circuit_name = circuit_name[:-1]
+        self.label(circuit_name, 885, 275, 24, (247, 242, 228))
+        self.label(f"From {self.source}   →   {'ordered lap' if self.ordered_plan else f'To {self.target}'}", 885, 322, 18, (218, 224, 211))
+        self.label(f"Optimized cost   {route.cost:.3f}" if route.vertices else "Destination unreachable", 885, 358, 18, (246, 125, 84))
+        self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", 885, 391, 14, (153, 168, 158))
+        self.menu_button((885, 430, 330, 48), f"PRESET: {profile_name.upper()}", None, self.cycle_profile)
+        self.menu_button((885, 488, 330, 48), f"ALGORITHM: {self.route_algorithm.upper()}", None, self.toggle_route_algorithm)
+        self.menu_button((885, 546, 330, 48), "FIXED SEASON ORDER" if self.pending_championship else "GENERATE CIRCUIT", None, self.generate)
         race_label = (f"START RACE {self.track_index + 1} / {len(self.authored_paths)}"
                       if self.pending_championship else "START QUICK RACE")
-        self.button((885, 604, 330, 48), race_label, self.start_planned_race)
+        self.menu_button((885, 604, 330, 48), race_label, None, self.start_planned_race, True)
         destinations = self.ordered_destinations() if self.ordered_plan else [self.target]
         pickup_key = (self.source, tuple(destinations), self.resource_graph_signature())
         if pickup_key not in self._pickup_cache:
@@ -1032,7 +1039,7 @@ class App:
                     action()
                     return
             if self.screen == "planner":
-                for vertex, point in self.map_positions((60, 242, 760, 480), self.circuit).items():
+                for vertex, point in self.map_positions(PLANNER_MAP, self.circuit).items():
                     if math.dist(point, position) <= 14:
                         self.source, self.target = self.target, vertex
                         break
