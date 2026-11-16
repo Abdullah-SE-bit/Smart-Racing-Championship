@@ -1,10 +1,11 @@
 # Visual and motion direction
 
-The main menu uses a darker pit-wall palette, warm white type and a vivid
-orange primary action. Its featured circuit is drawn from the selected track's
+The main menu and settings use a darker pit-wall palette, warm white type and a
+vivid orange primary action. The menu's featured circuit is drawn from the selected track's
 stored main route and roads; the moving markers are decorative and never feed
-the race engine. Reduced motion holds these markers still. The other screens
-currently retain the earlier palette while they are redesigned screen by screen.
+the race engine. Reduced motion holds these markers still. Settings groups
+keyboard inputs and race options into separate panels. The other screens retain
+the earlier palette while they are redesigned screen by screen.
 
 The interface uses a restrained paddock-inspired palette: deep racing green for
 the track and panels, warm ivory for primary text, pale lime for the recommended
