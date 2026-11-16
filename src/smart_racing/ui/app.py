@@ -26,7 +26,7 @@ from smart_racing.tracks.generator import _assign_checkpoints, _ring_compatible,
 WIDTH, HEIGHT = 1280, 800
 PLANNER_MAP = (60, 242, 760, 400)
 BACKGROUND = (17, 31, 27)
-PANEL = (28, 44, 37)
+PANEL = (21, 33, 32)
 PANEL_LIGHT = (40, 57, 47)
 TEXT = (246, 239, 220)
 MUTED = (174, 185, 167)
@@ -103,21 +103,12 @@ class App:
     def label(self, text, x, y, size=18, color=TEXT):
         self.surface.blit(self.fonts[size].render(str(text), True, color), (int(x), int(y)))
 
-    def card(self, rect, color=PANEL, radius=18, border=(63, 82, 67)):
+    def card(self, rect, color=PANEL, radius=12, border=(58, 73, 68)):
         pygame.draw.rect(self.surface, color, rect, border_radius=radius)
         pygame.draw.rect(self.surface, border, rect, width=1, border_radius=radius)
 
     def button(self, rect, title, action, selected=False, subtitle=None):
-        rect = pygame.Rect(rect)
-        hover = rect.collidepoint(self.logical_position(pygame.mouse.get_pos()))
-        color = (67, 78, 52) if selected else ((56, 75, 61) if hover else PANEL_LIGHT)
-        self.card(rect, color, 12, ACCENT if selected else (70, 89, 72))
-        if self.keyboard_focus and self.focused_button == len(self.buttons):
-            pygame.draw.rect(self.surface, GOLD, rect, width=2, border_radius=12)
-        self.label(title, rect.x + 15, rect.y + (8 if subtitle else 11), 18, ACCENT if selected else TEXT)
-        if subtitle:
-            self.label(subtitle, rect.x + 15, rect.y + 34, 14, MUTED)
-        self.buttons.append((rect, action))
+        self.menu_button(rect, title, subtitle, action, selected)
 
     def background(self):
         self.surface.fill(BACKGROUND)
@@ -132,12 +123,13 @@ class App:
         pygame.draw.line(self.surface, (61, 78, 63), (0, 69), (WIDTH, 69))
 
     def header(self, eyebrow, title, description):
-        self.label(eyebrow.upper(), 48, 92, 14, ACCENT)
-        self.label(title, 45, 111, 42)
-        self.label(description, 48, 170, 16, MUTED)
+        self.draw_pit_background()
+        self.label(f"RACE CONTROL  /  {eyebrow.upper()}", 48, 98, 14, (246, 125, 84))
+        self.label(title.upper(), 45, 118, 42, (247, 242, 228))
+        self.label(description, 48, 176, 16, (170, 182, 172))
 
     def nav(self):
-        self.button((1045, 91, 185, 44), "←  Main menu", lambda: self.go("menu"))
+        self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
 
     def go(self, screen):
         if screen != self.screen and not self.reduced_motion:
@@ -255,7 +247,10 @@ class App:
         if rect.width <= 60:
             self.label(title, rect.centerx - 5, rect.y + 9, 20, ink)
         else:
-            self.label(title, rect.x + 18, rect.y + 9, 18 if rect.width < 250 else 20, ink)
+            size = 18 if rect.width < 250 else 20
+            if self.fonts[size].size(title)[0] > rect.width - 60:
+                size = 16
+            self.label(title, rect.x + 18, rect.y + 9, size, ink)
         if detail:
             self.label(detail, rect.x + 18, rect.y + 35, 14,
                        (79, 43, 32) if primary else (159, 171, 164))
@@ -555,6 +550,9 @@ class App:
         self.nav()
         self.card((40, 220, 1200, 530))
         route, stops = self.refuel_stops()
+        self.card((635, 245, 550, 370), (26, 38, 36), 8, (58, 73, 68))
+        self.label("SELECTED ROUTE", 655, 260, 14, (246, 125, 84))
+        self.draw_map((650, 280, 520, 315), self.circuit, route.edges, route.vertices)
         if not route.vertices:
             self.label("The selected destination is unreachable.", 75, 270, 20, GOLD)
         elif stops is None:

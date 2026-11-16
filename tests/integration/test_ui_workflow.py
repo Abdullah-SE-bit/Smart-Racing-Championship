@@ -633,12 +633,19 @@ def test_refuel_screen_shows_actual_stop_and_planned_fuel(monkeypatch):
         app.circuit.graph = graph
         monkeypatch.setattr(app, "planned_route", lambda profile: Route(vertices=[0, 1, 2], edges=[0, 1], cost=2))
         labels = []
+        maps = []
+        draw_map = app.draw_map
+        def record_map(rect, circuit, route, visited):
+            maps.append((route, visited))
+            return draw_map(rect, circuit, route, visited)
+        monkeypatch.setattr(app, "draw_map", record_map)
         monkeypatch.setattr(app, "label", lambda text, *args, **kwargs: labels.append(str(text)))
         app.open_refuel_plan()
         app.draw_refuel_plan()
         assert app.screen == "refuel"
         assert "01   1" in labels
         assert "40.0 units" in labels
+        assert maps == [([0, 1], [0, 1, 2])]
         assert any("press F" in label for label in labels)
     finally:
         pygame.quit()
