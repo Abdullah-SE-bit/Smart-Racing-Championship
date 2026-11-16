@@ -26,6 +26,9 @@ tests**. In a visible Windows game window, clicking Drive reached checkpoint 1,
 Next Road selected checkpoint 2, and Pause changed to Resume. Automated
 keyboard injection did not produce visible actions during this inspection;
 physical keyboard operation has not been established by that observation.
+The subsequent shortcut-routing change passed **114 tests** locally, including
+a shortcut with a multi-road approach and exit, closure during an approach,
+and rejection of a route through a later checkpoint.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

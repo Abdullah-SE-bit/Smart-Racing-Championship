@@ -61,6 +61,14 @@ candidate sets and retry limit bound work in the current generator.
   later checkpoints. The distance opponent checks for a reachable active
   station along its current shortest route to the next checkpoint. All three
   refuel on arrival and then resume their respective routing policies.
+- The shortcut opponent considers open shortcut roads reachable before the
+  next required checkpoint. For each orientation it finds a distance-based
+  approach and an exit to that checkpoint, avoiding later checkpoints and
+  vertices already visited on the current leg. It conservatively requires
+  enough current fuel for that candidate without another refuelling stop.
+  Candidates are ordered by approach distance, road ID and endpoint IDs.
+  The racer commits through the chosen shortcut; if a planned road closes, it
+  discards that detour and chooses again or falls back to the main route.
 - The initial nitro allocation is one charge, capacity three. A charge lasts
   four simulation seconds, multiplies speed by 1.5 and doubles fuel for the
   boosted portion. Pickup vertices are consumed after collection. Resource

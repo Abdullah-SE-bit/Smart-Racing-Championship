@@ -243,6 +243,41 @@ class Race:
             return self.circuit.checkpoints[racer.next_checkpoint]
         return self.circuit.start
 
+    def _shortcut_detour(self, racer, target, future):
+        """Find a deterministic, legal route to and across a useful shortcut.
+
+        Each candidate must reach the next checkpoint without passing a later
+        checkpoint or revisiting a vertex in this checkpoint leg. The racer
+        commits only through the shortcut and then makes its normal decision.
+        """
+        graph = self.circuit.graph
+        distance = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0)
+        visited = racer.visited_since_checkpoint - {racer.vertex}
+        candidates = []
+        for source in sorted(graph.vertices):
+            if source in future or source in visited or (source == target and source != racer.vertex):
+                continue
+            approach = shortest_path(graph, racer.vertex, source, distance,
+                                     avoid_vertices=future | visited | ({target} if source != target else set()))
+            if not approach.vertices:
+                continue
+            for destination, edge in graph.neighbors(source):
+                if not edge.shortcut or destination in future:
+                    continue
+                if destination in (set(approach.vertices) | visited) and destination != target:
+                    continue
+                avoid = future | visited | (set(approach.vertices) - {destination})
+                exit_route = shortest_path(graph, destination, target, distance, avoid_vertices=avoid)
+                if not exit_route.vertices:
+                    continue
+                fuel = sum(graph.edges[edge_id].fuel_cost * (1 + .1 * (graph.edges[edge_id].difficulty - 1))
+                           for edge_id in approach.edges + [edge.id] + exit_route.edges)
+                if fuel > racer.fuel + 1e-9:
+                    continue
+                path = approach.vertices[1:] + [destination]
+                candidates.append((approach.cost, edge.id, source, destination, path))
+        return min(candidates)[-1] if candidates else []
+
     def _ai_target(self, racer):
         graph = self.circuit.graph
         target = self._destination(racer)
@@ -280,22 +315,18 @@ class Race:
                 return min(candidates, key=lambda candidate: candidate[1])[2]
         if racer.detour:
             next_vertex = racer.detour[0]
-            return next_vertex if any(n == next_vertex for n, _ in graph.neighbors(racer.vertex)) else None
+            if all(any(n == destination for n, _ in graph.neighbors(source))
+                   for source, destination in zip([racer.vertex] + racer.detour, racer.detour)):
+                return next_vertex
+            racer.detour.clear()
         distance = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0)
         future = set(self.circuit.checkpoints[racer.next_checkpoint + 1:])
         avoid = future | (racer.visited_since_checkpoint - {racer.vertex, target})
         if racer.strategy == "shortcut":
-            # Use a legal shortcut directly into the next checkpoint, including
-            # a service vertex on the way. Otherwise follow the main route.
-            for neighbor, edge in graph.neighbors(racer.vertex):
-                if edge.shortcut and neighbor == target:
-                    return neighbor
-            for neighbor, _ in graph.neighbors(racer.vertex):
-                if neighbor in avoid or neighbor == target:
-                    continue
-                if any(next_vertex == target and edge.shortcut
-                       for next_vertex, edge in graph.neighbors(neighbor)):
-                    return neighbor
+            shortcut = self._shortcut_detour(racer, target, future)
+            if shortcut:
+                racer.detour = shortcut
+                return shortcut[0]
         if racer.strategy in {"main", "shortcut"} and racer.vertex in self.circuit.main_route[:-1]:
             index = self.circuit.main_route.index(racer.vertex)
             next_vertex = self.circuit.main_route[index + 1]
