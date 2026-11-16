@@ -15,7 +15,7 @@ from smart_racing.tracks.generator import generate_circuit
 from smart_racing.algorithms.routing.shortest import Route, shortest_path
 from smart_racing.championship.standings import leaders, standings
 from smart_racing.core.graph import Edge, Graph, Vertex
-from smart_racing.ui.app import ACCENT, MUTED, PANEL, TEXT, App, LAB_ALGORITHMS, PROFILES
+from smart_racing.ui.app import ACCENT, MUTED, PANEL, PLANNER_MAP, TEXT, App, LAB_ALGORITHMS, PROFILES
 
 
 def test_menu_track_selection_navigation_and_reduced_motion():
@@ -63,6 +63,27 @@ def test_settings_screen_changes_options_and_returns_to_menu():
         app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_TAB, mod=0))
         app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, mod=0))
         assert app.screen == "menu"
+    finally:
+        pygame.quit()
+
+
+def test_planner_map_selection_and_separate_tools():
+    app = App()
+    try:
+        app.open_quick_planner()
+        app.buttons = []
+        app.draw_planner()
+        selected = app.circuit.checkpoints[1]
+        point = app.map_positions(PLANNER_MAP, app.circuit)[selected]
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=point))
+        assert app.target == selected
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(130, 682)))
+        assert app.screen == "refuel"
+        app.go("planner")
+        app.buttons = []
+        app.draw_planner()
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(350, 682)))
+        assert app.screen == "alternatives"
     finally:
         pygame.quit()
 
