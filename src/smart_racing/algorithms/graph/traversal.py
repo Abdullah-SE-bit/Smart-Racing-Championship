@@ -209,22 +209,63 @@ def weak_components(graph: Graph) -> list[list[int]]:
 
 
 def has_cycle(graph: Graph) -> bool:
-    """Detect directed cycles and undirected cycles, including parallel roads."""
-    state = {vertex: 0 for vertex in graph.vertices}
+    """Detect cycles in a mixed graph without counting one road twice.
 
-    def visit(vertex, parent_edge):
-        state[vertex] = 1
-        for neighbor, edge in graph.neighbors(vertex):
-            if not edge.directed and edge.id == parent_edge:
+    First search the undirected roads for cycles and label their components.
+    A directed road within one component closes a cycle; otherwise directed
+    roads form a component graph where ordinary directed DFS detects cycles.
+    """
+    component = {}
+    component_count = 0
+    for start in graph.vertices:
+        if start in component:
+            continue
+        component[start] = component_count
+        stack = [(start, None, iter(graph.neighbors(start)))]
+        while stack:
+            vertex, parent_edge, neighbors = stack[-1]
+            try:
+                neighbor, edge = next(neighbors)
+            except StopIteration:
+                stack.pop()
+                continue
+            if edge.directed or edge.id == parent_edge:
+                continue
+            if neighbor in component:
+                return True
+            component[neighbor] = component_count
+            stack.append((neighbor, edge.id, iter(graph.neighbors(neighbor))))
+        component_count += 1
+
+    adjacency = [[] for _ in range(component_count)]
+    for edge in graph.edges.values():
+        if edge.status == "blocked" or not edge.directed:
+            continue
+        source, target = component[edge.source], component[edge.target]
+        if source == target:
+            return True
+        adjacency[source].append(target)
+
+    state = [0] * component_count
+    for start in range(component_count):
+        if state[start]:
+            continue
+        state[start] = 1
+        stack = [(start, iter(adjacency[start]))]
+        while stack:
+            current, neighbors = stack[-1]
+            try:
+                neighbor = next(neighbors)
+            except StopIteration:
+                state[current] = 2
+                stack.pop()
                 continue
             if state[neighbor] == 1:
                 return True
-            if state[neighbor] == 0 and visit(neighbor, edge.id):
-                return True
-        state[vertex] = 2
-        return False
-
-    return any(state[vertex] == 0 and visit(vertex, None) for vertex in sorted(graph.vertices))
+            if state[neighbor] == 0:
+                state[neighbor] = 1
+                stack.append((neighbor, iter(adjacency[neighbor])))
+    return False
 
 
 def dead_ends(graph: Graph, finish: int) -> list[int]:

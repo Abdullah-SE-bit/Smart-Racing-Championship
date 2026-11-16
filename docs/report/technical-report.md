@@ -96,6 +96,11 @@ Separate graph helpers test cycles, weak components and dead ends. Alternative
 paths backtrack over vertices already on the current path and stop at explicit
 state, path-count and length limits. A limited search can be incomplete; a
 single traversal is linear, while simple-path enumeration may be exponential.
+For mixed directed and undirected roads, cycle detection first finds
+undirected components and cycles. A directed road inside one component closes
+a cycle; directed roads between components are then checked with directed DFS.
+This avoids mistaking the reversal of one two-way road for a cycle and takes
+O(V+E) time and space.
 
 **Dijkstra.** Set the start distance to zero, push it into a min-heap, and
 repeatedly extract the least tentative distance. For each legal outgoing road,
