@@ -214,6 +214,42 @@ def test_simultaneous_events_use_assignment_priorities_before_movement():
         race.schedule(Event(7, 2, 6, "block", 0))
 
 
+def test_shortcut_opponent_plans_longer_approach_and_exit_and_replans_on_closure():
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0), Vertex(2, 2, 0),
+                   Vertex(3, 3, 0), Vertex(4, 4, 0), Vertex(5, 5, 0, "checkpoint", 1)):
+        graph.add_vertex(vertex)
+    for edge in (Edge(0, 0, 5, 8, 1, 1), Edge(1, 0, 1, 1, 1, 1),
+                 Edge(2, 1, 2, 1, 1, 1), Edge(3, 2, 3, 1, 1, 1, shortcut=True, directed=True),
+                 Edge(4, 3, 4, 1, 1, 1), Edge(5, 4, 5, 1, 1, 1)):
+        graph.add_edge(edge)
+    racer = Racer(1, "Shortcut", "shortcut", 0)
+    race = Race(Circuit("Long shortcut", graph, 0, [5], [0, 5, 0]), racers=[racer])
+    assert race._ai_target(racer) == 1
+    assert racer.detour == [1, 2, 3]
+    racer.vertex = 1
+    racer.visited_since_checkpoint.add(1)
+    racer.detour.pop(0)
+    graph.edges[3].status = "blocked"
+    assert race._ai_target(racer) == 0
+    assert not racer.detour
+
+
+def test_shortcut_opponent_rejects_route_through_future_checkpoint():
+    graph = Graph()
+    for vertex in (Vertex(0, 0, 0, "start"), Vertex(1, 1, 0, "checkpoint", 1),
+                   Vertex(2, 2, 0, "checkpoint", 2), Vertex(3, 3, 0)):
+        graph.add_vertex(vertex)
+    for edge in (Edge(0, 0, 1, 1, 1, 1), Edge(1, 1, 2, 1, 1, 1),
+                 Edge(2, 0, 2, 1, 1, 1), Edge(3, 2, 3, 1, 1, 1, shortcut=True),
+                 Edge(4, 3, 1, 1, 1, 1)):
+        graph.add_edge(edge)
+    racer = Racer(1, "Shortcut", "shortcut", 0)
+    race = Race(Circuit("Future checkpoint", graph, 0, [1, 2], [0, 1, 2, 0]), racers=[racer])
+    assert race._ai_target(racer) == 1
+    assert not racer.detour
+
+
 def test_shortcut_opponent_uses_service_detour_and_falls_back_when_closed():
     race = Race(load_circuit(CIRCUITS[0]))
     opponent = race.racers[2]
