@@ -182,6 +182,67 @@ def test_expired_and_overlapping_road_effects_restore_correctly():
     assert race.circuit.graph.edges[0].difficulty == original
 
 
+def test_permanent_block_takes_precedence_over_temporary_effects():
+    race = Race(load_circuit(CIRCUITS[0]))
+    road = race.circuit.graph.edges[0]
+    race.schedule(Event(100, 1, 1, "block", road.id))
+    race.schedule(Event(101, 2, 3, "oil", road.id, 5))
+    race.schedule(Event(102, 2, 4, "restriction", road.id, 2))
+    race.schedule(Event(103, 3, 1, "unblock", road.id))
+    race.tick(1)
+    assert road.status == "blocked"
+    race.tick(1)
+    assert road.status == "blocked"
+    race.tick(1)
+    assert road.status == "restricted"
+    race.tick(4)
+    assert road.status == "open"
+
+
+def test_temporary_shortcut_open_does_not_erase_block_or_restriction():
+    circuit = load_circuit(CIRCUITS[0])
+    road = next(edge for edge in circuit.graph.edges.values() if edge.shortcut)
+    road.status = "blocked"
+    race = Race(circuit)
+    race.schedule(Event(100, 1, 1, "block", road.id, 2))
+    race.schedule(Event(101, 1, 2, "shortcut_open", road.id, 4))
+    race.schedule(Event(102, 1, 4, "restriction", road.id, 8))
+    race.tick(1)
+    assert road.status == "blocked"
+    race.tick(2)
+    assert road.status == "restricted"
+    race.tick(2)
+    assert road.status == "blocked"
+    race.tick(4)
+    assert road.status == "blocked"
+
+
+def test_permanent_block_and_shortcut_state_are_independent():
+    race = Race(load_circuit(CIRCUITS[0]))
+    road = next(edge for edge in race.circuit.graph.edges.values() if edge.shortcut)
+    race.schedule(Event(100, 1, 1, "block", road.id))
+    race.schedule(Event(101, 2, 2, "shortcut_open", road.id, 4))
+    race.schedule(Event(102, 3, 1, "unblock", road.id))
+    race.schedule(Event(103, 4, 2, "shortcut_close", road.id))
+    race.schedule(Event(104, 5, 1, "unblock", road.id))
+    race.schedule(Event(105, 7, 2, "shortcut_open", road.id))
+    race.tick(1)
+    assert road.status == "blocked"
+    race.tick(1)
+    assert road.status == "blocked"  # The temporary opening cannot override the block.
+    race.tick(1)
+    assert road.status == "open"
+    race.tick(1)
+    # A temporary opening remains active until its own expiry.
+    assert road.status == "open"
+    race.tick(1)
+    assert road.status == "open"
+    race.tick(1)
+    assert road.status == "blocked"  # Unblock did not erase the persistent shortcut closure.
+    race.tick(1)
+    assert road.status == "open"
+
+
 def test_permanent_road_and_service_events_can_be_reversed():
     race = Race(load_circuit(CIRCUITS[0]))
     shortcut = next(edge.id for edge in race.circuit.graph.edges.values() if edge.shortcut)

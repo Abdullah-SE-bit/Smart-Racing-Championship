@@ -13,7 +13,7 @@ counterexamples, sorting and top-k, circuit loading and generation, event
 ordering and overlapping expiry, resources, repeatable races on all three
 authored circuits, championship points, and headless screen rendering.
 
-The latest recorded local run used Python 3.12.16 on Windows and reported
+An earlier local run used Python 3.12.16 on Windows and reported
 **90 passed**. Rerun the suite after further changes; the count and outcome may
 change. `pip check` reported no broken requirements. A separate check generated
 and validated 100 seeds; five seeded tracks were also raced in automated tests.
@@ -48,6 +48,9 @@ An independent Bellman-Ford comparison subsequently passed on 160 seeded
 four-vertex mixed graphs for every source and destination, checking 5,120
 Dijkstra and A-star results and their road IDs. The full suite reported
 **121 passed** locally. These samples are not a proof for all graphs.
+The road-effect precedence fix subsequently passed **124 tests** locally,
+including independent permanent road blocks and shortcut states, plus
+temporary closures overlapping oil, restriction and shortcut-open effects.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python
@@ -68,6 +71,8 @@ its launch. The CI package-smoke workflow is configured to perform the full
 test-archive check and launch from the extracted directory on its Windows
 runner, using a report rebuilt from the current source. Neither test archive is
 the final group-specific submission.
+The full test-archive workflow passed in Windows CI for PR #284, including
+launch of the extracted executable from its own directory.
 Saved circuits with nonconsecutive IDs are exercised through selection,
 planning, and scheduled race events.
 The planner's alternative-route view and its state, route-count, and path-length

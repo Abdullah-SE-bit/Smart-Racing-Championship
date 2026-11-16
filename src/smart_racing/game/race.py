@@ -75,6 +75,8 @@ class Race:
     service_active: dict[int, bool] = field(default_factory=dict)
     collected_pickups: set[int] = field(default_factory=set)
     _initial_status: dict[int, str] = field(default_factory=dict)
+    _permanent_blocks: set[int] = field(default_factory=set)
+    _shortcut_status: dict[int, str] = field(default_factory=dict)
     _initial_difficulty: dict[int, int] = field(default_factory=dict)
     _initial_service: dict[int, bool] = field(default_factory=dict)
     _fixed_detours: dict[tuple[int, int], list[int]] = field(default_factory=dict)
@@ -200,10 +202,13 @@ class Race:
         graph = self.circuit.graph
         for edge_id, status in self._initial_status.items():
             relevant = [effect for effect in self.active_effects.values() if effect.target == edge_id]
-            graph.edges[edge_id].status = ("blocked" if any(e.kind in {"block", "shortcut_close"} for e in relevant)
-                                           else "restricted" if any(e.kind in {"restriction", "oil"} for e in relevant)
-                                           else "open" if any(e.kind == "shortcut_open" for e in relevant)
-                                           else status)
+            base_status = self._shortcut_status.get(edge_id, status)
+            if any(e.kind == "shortcut_open" for e in relevant):
+                base_status = "open"
+            blocked = (edge_id in self._permanent_blocks or base_status == "blocked"
+                       or any(e.kind in {"block", "shortcut_close"} for e in relevant))
+            restricted = any(e.kind in {"restriction", "oil"} for e in relevant)
+            graph.edges[edge_id].status = ("blocked" if blocked else "restricted" if restricted else base_status)
             graph.edges[edge_id].difficulty = min(5, self._initial_difficulty[edge_id]
                                                  + int(any(e.kind == "oil" for e in relevant)))
         for vertex in graph.vertices.values():
@@ -230,9 +235,13 @@ class Race:
                 self.active_effects = {key: effect for key, effect in self.active_effects.items()
                                        if not (effect.kind == kind and effect.target == event.target)}
                 if event.kind == "unblock":
+                    self._permanent_blocks.discard(event.target)
                     self._initial_status[event.target] = "open"
             elif not event.duration and event.kind in {"block", "shortcut_close", "shortcut_open"}:
-                self._initial_status[event.target] = "open" if event.kind == "shortcut_open" else "blocked"
+                if event.kind == "block":
+                    self._permanent_blocks.add(event.target)
+                else:
+                    self._shortcut_status[event.target] = "open" if event.kind == "shortcut_open" else "blocked"
             elif not event.duration and event.kind in {"fuel_off", "fuel_on", "nitro_off", "nitro_on"}:
                 self._initial_service[event.target] = event.kind in {"fuel_on", "nitro_on"}
             else:

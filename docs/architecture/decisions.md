@@ -89,6 +89,14 @@ candidate sets and retry limit bound work in the current generator.
   racer decisions; each temporary effect schedules its own deterministic heap
   expiration, and active effects are recomputed together. Negative event IDs
   are reserved for internal expiration records.
+  A permanent or temporary closure takes precedence over oil and speed
+  restrictions. A temporary shortcut-open effect can open a baseline-blocked
+  shortcut, but another active closure still wins; any active restrictions
+  apply while the shortcut is open. Persistent road blocks and persistent
+  shortcut open/close states are stored independently: unblocking a road does
+  not erase a separately closed shortcut, and opening a shortcut does not erase
+  a road block. Each expiry recomputes from the remaining effects and baseline
+  status.
   A racer already on a road finishes crossing it before choosing a new road.
   If a chosen road closes before entry, the engine records an unavailable-road
   status. Insufficient fuel also produces status feedback. The race screen
