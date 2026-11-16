@@ -105,8 +105,10 @@ def test_refuelling_and_nitro_duration_are_consistent():
     human.fuel = 70
     assert race.refuel(0)
     assert human.fuel == 100 and human.stop_remaining == 3
+    assert race.event_log[-1] == "YOU: refuelling"
     assert not race.refuel(0)
     assert race.activate_nitro(0)
+    assert race.event_log[-1] == "YOU: nitro activated"
     race.tick(1)
     assert human.nitro_remaining == 3
 
@@ -130,6 +132,7 @@ def test_nitro_pickup_respects_capacity_and_is_consumed_on_collection():
     race.tick(1)
     assert racer.nitro == 3 and not race.service_active[1]
     assert 1 in race.collected_pickups
+    assert race.event_log[-1] == "Human: collected nitro"
 
 
 @pytest.mark.parametrize("strategy", ["human", "main", "shortcut", "distance"])

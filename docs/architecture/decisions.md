@@ -58,7 +58,8 @@ candidate sets and retry limit bound work in the current generator.
   25 units at active stations.
 - The initial nitro allocation is one charge, capacity three. A charge lasts
   four simulation seconds, multiplies speed by 1.5 and doubles fuel for the
-  boosted portion. Pickup vertices are consumed after collection.
+  boosted portion. Pickup vertices are consumed after collection. Resource
+  actions and finish events are reported by the engine for the race HUD.
 - A blocked road cannot be entered. A restriction multiplies traversal time
   by 1.5; an oil effect also increases difficulty by one, capped at five.
   Events at a tick are processed in `(time, priority, sequence)` order before
