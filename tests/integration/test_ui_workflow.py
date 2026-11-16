@@ -13,6 +13,7 @@ from smart_racing.tracks.circuits import load_circuit, save_circuit
 from smart_racing.tracks import generator
 from smart_racing.tracks.generator import generate_circuit
 from smart_racing.algorithms.routing.shortest import shortest_path
+from smart_racing.championship.standings import leaders, standings
 from smart_racing.core.graph import Graph
 from smart_racing.ui.app import ACCENT, MUTED, PANEL, TEXT, App, LAB_ALGORITHMS, PROFILES
 
@@ -273,6 +274,30 @@ def test_route_comparison_animation_uses_actual_vertices_and_respects_reduced_mo
         app.time = 0
         assert app.comparison_path(vertices, 0) == "0 → 2 → 7 → 9"
         assert app.comparison_path([], 0) == "No route"
+    finally:
+        pygame.quit()
+
+
+def test_live_championship_leaders_follow_changed_results_and_every_k():
+    app = App()
+    try:
+        app.prepare_championship()
+        app.top_k_count = 1
+        labels = []
+        app.label = lambda text, *args, **kwargs: labels.append(str(text))
+        app.entries[1].total_points = 25
+        app.draw_standings()
+        assert "#1  NOVA" in labels
+        labels.clear()
+        app.entries[2].total_points = 30
+        app.draw_standings()
+        assert "#1  BLAZE" in labels
+        for k in range(1, len(app.entries) + 1):
+            app.top_k_count = k
+            assert leaders(app.entries, k) == standings(app.entries)[:k]
+        app.top_k_count = len(app.entries)
+        app.change_top_k()
+        assert app.top_k_count == 1
     finally:
         pygame.quit()
 
