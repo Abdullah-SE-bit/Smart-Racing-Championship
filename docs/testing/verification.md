@@ -44,6 +44,10 @@ include parallel one-way and two-way roads, blocked roads and 300 seeded small
 graphs compared with an independent exhaustive cycle search.
 The weak-component traversal update passed **120 tests** locally, including
 2,000 vertices with directed, parallel and blocked roads and many isolates.
+An independent Bellman-Ford comparison subsequently passed on 160 seeded
+four-vertex mixed graphs for every source and destination, checking 5,120
+Dijkstra and A-star results and their road IDs. The full suite reported
+**121 passed** locally. These samples are not a proof for all graphs.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python
