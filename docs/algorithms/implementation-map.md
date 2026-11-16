@@ -18,9 +18,10 @@ requirements and complexity details.
 
 Routing's `relaxed` counter counts edge relaxation attempts, not only successful
 distance updates. Traversal counts examined adjacency entries, so an undirected
-road may be examined from both endpoints. Heap operations count insertions and
-extractions; bottom-up heap construction is included in elapsed time but is not
-counted as insertions. Experiment timing conventions are in the generated
+road may be examined from both endpoints. Routing heap operations count
+insertions, priority decreases and extractions; event-queue heap operations
+count insertions and extractions. Bottom-up heap construction is included in
+elapsed time but is not counted as insertions. Experiment timing conventions are in the generated
 `experiments/results/analysis.md`.
 
 The Lab uses the selected circuit's reachable pickup suggestion for the DP and

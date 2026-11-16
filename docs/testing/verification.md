@@ -51,6 +51,10 @@ Dijkstra and A-star results and their road IDs. The full suite reported
 The road-effect precedence fix subsequently passed **124 tests** locally,
 including independent permanent road blocks and shortcut states, plus
 temporary closures overlapping oil, restriction and shortcut-open effects.
+The indexed routing heap update passed **126 tests** locally, including seeded
+heap operations, 100 parallel roads with repeated key decreases, and the
+independent Bellman-Ford routing comparison. All five recorded studies were
+rerun on the documented local environment after the routing change.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

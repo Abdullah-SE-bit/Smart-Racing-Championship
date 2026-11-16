@@ -9,7 +9,7 @@ from smart_racing.algorithms.graph.traversal import bfs, bounded_simple_paths, d
 from smart_racing.algorithms.optimization.resources import Pickup, greedy, knapsack, refuel_plan
 from smart_racing.algorithms.routing.shortest import checkpoint_route, shortest_path
 from smart_racing.algorithms.sorting.rankings import heap_sort, merge_sort, quick_sort, top_k
-from smart_racing.algorithms.structures.heap import MinHeap
+from smart_racing.algorithms.structures.heap import IndexedMinHeap, MinHeap
 from smart_racing.core.graph import CostProfile, Edge, Graph, Vertex
 from smart_racing.resources.planner import pickup_suggestions, route_refuelling
 from smart_racing.championship.standings import ChampionshipEntry, ranking_key
@@ -217,6 +217,51 @@ def test_heap_handles_duplicates_and_empty():
         heap.pop()
     with pytest.raises(IndexError):
         heap.peek()
+
+
+def test_indexed_heap_tracks_decreases_and_never_duplicates_vertices():
+    rng = Random(20261205)
+    heap = IndexedMinHeap()
+    expected = {}
+    for _ in range(500):
+        if expected and rng.randrange(4) == 0:
+            item = heap.pop()
+            assert item == min(expected.values())
+            del expected[item[2]]
+        else:
+            vertex = rng.randrange(30)
+            if vertex in expected:
+                old = expected[vertex]
+                item = (old[0] - 1, old[1] - 1, vertex)
+            else:
+                value = rng.randrange(100)
+                item = (value, value, vertex)
+            heap.push_or_decrease(item)
+            expected[vertex] = item
+        assert len(heap) == len(expected) <= 30
+    while expected:
+        item = heap.pop()
+        assert item == min(expected.values())
+        del expected[item[2]]
+    with pytest.raises(IndexError):
+        heap.pop()
+    heap.push_or_decrease((1, 1, 4))
+    with pytest.raises(ValueError, match="decrease"):
+        heap.push_or_decrease((2, 2, 4))
+
+
+def test_routing_decreases_one_vertex_key_for_many_parallel_roads():
+    graph = Graph()
+    graph.add_vertex(Vertex(0, 0, 0))
+    graph.add_vertex(Vertex(1, 1, 0))
+    for road_id in range(100):
+        graph.add_edge(Edge(road_id, 0, 1, 100 - road_id, 1, 1, directed=True))
+    profile = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0,
+                          distance_reference=1)
+    route = shortest_path(graph, 0, 1, profile)
+    assert route.cost == 1 and route.edges == [99]
+    assert route.relaxed == 100
+    assert route.heap_operations == 103  # start insertion, 100 updates, two extractions
 
 
 def test_knapsack_matches_exhaustive_and_greedy_counterexample():

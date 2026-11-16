@@ -229,7 +229,8 @@ def write_analysis(output):
               "Objective: compare optimal routing on identical seeded sparse graphs with non-negative "
               "normalized costs. Coordinates are randomly generated and road costs need not equal "
               "geometric length. The heuristic uses the minimum edge cost per geometric unit. "
-              "The script checks equal final costs outside timed regions.", "",
+              "The script checks equal final costs outside timed regions. Routing heap operations "
+              "count insertions, priority decreases and extractions.", "",
               "| Vertices | Edges | Algorithm | Cost | Expanded | Relaxed | Heap operations | Mean ms |",
               "| ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |"]
     for row in output["routing"]:
