@@ -230,6 +230,7 @@ def test_shortcut_opponent_plans_longer_approach_and_exit_and_replans_on_closure
     racer.vertex = 1
     racer.visited_since_checkpoint.add(1)
     racer.detour.pop(0)
+    racer.detour_edges.pop(0)
     graph.edges[3].status = "blocked"
     assert race._ai_target(racer) == 0
     assert not racer.detour
@@ -273,6 +274,7 @@ def test_main_route_opponent_uses_fixed_detour_and_waits_if_it_closes():
     assert race._ai_target(opponent) == 11
     opponent.vertex = 11
     opponent.detour.pop(0)
+    opponent.detour_edges.pop(0)
     detour_road = next(edge for neighbor, edge in race.circuit.graph.neighbors(11) if neighbor == 3)
     detour_road.status = "blocked"
     assert race._ai_target(opponent) is None
@@ -391,6 +393,39 @@ def test_full_ten_racer_points_table():
     entries = [ChampionshipEntry(racer.id, racer.name) for racer in racers]
     award_results(entries, results)
     assert [entry.racer_id for entry in standings(entries)] == list(range(10))
+
+
+def test_parallel_roads_preserve_selected_id_and_do_not_switch_after_closure():
+    graph = Graph()
+    graph.add_vertex(Vertex(0, 0, 0, "start"))
+    graph.add_vertex(Vertex(1, 1, 0, "checkpoint", 1))
+    graph.add_edge(Edge(0, 0, 1, 1, 1, 1))
+    graph.add_edge(Edge(1, 0, 1, 2, 1, 5, directed=True))
+    racer = Racer(0, "Human", "human", 0)
+    race = Race(Circuit("Parallel", graph, 0, [1], [0, 1, 0]), racers=[racer])
+    assert not race.choose(0, 1)
+    assert race.choose(0, 1, 1)
+    race.tick(.1)
+    assert racer.edge_id == 1
+
+    second = Racer(2, "Human", "human", 0)
+    other_race = Race(Circuit("Parallel", graph, 0, [1], [0, 1, 0]), racers=[second])
+    assert other_race.choose(2, 1, 1)
+    graph.edges[1].status = "blocked"
+    other_race.tick(.1)
+    assert second.edge_id is None and second.vertex == 0
+
+
+def test_shortcut_opponent_uses_the_designated_parallel_road():
+    graph = Graph()
+    graph.add_vertex(Vertex(0, 0, 0, "start"))
+    graph.add_vertex(Vertex(1, 1, 0, "checkpoint", 1))
+    graph.add_edge(Edge(0, 0, 1, 2, 1, 1))
+    graph.add_edge(Edge(1, 0, 1, 1, 1, 1, shortcut=True, directed=True))
+    racer = Racer(1, "Shortcut", "shortcut", 0)
+    race = Race(Circuit("Parallel", graph, 0, [1], [0, 1, 0]), racers=[racer])
+    race.tick(.1)
+    assert racer.edge_id == 1
 
 
 def test_closed_road_and_low_fuel_do_not_permit_illegal_move():

@@ -29,6 +29,9 @@ physical keyboard operation has not been established by that observation.
 The subsequent shortcut-routing change passed **114 tests** locally, including
 a shortcut with a multi-road approach and exit, closure during an approach,
 and rejection of a route through a later checkpoint.
+The road-identity change passed **116 tests** locally, including parallel
+directed and undirected roads, a selected road closing before entry, and an
+opponent taking a designated shortcut that shares its endpoints.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

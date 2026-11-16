@@ -780,7 +780,7 @@ class App:
         self.label(f"NEXT CHECKPOINT   {human.next_checkpoint + 1 if human.next_checkpoint < checkpoint_count else 'FINISH'}", 885, 391, 16, MUTED)
         if options:
             target, edge = options[self.selected_road]
-            self.label(f"ROAD → {target}   {'SHORTCUT' if edge.shortcut else ''}", 885, 440, 20, ACCENT)
+            self.label(f"ROAD {edge.id} → {target}   {'SHORTCUT' if edge.shortcut else ''}", 885, 440, 20, ACCENT)
             self.label("[←] / [→] select road    [ENTER] drive", 885, 476, 14, MUTED)
         elif human.finished:
             self.label("RACE COMPLETE", 885, 440, 20, ACCENT)
@@ -814,7 +814,8 @@ class App:
         human = self.race.racers[0]
         options = self.race.options(human) if human.edge_id is None else []
         if options:
-            self.race.choose(0, options[self.selected_road % len(options)][0])
+            target, edge = options[self.selected_road % len(options)]
+            self.race.choose(0, target, edge.id)
 
     def toggle_pause(self):
         self.paused = not self.paused

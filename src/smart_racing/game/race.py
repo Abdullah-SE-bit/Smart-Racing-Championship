@@ -43,10 +43,12 @@ class Racer:
     finish_time: float = inf
     dnf: bool = False
     desired_target: int | None = None
+    desired_edge_id: int | None = None
     refuelled_here: bool = False
     status: str = "ready"
     visited_since_checkpoint: set[int] = field(default_factory=set)
     detour: list[int] = field(default_factory=list)
+    detour_edges: list[int] = field(default_factory=list)
 
     def __post_init__(self):
         if any(isinstance(value, bool) or not isinstance(value, int) for value in (self.id, self.vertex, self.nitro, self.next_checkpoint, self.laps)):
@@ -76,6 +78,7 @@ class Race:
     _initial_difficulty: dict[int, int] = field(default_factory=dict)
     _initial_service: dict[int, bool] = field(default_factory=dict)
     _fixed_detours: dict[tuple[int, int], list[int]] = field(default_factory=dict)
+    _fixed_detour_edges: dict[tuple[int, int], list[int]] = field(default_factory=dict)
     _next_expiry_id: int = -1
 
     def __post_init__(self):
@@ -120,6 +123,7 @@ class Race:
                 future = set(self.circuit.checkpoints[progress:]) - {target}
                 route = shortest_path(graph, source, target, distance, avoid_vertices=future)
                 self._fixed_detours[(source, target)] = route.vertices[1:]
+                self._fixed_detour_edges[(source, target)] = route.edges
             finally:
                 road.status = old_status
 
@@ -136,13 +140,17 @@ class Race:
                 return racer
         raise ValueError(f"Unknown racer ID {racer_id}")
 
-    def choose(self, racer_id: int, target: int):
+    def choose(self, racer_id: int, target: int, edge_id: int | None = None):
         racer = self._racer_by_id(racer_id)
         if racer.strategy != "human" or racer.edge_id is not None or racer.finished or racer.dnf:
             return False
-        if target not in [neighbor for neighbor, _ in self.options(racer)]:
+        roads = [edge for neighbor, edge in self.options(racer) if neighbor == target]
+        if edge_id is None and len(roads) == 1:
+            edge_id = roads[0].id
+        if not any(edge.id == edge_id for edge in roads):
             return False
         racer.desired_target = target
+        racer.desired_edge_id = edge_id
         return True
 
     def activate_nitro(self, racer_id: int):
@@ -275,11 +283,13 @@ class Race:
                 if fuel > racer.fuel + 1e-9:
                     continue
                 path = approach.vertices[1:] + [destination]
-                candidates.append((approach.cost, edge.id, source, destination, path))
-        return min(candidates)[-1] if candidates else []
+                roads = approach.edges + [edge.id]
+                candidates.append((approach.cost, edge.id, source, destination, path, roads))
+        return min(candidates)[-2:] if candidates else ([], [])
 
     def _ai_target(self, racer):
         graph = self.circuit.graph
+        racer.desired_edge_id = None
         target = self._destination(racer)
         if racer.fuel < 25 and racer.strategy == "distance":
             distance_profile = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0)
@@ -294,6 +304,8 @@ class Race:
                     break
                 if vertex.kind == "fuel" and self.service_active[vertex.id]:
                     racer.detour.clear()
+                    racer.detour_edges.clear()
+                    racer.desired_edge_id = route.edges[0]
                     return route.vertices[1]
         elif racer.fuel < 25:
             # Search active stations that can be reached on the remaining fuel.
@@ -309,32 +321,44 @@ class Race:
                 route = shortest_path(graph, racer.vertex, vertex.id, fuel_profile,
                                       avoid_vertices=future)
                 if route.vertices and route.cost <= racer.fuel:
-                    candidates.append((route.cost, vertex.id, route.vertices[1]))
+                    candidates.append((route.cost, vertex.id, route.vertices[1], route.edges[0]))
             if candidates:
                 racer.detour.clear()
-                return min(candidates, key=lambda candidate: candidate[1])[2]
+                racer.detour_edges.clear()
+                candidate = min(candidates, key=lambda candidate: candidate[1])
+                racer.desired_edge_id = candidate[3]
+                return candidate[2]
         if racer.detour:
             next_vertex = racer.detour[0]
-            if all(any(n == destination for n, _ in graph.neighbors(source))
-                   for source, destination in zip([racer.vertex] + racer.detour, racer.detour)):
+            if len(racer.detour_edges) == len(racer.detour) and all(
+                    any(n == destination and edge.id == edge_id for n, edge in graph.neighbors(source))
+                    for source, destination, edge_id in zip([racer.vertex] + racer.detour,
+                                                             racer.detour, racer.detour_edges)):
+                racer.desired_edge_id = racer.detour_edges[0]
                 return next_vertex
             racer.detour.clear()
+            racer.detour_edges.clear()
         distance = CostProfile(distance=1, time=0, fuel=0, difficulty=0, obstacle=0)
         future = set(self.circuit.checkpoints[racer.next_checkpoint + 1:])
         avoid = future | (racer.visited_since_checkpoint - {racer.vertex, target})
         if racer.strategy == "shortcut":
-            shortcut = self._shortcut_detour(racer, target, future)
+            shortcut, shortcut_edges = self._shortcut_detour(racer, target, future)
             if shortcut:
                 racer.detour = shortcut
+                racer.detour_edges = shortcut_edges
+                racer.desired_edge_id = shortcut_edges[0]
                 return shortcut[0]
         if racer.strategy in {"main", "shortcut"} and racer.vertex in self.circuit.main_route[:-1]:
             index = self.circuit.main_route.index(racer.vertex)
             next_vertex = self.circuit.main_route[index + 1]
             if next_vertex not in future and next_vertex in [n for n, _ in graph.neighbors(racer.vertex)]:
+                racer.desired_edge_id = next(edge.id for n, edge in graph.neighbors(racer.vertex) if n == next_vertex)
                 return next_vertex
             detour = self._fixed_detours.get((racer.vertex, next_vertex), [])
             if detour and any(n == detour[0] for n, _ in graph.neighbors(racer.vertex)):
                 racer.detour = detour.copy()
+                racer.detour_edges = self._fixed_detour_edges[(racer.vertex, next_vertex)].copy()
+                racer.desired_edge_id = racer.detour_edges[0]
                 return racer.detour[0]
             return None
         route = shortest_path(graph, racer.vertex, target, distance, avoid_vertices=avoid)
@@ -342,10 +366,14 @@ class Race:
             # A closure or dead end may make revisiting a road necessary.
             racer.visited_since_checkpoint = {racer.vertex}
             route = shortest_path(graph, racer.vertex, target, distance, avoid_vertices=future)
-        return route.vertices[1] if len(route.vertices) > 1 else None
+        if len(route.vertices) > 1:
+            racer.desired_edge_id = route.edges[0]
+            return route.vertices[1]
+        return None
 
-    def _enter(self, racer, target, nitro_remaining):
-        road = next((edge for neighbor, edge in self.options(racer) if neighbor == target), None)
+    def _enter(self, racer, target, nitro_remaining, edge_id=None):
+        road = next((edge for neighbor, edge in self.options(racer)
+                     if neighbor == target and (edge_id is None or edge.id == edge_id)), None)
         if road is None:
             return
         needed = road.fuel_cost * (1 + .1 * (road.difficulty - 1))
@@ -371,6 +399,8 @@ class Race:
         racer.visited_since_checkpoint.add(racer.vertex)
         if racer.detour and racer.detour[0] == racer.vertex:
             racer.detour.pop(0)
+            if racer.detour_edges:
+                racer.detour_edges.pop(0)
         racer.edge_id = racer.edge_target = None
         racer.edge_progress = 0.0
         racer.refuelled_here = False
@@ -419,9 +449,11 @@ class Race:
                 continue
             if racer.edge_id is None:
                 target = racer.desired_target if racer.strategy == "human" else self._ai_target(racer)
+                edge_id = racer.desired_edge_id
                 racer.desired_target = None
+                racer.desired_edge_id = None
                 if target is not None:
-                    self._enter(racer, target, nitro_remaining)
+                    self._enter(racer, target, nitro_remaining, edge_id)
                 elif racer.strategy != "human":
                     if racer.status != "waiting for a route":
                         self.event_log.append(f"{racer.name}: waiting for a route")
