@@ -367,6 +367,34 @@ def test_race_controls_support_mouse_actions():
         pygame.quit()
 
 
+def test_race_hud_explains_unavailable_route_and_insufficient_fuel(monkeypatch):
+    app = App()
+    try:
+        app.start_race()
+        race = app.race
+        human = race.racers[0]
+        roads = race.options(human)
+        assert len(roads) >= 2
+        human.fuel = 1
+        roads[0][1].fuel_cost = 20
+        roads[1][1].fuel_cost = .1
+        assert race.choose(human.id, roads[0][0], roads[0][1].id)
+        race.tick(.1)
+        assert human.status == "insufficient fuel for selected road"
+        labels = []
+        monkeypatch.setattr(app, "label", lambda text, *args, **kwargs: labels.append(str(text)))
+        app.draw_race()
+        assert "INSUFFICIENT FUEL FOR SELECTED ROAD" in labels
+
+        for _, road in race.options(human):
+            road.status = "blocked"
+        labels.clear()
+        app.draw_race()
+        assert any(label.startswith("ROUTE UNAVAILABLE:") for label in labels)
+    finally:
+        pygame.quit()
+
+
 def test_race_hud_uses_actual_checkpoint_count_and_shows_feedback():
     app = App()
     try:

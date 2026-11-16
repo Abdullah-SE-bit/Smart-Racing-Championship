@@ -414,6 +414,8 @@ def test_parallel_roads_preserve_selected_id_and_do_not_switch_after_closure():
     graph.edges[1].status = "blocked"
     other_race.tick(.1)
     assert second.edge_id is None and second.vertex == 0
+    assert second.status == "selected road unavailable"
+    assert other_race.event_log[-1] == "Human: selected road unavailable"
 
 
 def test_shortcut_opponent_uses_the_designated_parallel_road():

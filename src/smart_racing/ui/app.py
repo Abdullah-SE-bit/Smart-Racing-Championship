@@ -786,6 +786,8 @@ class App:
         route = checkpoint_route(race.circuit.graph, origin, remaining, PROFILES[list(PROFILES)[self.profile_index]])
         self.draw_map((60, 242, 760, 480), race.circuit, route.edges, racers=race.racers,
                       selected_edge=selected_edge, service_active=race.service_active)
+        if not route.vertices and not human.finished and not human.dnf:
+            self.label("ROUTE UNAVAILABLE: wait for reopening or choose another road.", 75, 683, 14, PINK)
         self.label("LIME  /  SUGGESTED ROUTE     ORANGE  /  SELECTED ROAD", 75, 715, 14, MUTED)
         self.card((860, 220, 380, 530))
         self.label(f"LAP {min(human.laps + 1, race.laps_required)} / {race.laps_required}", 884, 246, 20, ACCENT)
@@ -800,6 +802,8 @@ class App:
             target, edge = options[self.selected_road]
             self.label(f"ROAD {edge.id} → {target}   {'SHORTCUT' if edge.shortcut else ''}", 885, 440, 20, ACCENT)
             self.label("[←] / [→] select road    [ENTER] drive", 885, 476, 14, MUTED)
+            if human.status in {"insufficient fuel for selected road", "selected road unavailable"}:
+                self.label(human.status.upper(), 885, 500, 14, PINK)
         elif human.finished:
             self.label("RACE COMPLETE", 885, 440, 20, ACCENT)
         elif human.dnf:
