@@ -341,9 +341,10 @@ def test_race_controls_support_mouse_actions():
 
         click_button("NEXT ROAD")
         assert app.selected_road == 1
-        expected = app.race.options(app.race.racers[0])[1][0]
+        expected, expected_road = app.race.options(app.race.racers[0])[1]
         click_button("DRIVE")
         assert app.race.racers[0].desired_target == expected
+        assert app.race.racers[0].desired_edge_id == expected_road.id
         click_button("BOOST")
         assert app.race.racers[0].nitro == 0
         click_button("PAUSE")

@@ -69,6 +69,12 @@ candidate sets and retry limit bound work in the current generator.
   Candidates are ordered by approach distance, road ID and endpoint IDs.
   The racer commits through the chosen shortcut; if a planned road closes, it
   discards that detour and chooses again or falls back to the main route.
+- Roads are selected by edge ID as well as destination. When multiple open
+  roads share endpoints, the human interface sends the selected ID and the AI
+  preserves IDs from its searches and planned detours. A destination-only
+  human command is accepted only when exactly one open road reaches it. If the
+  selected road closes before entry, the racer does not silently take a
+  different parallel road.
 - The initial nitro allocation is one charge, capacity three. A charge lasts
   four simulation seconds, multiplies speed by 1.5 and doubles fuel for the
   boosted portion. Pickup vertices are consumed after collection. Resource
