@@ -228,8 +228,8 @@ class App:
         self.label("CIRCUIT PREVIEW", 510, 124, 14, ACCENT)
         self.label(self.circuit.name.upper(), 510, 150, 30)
         self.draw_map((510, 215, 690, 430), self.circuit)
-        self.label("10 CHECKPOINTS", 510, 677, 14, TEXT)
-        self.label("02 SHORTCUTS", 690, 677, 14, TEXT)
+        self.label(f"{len(self.circuit.checkpoints):02} CHECKPOINTS", 510, 677, 14, TEXT)
+        self.label(f"{sum(edge.shortcut for edge in self.circuit.graph.edges.values()):02} SHORTCUTS", 690, 677, 14, TEXT)
         self.label("04 RACERS", 850, 677, 14, TEXT)
 
     def map_positions(self, rect, circuit):
@@ -242,7 +242,8 @@ class App:
         return {v.id: (int(left + width / 2 + (v.x - cx) * scale),
                        int(top + height / 2 + (v.y - cy) * scale)) for v in points}
 
-    def draw_map(self, rect, circuit, route=None, visited=(), racers=(), selected_edge=None, unreachable=()):
+    def draw_map(self, rect, circuit, route=None, visited=(), racers=(), selected_edge=None, unreachable=(),
+                 service_active=None):
         positions = self.map_positions(rect, circuit)
         selected = set(route or [])
         for edge in circuit.graph.edges.values():
@@ -277,6 +278,8 @@ class App:
             if vertex.id in unreachable:
                 pygame.draw.line(self.surface, PINK, (x - 6, y - 6), (x + 6, y + 6), 2)
                 pygame.draw.line(self.surface, PINK, (x + 6, y - 6), (x - 6, y + 6), 2)
+            if service_active is not None and vertex.kind in {"fuel", "nitro"} and not service_active[vertex.id]:
+                pygame.draw.line(self.surface, PINK, (x - 8, y + 8), (x + 8, y - 8), 2)
             if vertex.kind == "checkpoint":
                 self.label(str(vertex.checkpoint_order), x + 9, y - 15, 14, TEXT)
             elif vertex.kind in {"fuel", "nitro"}:
@@ -653,7 +656,7 @@ class App:
             remaining = remaining[1:]
         route = checkpoint_route(race.circuit.graph, origin, remaining, PROFILES[list(PROFILES)[self.profile_index]])
         self.draw_map((60, 242, 760, 480), race.circuit, route.edges, racers=race.racers,
-                      selected_edge=selected_edge)
+                      selected_edge=selected_edge, service_active=race.service_active)
         self.label("LIME  /  SUGGESTED ROUTE     ORANGE  /  SELECTED ROAD", 75, 715, 14, MUTED)
         self.card((860, 220, 380, 530))
         self.label(f"LAP {min(human.laps + 1, race.laps_required)} / {race.laps_required}", 884, 246, 20, ACCENT)
@@ -662,7 +665,8 @@ class App:
         pygame.draw.rect(self.surface, (65, 82, 67), (885, 330, 325, 8), border_radius=4)
         pygame.draw.rect(self.surface, ACCENT if human.fuel > 25 else PINK, (885, 330, int(325 * max(human.fuel, 0) / 100), 8), border_radius=4)
         self.label(f"NITRO {human.nitro}/3  [N] BOOST  [F] REFUEL", 885, 353, 16, GOLD)
-        self.label(f"NEXT CHECKPOINT   {human.next_checkpoint + 1 if human.next_checkpoint < 10 else 'FINISH'}", 885, 391, 16, MUTED)
+        checkpoint_count = len(race.circuit.checkpoints)
+        self.label(f"NEXT CHECKPOINT   {human.next_checkpoint + 1 if human.next_checkpoint < checkpoint_count else 'FINISH'}", 885, 391, 16, MUTED)
         if options:
             target, edge = options[self.selected_road]
             self.label(f"ROAD → {target}   {'SHORTCUT' if edge.shortcut else ''}", 885, 440, 20, ACCENT)
@@ -675,7 +679,7 @@ class App:
             self.label(human.status.upper()[:25], 885, 440, 20, ACCENT)
         self.label("LIVE POSITIONS", 885, 529, 14, MUTED)
         for index, racer in enumerate(race.results()):
-            self.label(f"{index + 1:02}   {racer.name:<8}   CP {min(racer.next_checkpoint, 10):02}",
+            self.label(f"{index + 1:02}   {racer.name:<8}   CP {min(racer.next_checkpoint, checkpoint_count):02}",
                        885, 558 + 27 * index, 16, CAR_COLORS[racer.id])
         if race.event_log:
             self.label(race.event_log[-1][:38], 885, 694, 14, GOLD)

@@ -14,7 +14,7 @@ from smart_racing.tracks import generator
 from smart_racing.tracks.generator import generate_circuit
 from smart_racing.algorithms.routing.shortest import shortest_path
 from smart_racing.championship.standings import leaders, standings
-from smart_racing.core.graph import Graph
+from smart_racing.core.graph import Edge, Graph, Vertex
 from smart_racing.ui.app import ACCENT, MUTED, PANEL, TEXT, App, LAB_ALGORITHMS, PROFILES
 
 
@@ -322,6 +322,28 @@ def test_live_championship_leaders_follow_changed_results_and_every_k():
         app.top_k_count = len(app.entries)
         app.change_top_k()
         assert app.top_k_count == 1
+    finally:
+        pygame.quit()
+
+
+def test_race_hud_uses_actual_checkpoint_count_and_shows_feedback():
+    app = App()
+    try:
+        app.start_race()
+        race = app.race
+        graph = race.circuit.graph
+        graph.add_vertex(Vertex(100, 500, 350, "checkpoint", 11))
+        graph.add_edge(Edge(1000, race.circuit.checkpoints[-1], 100, 1, 1, 1))
+        graph.add_edge(Edge(1001, 100, race.circuit.start, 1, 1, 1))
+        race.circuit.checkpoints.append(100)
+        race.racers[0].next_checkpoint = 10
+        race.service_active[next(v.id for v in graph.vertices.values() if v.kind == "nitro")] = False
+        race.event_log.append("YOU: collected nitro")
+        labels = []
+        app.label = lambda text, *args, **kwargs: labels.append(str(text))
+        app.draw_race()
+        assert "NEXT CHECKPOINT   11" in labels
+        assert "YOU: collected nitro" in labels
     finally:
         pygame.quit()
 

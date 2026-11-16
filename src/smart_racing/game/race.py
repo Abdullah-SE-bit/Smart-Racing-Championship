@@ -150,6 +150,7 @@ class Race:
         if racer.nitro > 0 and racer.nitro_remaining <= 0 and not racer.finished and not racer.dnf:
             racer.nitro -= 1
             racer.nitro_remaining = 4.0
+            self.event_log.append(f"{racer.name}: nitro activated")
             return True
         return False
 
@@ -163,6 +164,7 @@ class Race:
         racer.stop_remaining = 3.0
         racer.refuelled_here = True
         racer.status = "refuelling"
+        self.event_log.append(f"{racer.name}: refuelling")
         return True
 
     def schedule(self, event: Event):
@@ -356,6 +358,7 @@ class Race:
                     racer.finished = True
                     racer.finish_time = self.elapsed
                     racer.status = "finished"
+                    self.event_log.append(f"{racer.name}: finished")
         vertex = self.circuit.graph.vertices[racer.vertex]
         if vertex.kind == "fuel" and racer.strategy != "human" and racer.fuel < 25:
             self.refuel(racer.id)
@@ -363,6 +366,7 @@ class Race:
             racer.nitro += 1
             self.service_active[vertex.id] = False
             self.collected_pickups.add(vertex.id)
+            self.event_log.append(f"{racer.name}: collected nitro")
 
     def tick(self, delta: float):
         if isinstance(delta, bool) or not isinstance(delta, Real) or not isfinite(delta):
