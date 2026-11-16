@@ -32,3 +32,11 @@ jobs:
           } else {
             Write-Host "No test files yet; skipping pytest until project functionality is implemented."
           }
+      - name: Render interface previews
+        run: python scripts/capture_previews.py
+      - name: Upload interface previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: interface-previews
+          path: output/previews/*.png
+          if-no-files-found: error

@@ -19,6 +19,9 @@ change. `pip check` reported no broken requirements. A separate check generated
 and validated 100 seeds; five seeded tracks were also raced in automated tests.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
+The run for PR #254 subsequently passed **105 tests** on Windows with Python
+3.12. The local Python executable was blocked by Windows Application Control;
+later runs must be checked separately.
 Saved circuits with nonconsecutive IDs are exercised through selection,
 planning, and scheduled race events.
 The planner's alternative-route view and its state, route-count, and path-length
@@ -40,3 +43,8 @@ machine, try the Lab and planner controls, verify the generated circuit and
 bonus views, run the built executable, and check the extracted submission ZIP.
 Record actual outcomes and failures instead of assuming a successful build means
 the game can run.
+
+`scripts/capture_previews.py` renders the screen flow to `output/previews/` with
+the dummy SDL driver. CI uploads those images as an artifact for visual review;
+the previews are generated from the app and a simulated race, not a recording of
+a human playthrough.

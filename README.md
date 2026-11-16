@@ -79,6 +79,10 @@ activates the focused button. In the planner, arrow keys change the destination;
 hold Shift with an arrow key to change the starting vertex.
 The Algorithm Lab uses the selected track and, when available, current
 championship standings for its shared-algorithm demonstrations.
+Windows CI also renders screen previews as the `interface-previews` workflow
+artifact. To regenerate them locally, run
+`.\.venv\Scripts\python.exe scripts/capture_previews.py`; the images are written
+to `output/previews/`.
 Run the current automated tests with `.\.venv\Scripts\python.exe -m pytest`.
 
 To build a Windows executable after installing the optional packaging tools, run

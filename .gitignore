@@ -26,6 +26,7 @@ junit.xml
 # Generated application builds (keep submitted experiment results tracked)
 /build/
 /dist/
+/output/previews/
 
 # Local editor and operating system files
 .idea/
