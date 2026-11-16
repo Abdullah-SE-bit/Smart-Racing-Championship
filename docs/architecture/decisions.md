@@ -90,6 +90,9 @@ candidate sets and retry limit bound work in the current generator.
   expiration, and active effects are recomputed together. Negative event IDs
   are reserved for internal expiration records.
   A racer already on a road finishes crossing it before choosing a new road.
+  If a chosen road closes before entry, the engine records an unavailable-road
+  status. Insufficient fuel also produces status feedback. The race screen
+  warns when the ordered route cannot currently be found.
 - When no route exists, opponents wait and retry after the road state changes.
   A racer with no affordable outgoing edge and no available refuelling option
   is DNF; the time limit resolves other prolonged waits. Unaffordable selected

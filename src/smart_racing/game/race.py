@@ -375,6 +375,8 @@ class Race:
         road = next((edge for neighbor, edge in self.options(racer)
                      if neighbor == target and (edge_id is None or edge.id == edge_id)), None)
         if road is None:
+            racer.status = "selected road unavailable"
+            self.event_log.append(f"{racer.name}: selected road unavailable")
             return
         needed = road.fuel_cost * (1 + .1 * (road.difficulty - 1))
         duration = max(road.base_time, 0.01) * (1.5 if road.status == "restricted" else 1.0)
@@ -390,6 +392,7 @@ class Race:
                 self.event_log.append(f"{racer.name}: out of fuel")
             else:
                 racer.status = "insufficient fuel for selected road"
+                self.event_log.append(f"{racer.name}: insufficient fuel for selected road")
             return
         racer.edge_id, racer.edge_target, racer.edge_progress = road.id, target, 0.0
         racer.status = "racing"
