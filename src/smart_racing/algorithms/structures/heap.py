@@ -1,4 +1,4 @@
-"""A small manual binary min-heap, shared by routing and events."""
+"""Manual binary heaps for event scheduling, rankings and indexed routing."""
 
 
 class MinHeap:
@@ -60,4 +60,63 @@ class MinHeap:
         self.operations += 1
         if self.trace is not None:
             self.trace.append({"action": "heap extract", "value": len(items)})
+        return result
+
+
+class IndexedMinHeap:
+    """A routing heap with at most one (priority, distance, vertex) per vertex."""
+
+    def __init__(self):
+        self._items = []
+        self._positions = {}
+        self.operations = 0
+
+    def __len__(self):
+        return len(self._items)
+
+    def _swap(self, first, second):
+        items = self._items
+        items[first], items[second] = items[second], items[first]
+        self._positions[items[first][2]] = first
+        self._positions[items[second][2]] = second
+
+    def push_or_decrease(self, item):
+        """Insert a vertex or replace its entry with a strictly smaller one."""
+        vertex = item[2]
+        if vertex in self._positions:
+            index = self._positions[vertex]
+            if item >= self._items[index]:
+                raise ValueError("A heap update must decrease the vertex priority")
+            self._items[index] = item
+        else:
+            index = len(self._items)
+            self._items.append(item)
+            self._positions[vertex] = index
+        while index:
+            parent = (index - 1) // 2
+            if self._items[parent] <= self._items[index]:
+                break
+            self._swap(parent, index)
+            index = parent
+        self.operations += 1
+
+    def pop(self):
+        if not self._items:
+            raise IndexError("pop from empty heap")
+        result = self._items[0]
+        last = self._items.pop()
+        del self._positions[result[2]]
+        if self._items:
+            self._items[0] = last
+            self._positions[last[2]] = 0
+            index = 0
+            while 2 * index + 1 < len(self._items):
+                child = 2 * index + 1
+                if child + 1 < len(self._items) and self._items[child + 1] < self._items[child]:
+                    child += 1
+                if self._items[index] <= self._items[child]:
+                    break
+                self._swap(index, child)
+                index = child
+        self.operations += 1
         return result

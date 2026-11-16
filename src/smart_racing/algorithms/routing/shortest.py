@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from math import hypot, inf
 
-from smart_racing.algorithms.structures.heap import MinHeap
+from smart_racing.algorithms.structures.heap import IndexedMinHeap
 from smart_racing.core.graph import CostProfile, Graph
 
 
@@ -43,15 +43,13 @@ def shortest_path(graph: Graph, start: int, target: int,
         position = graph.vertices[vertex]
         return ratio * hypot(position.x - destination.x, position.y - destination.y)
 
-    queue = MinHeap()
-    queue.push((heuristic(start), 0.0, start))
+    queue = IndexedMinHeap()
+    queue.push_or_decrease((heuristic(start), 0.0, start))
     distances = {start: 0.0}
     parents = {}
     result = Route()
     while queue:
         _, distance, vertex = queue.pop()
-        if distance != distances.get(vertex):
-            continue
         result.expanded += 1
         result.trace.append({"action": "expand", "vertex": vertex, "cost": distance})
         if vertex == target:
@@ -65,7 +63,7 @@ def shortest_path(graph: Graph, start: int, target: int,
             if candidate < distances.get(neighbor, inf):
                 distances[neighbor] = candidate
                 parents[neighbor] = (vertex, edge.id)
-                queue.push((candidate + heuristic(neighbor), candidate, neighbor))
+                queue.push_or_decrease((candidate + heuristic(neighbor), candidate, neighbor))
                 result.trace.append({"action": "relax", "vertex": neighbor, "edge": edge.id, "cost": candidate})
     result.heap_operations = queue.operations
     if result.cost != inf:

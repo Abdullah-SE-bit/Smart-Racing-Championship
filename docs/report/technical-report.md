@@ -104,11 +104,13 @@ O(V+E) time and space.
 Weak components similarly build an undirected view of open roads and visit it
 in O(V+E) time and space; the directed state of each original road is unchanged.
 
-**Dijkstra.** Set the start distance to zero, push it into a min-heap, and
-repeatedly extract the least tentative distance. For each legal outgoing road,
-relax the destination and push an improved value; ignore stale heap entries.
-With non-negative costs, the first current extraction of the destination has
-optimal cost. Parent roads reconstruct the path; blocked roads are excluded.
+**Dijkstra.** Set the start distance to zero, insert it into an indexed
+min-heap, and repeatedly extract the least tentative distance. For each legal
+outgoing road, relax the destination and insert or decrease its heap entry.
+The heap keeps at most one entry per vertex, with a vertex-to-position map.
+With non-negative costs, extracting the destination gives optimal cost. Parent
+roads reconstruct the path; blocked roads are excluded. Insertions, decreases
+and extractions take O(log V), giving O((V+E) log V) time and O(V) heap space.
 
 **A-star.** Use the same relaxation and parents, but order the heap by the sum
 of tentative cost and a geometric lower bound to the target. The minimum current

@@ -122,7 +122,9 @@ obstacle penalty by 1. Balanced weights are all one. Speed uses weights
 
 A* multiplies Euclidean distance by the minimum current edge cost per geometric
 distance. This is a consistent lower bound; if the minimum is zero, A* falls
-back to zero heuristic. Checkpoint route legs exclude later mandatory
+back to zero heuristic. Both routing algorithms use a manual indexed min-heap
+with at most one pending entry per vertex and a position map for decrease-key.
+Checkpoint route legs exclude later mandatory
 checkpoints. A single-pickup recommendation checks the estimated detour and
 fuel requirement independently rather than mixing fuel and distance budgets.
 
