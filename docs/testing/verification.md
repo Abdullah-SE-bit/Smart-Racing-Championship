@@ -60,6 +60,14 @@ local executable remains blocked by Application Control. The package-smoke job
 also checks the executable after extraction from a temporary executable-only
 test archive. That archive is not the final submission package and does not
 verify group-specific naming or the complete submission contents.
+The local submission packager was also exercised with explicitly test-only
+identifiers: the ZIP passed its integrity check, required files were present
+after extraction, and the extracted executable and report matched their source
+hashes. The host blocked the local built executable, so this did not verify
+its launch. The CI package-smoke workflow is configured to perform the full
+test-archive check and launch from the extracted directory on its Windows
+runner, using a report rebuilt from the current source. Neither test archive is
+the final group-specific submission.
 Saved circuits with nonconsecutive IDs are exercised through selection,
 planning, and scheduled race events.
 The planner's alternative-route view and its state, route-count, and path-length

@@ -56,6 +56,8 @@ shared functions and their actual game, Lab and experiment call sites.
 - `scripts/package_submission.py` can create and inspect a local ZIP after
   actual group details and final artifacts are available. The final ZIP's name,
   contents, extraction, offline execution and malware check remain unverified.
+  CI is configured to exercise the same packager with test-only identifiers and
+  smoke-test its extracted executable; that test is not a final submission.
 - The group must rehearse the demonstration and viva and verify that every
   member understands the project. See [the demo guide](demo-and-viva.md).
 - The user has instructed us not to submit now. Creating or uploading a final
