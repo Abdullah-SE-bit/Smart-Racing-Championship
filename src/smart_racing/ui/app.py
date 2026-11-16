@@ -368,14 +368,16 @@ class App:
                        int(top + height / 2 + (v.y - cy) * scale)) for v in points}
 
     def draw_map(self, rect, circuit, route=None, visited=(), racers=(), selected_edge=None, unreachable=(),
-                 service_active=None):
+                 service_active=None, race_style=False):
         positions = self.map_positions(rect, circuit)
         selected = set(route or [])
         for edge in circuit.graph.edges.values():
             a, b = positions[edge.source], positions[edge.target]
             color = (97, 53, 47) if edge.status == "blocked" else ((93, 77, 47) if edge.status == "restricted" else (75, 93, 77))
-            pygame.draw.line(self.surface, (15, 28, 23), a, b, 13)
-            pygame.draw.line(self.surface, color, a, b, 8)
+            pygame.draw.line(self.surface, (15, 28, 23), a, b, 20 if race_style else 13)
+            pygame.draw.line(self.surface, color, a, b, 15 if race_style else 8)
+            if race_style and edge.status == "open":
+                pygame.draw.line(self.surface, (42, 54, 52), a, b, 10)
             if edge.id == selected_edge:
                 pulse = 0 if self.reduced_motion else int((1 + math.sin(self.time * 5)) / 2 * 2)
                 pygame.draw.line(self.surface, GOLD, a, b, 6 + pulse)
@@ -429,6 +431,20 @@ class App:
             y += (racer.id // 2) * 7 - 3
             forward = (math.cos(heading), math.sin(heading))
             side = (-forward[1], forward[0])
+            if race_style:
+                def car_point(along, across):
+                    return (round(x + along * forward[0] + across * side[0]),
+                            round(y + along * forward[1] + across * side[1]))
+
+                # A small top-down car stays attached to the real interpolated
+                # racer position; decoration does not change simulation state.
+                body = [car_point(9, 0), car_point(6, 5), car_point(-7, 5),
+                        car_point(-9, 3), car_point(-9, -3), car_point(-7, -5), car_point(6, -5)]
+                pygame.draw.polygon(self.surface, (9, 16, 15), body, 4)
+                pygame.draw.polygon(self.surface, CAR_COLORS[racer.id % len(CAR_COLORS)], body)
+                pygame.draw.polygon(self.surface, (28, 38, 37),
+                                    [car_point(3, 3), car_point(-3, 3), car_point(-3, -3), car_point(3, -3)])
+                continue
             points = [(x + 10 * forward[0], y + 10 * forward[1]),
                       (x - 7 * forward[0] + 6 * side[0], y - 7 * forward[1] + 6 * side[1]),
                       (x - 4 * forward[0], y - 4 * forward[1]),
@@ -887,9 +903,15 @@ class App:
 
     def draw_race(self):
         race = self.race
-        self.header("03 / Race day", self.circuit.name, "Choose a connected road at each junction. Stay on the checkpoint sequence.")
-        self.nav()
-        self.card((40, 220, 800, 530))
+        self.draw_pit_background()
+        self.label("RACE CONTROL  /  LIVE RACE", 48, 98, 14, (246, 125, 84))
+        race_name = self.circuit.name.upper()
+        while self.fonts[42].size(race_name)[0] > 740 and len(race_name) > 1:
+            race_name = race_name[:-1]
+        self.label(race_name, 45, 118, 42, (247, 242, 228))
+        self.label("Choose a road at each junction and follow the checkpoints in order.", 48, 176, 16, (170, 182, 172))
+        self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
+        self.card((40, 220, 800, 530), (21, 33, 32), 12, (58, 73, 68))
         human = race.racers[0]
         options = race.options(human) if human.edge_id is None and not human.finished and not human.dnf else []
         if options:
@@ -901,17 +923,17 @@ class App:
             remaining = remaining[1:]
         route = checkpoint_route(race.circuit.graph, origin, remaining, PROFILES[list(PROFILES)[self.profile_index]])
         self.draw_map((60, 242, 760, 480), race.circuit, route.edges, racers=race.racers,
-                      selected_edge=selected_edge, service_active=race.service_active)
+                      selected_edge=selected_edge, service_active=race.service_active, race_style=True)
         if not route.vertices and not human.finished and not human.dnf:
             self.label("ROUTE UNAVAILABLE: wait for reopening or choose another road.", 75, 683, 14, PINK)
         self.label("LIME  /  SUGGESTED ROUTE     ORANGE  /  SELECTED ROAD", 75, 715, 14, MUTED)
-        self.card((860, 220, 380, 530))
-        self.label(f"LAP {min(human.laps + 1, race.laps_required)} / {race.laps_required}", 884, 246, 20, ACCENT)
-        self.label(f"{race.elapsed:06.1f}s", 1075, 243, 24)
-        self.label(f"FUEL     {human.fuel:05.1f} / 100", 885, 297, 18)
-        pygame.draw.rect(self.surface, (65, 82, 67), (885, 330, 325, 8), border_radius=4)
-        pygame.draw.rect(self.surface, ACCENT if human.fuel > 25 else PINK, (885, 330, int(325 * max(human.fuel, 0) / 100), 8), border_radius=4)
-        self.label(f"NITRO {human.nitro}/3  [N] BOOST  [F] REFUEL", 885, 353, 16, GOLD)
+        self.card((860, 220, 380, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.label(f"LAP {min(human.laps + 1, race.laps_required)} / {race.laps_required}", 884, 246, 20, (246, 125, 84))
+        self.label(f"{race.elapsed:06.1f}s", 1075, 243, 24, (247, 242, 228))
+        self.label(f"FUEL     {human.fuel:05.1f} / 100", 885, 297, 18, (218, 224, 211))
+        pygame.draw.rect(self.surface, (52, 66, 61), (885, 330, 325, 8), border_radius=4)
+        pygame.draw.rect(self.surface, (244, 103, 64) if human.fuel > 25 else PINK, (885, 330, int(325 * max(human.fuel, 0) / 100), 8), border_radius=4)
+        self.label(f"NITRO {human.nitro}/3  [N] BOOST  [F] REFUEL", 885, 353, 16, (246, 125, 84))
         checkpoint_count = len(race.circuit.checkpoints)
         self.label(f"NEXT CHECKPOINT   {human.next_checkpoint + 1 if human.next_checkpoint < checkpoint_count else 'FINISH'}", 885, 391, 16, MUTED)
         if options:
@@ -933,7 +955,7 @@ class App:
         if race.event_log:
             self.label(race.event_log[-1][:38], 885, 694, 14, GOLD)
         if race.over:
-            self.button((885, 460, 330, 48), "VIEW RESULTS", self.finish_race, selected=True)
+            self.menu_button((885, 460, 330, 48), "VIEW RESULTS", None, self.finish_race, True)
         else:
             for rect, title, action in (
                 ((40, 756, 165, 40), "PREV ROAD", lambda: self.change_road(-1)),
@@ -943,7 +965,7 @@ class App:
                 ((740, 756, 165, 40), "REFUEL", lambda: self.race.refuel(0)),
                 ((915, 756, 180, 40), "RESUME" if self.paused else "PAUSE", self.toggle_pause),
             ):
-                self.button(rect, title, action)
+                self.menu_button(rect, title, None, action, title == "DRIVE")
 
     def change_road(self, direction):
         self.selected_road += direction

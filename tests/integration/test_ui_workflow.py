@@ -88,6 +88,24 @@ def test_planner_map_selection_and_separate_tools():
         pygame.quit()
 
 
+def test_race_presentation_does_not_advance_simulation():
+    app = App()
+    try:
+        app.start_race()
+        app.race.tick(.3)
+        before = [(racer.vertex, racer.edge_id, racer.edge_progress, racer.fuel)
+                  for racer in app.race.racers]
+        elapsed = app.race.elapsed
+        app.buttons = []
+        app.draw_race()
+        app.draw_race()
+        assert app.race.elapsed == elapsed
+        assert [(racer.vertex, racer.edge_id, racer.edge_progress, racer.fuel)
+                for racer in app.race.racers] == before
+    finally:
+        pygame.quit()
+
+
 def test_all_screens_render_and_primary_navigation():
     app = App()
     try:
