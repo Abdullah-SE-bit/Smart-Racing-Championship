@@ -21,6 +21,11 @@ The resource-planning changes were subsequently checked locally with Python
 3.12.16: **111 passed**, including ordered pickup recommendations, nitro
 capacity and the reconstructed refuelling screen. This run used the existing
 virtual environment's packages with an allowed base Python executable.
+The clickable race-control change was subsequently checked with **112 passing
+tests**. In a visible Windows game window, clicking Drive reached checkpoint 1,
+Next Road selected checkpoint 2, and Pause changed to Resume. Automated
+keyboard injection did not produce visible actions during this inspection;
+physical keyboard operation has not been established by that observation.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

@@ -522,6 +522,7 @@ class App:
             self.label(text, 70, 300 + index * 50, 18)
         self.label("Pass checkpoints in order and return to the start to complete a lap.", 70, 650, 16, MUTED)
         self.label("Planner: arrow keys choose destination; Shift + arrows choose start.", 70, 680, 16, MUTED)
+        self.label("Race actions are also available as on-screen buttons.", 70, 710, 16, MUTED)
         self.card((760, 220, 480, 530))
         self.label("RACE SETTINGS", 790, 250, 14, ACCENT)
         self.label("Laps per race", 790, 305, 20)
@@ -795,6 +796,28 @@ class App:
             self.label(race.event_log[-1][:38], 885, 694, 14, GOLD)
         if race.over:
             self.button((885, 460, 330, 48), "VIEW RESULTS", self.finish_race, selected=True)
+        else:
+            for rect, title, action in (
+                ((40, 756, 165, 40), "PREV ROAD", lambda: self.change_road(-1)),
+                ((215, 756, 165, 40), "NEXT ROAD", lambda: self.change_road(1)),
+                ((390, 756, 165, 40), "DRIVE", self.drive_selected),
+                ((565, 756, 165, 40), "BOOST", lambda: self.race.activate_nitro(0)),
+                ((740, 756, 165, 40), "REFUEL", lambda: self.race.refuel(0)),
+                ((915, 756, 180, 40), "RESUME" if self.paused else "PAUSE", self.toggle_pause),
+            ):
+                self.button(rect, title, action)
+
+    def change_road(self, direction):
+        self.selected_road += direction
+
+    def drive_selected(self):
+        human = self.race.racers[0]
+        options = self.race.options(human) if human.edge_id is None else []
+        if options:
+            self.race.choose(0, options[self.selected_road % len(options)][0])
+
+    def toggle_pause(self):
+        self.paused = not self.paused
 
     def finish_race(self):
         if not self.race.over:
@@ -906,21 +929,18 @@ class App:
             elif self.screen == "race":
                 if event.key == pygame.K_LEFT:
                     self.keyboard_focus = False
-                    self.selected_road -= 1
+                    self.change_road(-1)
                 elif event.key == pygame.K_RIGHT:
                     self.keyboard_focus = False
-                    self.selected_road += 1
+                    self.change_road(1)
                 elif event.key == pygame.K_n:
                     self.race.activate_nitro(0)
                 elif event.key == pygame.K_f:
                     self.race.refuel(0)
                 elif event.key == pygame.K_SPACE:
-                    self.paused = not self.paused
+                    self.toggle_pause()
                 elif event.key == pygame.K_RETURN:
-                    human = self.race.racers[0]
-                    options = self.race.options(human) if human.edge_id is None else []
-                    if options:
-                        self.race.choose(0, options[self.selected_road % len(options)][0])
+                    self.drive_selected()
 
     def run(self):
         while self.running:

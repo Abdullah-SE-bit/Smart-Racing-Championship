@@ -326,6 +326,39 @@ def test_live_championship_leaders_follow_changed_results_and_every_k():
         pygame.quit()
 
 
+def test_race_controls_support_mouse_actions():
+    app = App()
+    try:
+        app.start_race()
+
+        def click_button(title):
+            app.buttons = []
+            app.draw_race()
+            button = next((rect, action) for rect, action in app.buttons
+                          if rect.x == {"NEXT ROAD": 215, "DRIVE": 390, "BOOST": 565,
+                                        "REFUEL": 740, "PAUSE": 915}[title])
+            app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=button[0].center))
+
+        click_button("NEXT ROAD")
+        assert app.selected_road == 1
+        expected = app.race.options(app.race.racers[0])[1][0]
+        click_button("DRIVE")
+        assert app.race.racers[0].desired_target == expected
+        click_button("BOOST")
+        assert app.race.racers[0].nitro == 0
+        click_button("PAUSE")
+        assert app.paused
+        click_button("PAUSE")
+        assert not app.paused
+        human = app.race.racers[0]
+        human.vertex = next(v.id for v in app.race.circuit.graph.vertices.values() if v.kind == "fuel")
+        human.fuel = 50
+        click_button("REFUEL")
+        assert human.fuel == 90
+    finally:
+        pygame.quit()
+
+
 def test_race_hud_uses_actual_checkpoint_count_and_shows_feedback():
     app = App()
     try:
