@@ -37,8 +37,9 @@ checked against the supplied PDF. The user has authorized implementation.
 
 | Directory | Intended responsibility |
 | --- | --- |
-| `assets/` | Reserved asset directories; the current interface draws its graphics in code. |
-| `assets/images/`, `assets/sprites/`, `assets/fonts/`, `assets/sounds/` | Reserved for future media and associated license information. |
+| `assets/` | Versioned presentation assets included in the Windows build. |
+| `assets/images/` | Original generated pit-lane artwork and its provenance. |
+| `assets/sprites/`, `assets/fonts/`, `assets/sounds/` | Reserved for future media and associated license information. |
 | `data/` | Versioned JSON inputs and configuration. |
 | `data/circuits/` | Definitions for the three circuits and their checkpoints and shortcuts. |
 | `data/configurations/`, `data/experiments/` | Reserved input directories; current settings and study inputs are defined in code. |

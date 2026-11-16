@@ -89,6 +89,10 @@ Windows CI also renders screen previews as the `interface-previews` workflow
 artifact. To regenerate them locally, run
 `.\.venv\Scripts\python.exe scripts/capture_previews.py`; the images are written
 to `output/previews/`.
+The original generated pit-lane artwork and its generation prompt are recorded
+in [`assets/images/README.md`](assets/images/README.md). The Windows build
+bundles this artwork; reduced motion disables the background pan and button
+highlights.
 CI also builds the Windows executable and runs its headless smoke test before
 and after extraction from a temporary test archive on a clean Windows runner.
 Run the current automated tests with `.\.venv\Scripts\python.exe -m pytest`.

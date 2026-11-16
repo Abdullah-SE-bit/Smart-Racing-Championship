@@ -3,6 +3,7 @@
 import math
 import sys
 from copy import deepcopy
+from functools import lru_cache
 from pathlib import Path
 
 import pygame
@@ -49,12 +50,26 @@ LAB_ALGORITHMS = ["BFS", "DFS", "Dijkstra", "Astar", "Knapsack", "Greedy", "Back
                   "Kruskal", "Event heap", "Merge sort", "Quick sort", "Heap sort", "Top-k"]
 
 
+@lru_cache(maxsize=1)
+def load_pit_backdrop():
+    """Load the packaged original artwork once and scale it for the viewport."""
+    image = pygame.image.load(str(ROOT / "assets" / "images" / "pit-lane-night.png")).convert()
+    scale = max((WIDTH + 48) / image.get_width(), (HEIGHT + 24) / image.get_height())
+    return pygame.transform.smoothscale(image, (round(image.get_width() * scale),
+                                                round(image.get_height() * scale)))
+
+
 class App:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("Smart Racing Championship")
         self.window = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
         self.surface = pygame.Surface((WIDTH, HEIGHT))
+        self.pit_backdrop = load_pit_backdrop()
+        self.menu_veil = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        self.menu_veil.fill((6, 9, 14, 80))
+        self.screen_veil = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        self.screen_veil.fill((6, 9, 14, 195))
         self.clock = pygame.time.Clock()
         self.fonts = {size: pygame.font.SysFont("segoeui", size, bold=bold)
                       for size, bold in [(14, False), (16, False), (18, False), (20, True),
@@ -116,15 +131,6 @@ class App:
 
     def background(self):
         self.surface.fill(BACKGROUND)
-        for index in range(16):
-            x = int((index * 131 + (0 if self.reduced_motion else self.time * 11)) % (WIDTH + 100)) - 50
-            pygame.draw.line(self.surface, (25, 43, 35), (x, 0), (x - 220, HEIGHT), 1)
-        pygame.draw.rect(self.surface, (20, 36, 30), (0, 0, WIDTH, 70))
-        pygame.draw.polygon(self.surface, ACCENT, [(39, 22), (49, 34), (39, 46), (29, 34)], 2)
-        self.label("PADDOCK", 65, 17, 24)
-        self.label("/ SMART RACING CHAMPIONSHIP", 195, 23, 14, MUTED)
-        self.label("DAA  •  RACE LAB", 1078, 24, 14, ACCENT)
-        pygame.draw.line(self.surface, (61, 78, 63), (0, 69), (WIDTH, 69))
 
     def header(self, eyebrow, title, description):
         self.draw_pit_background()
@@ -245,9 +251,23 @@ class App:
         focused = self.keyboard_focus and self.focused_button == len(self.buttons)
         fill = PRIMARY if primary else (46, 51, 61) if hover else (32, 36, 44)
         border = (169, 218, 246) if focused else EMPHASIS if primary else BORDER
-        pygame.draw.rect(self.surface, fill, rect, border_radius=8)
-        pygame.draw.rect(self.surface, border, rect, 2 if focused else 1, border_radius=8)
-        ink = TEXT if primary else TEXT
+        cut = min(9, rect.height // 4, rect.width // 4)
+        shape = [(rect.left + cut, rect.top), (rect.right - 1, rect.top),
+                 (rect.right - 1, rect.bottom - cut), (rect.right - cut, rect.bottom - 1),
+                 (rect.left, rect.bottom - 1), (rect.left, rect.top + cut)]
+        pygame.draw.polygon(self.surface, fill, shape)
+        pygame.draw.polygon(self.surface, border, shape, 2 if focused else 1)
+        if primary or hover or focused:
+            pygame.draw.line(self.surface, TEXT if primary else EMPHASIS,
+                             (rect.left + 1, rect.top + cut), (rect.left + 1, rect.bottom - 5), 2)
+        if (primary or hover or focused) and not self.reduced_motion:
+            sweep = int(self.time * 65) % (rect.width + 75) - 40
+            highlight = pygame.Surface(rect.size, pygame.SRCALPHA)
+            pygame.draw.polygon(highlight, (255, 255, 255, 20),
+                                [(sweep, 0), (sweep + 25, 0),
+                                 (sweep - 5, rect.height), (sweep - 30, rect.height)])
+            self.surface.blit(highlight, rect.topleft)
+        ink = TEXT
         if rect.width <= 60:
             self.label(title, rect.centerx - 5, rect.y + 9, 20, ink)
         else:
@@ -311,8 +331,15 @@ class App:
                     distance -= length
 
     def draw_pit_background(self):
-        self.surface.fill(BACKGROUND)
-        pygame.draw.rect(self.surface, (20, 23, 29), (0, 0, WIDTH, 70))
+        x = (WIDTH - self.pit_backdrop.get_width()) // 2
+        y = (HEIGHT - self.pit_backdrop.get_height()) // 2
+        if not self.reduced_motion:
+            x += round(10 * math.sin(self.time * .18))
+        self.surface.blit(self.pit_backdrop, (x, y))
+        self.surface.blit(self.menu_veil if self.screen == "menu" else self.screen_veil, (0, 0))
+        header = pygame.Surface((WIDTH, 70), pygame.SRCALPHA)
+        header.fill((12, 15, 21, 220))
+        self.surface.blit(header, (0, 0))
         pygame.draw.line(self.surface, BORDER, (0, 69), (WIDTH, 69))
         pygame.draw.polygon(self.surface, PRIMARY, [(48, 22), (59, 34), (48, 46), (37, 34)])
         self.label("PADDOCK", 72, 18, 24, TEXT)
@@ -339,15 +366,21 @@ class App:
             name = name[:-1]
         self.label(name, 122, 679, 20, TEXT)
 
-        pygame.draw.rect(self.surface, PANEL, (510, 100, 722, 625), border_radius=12)
+        hero_panel = pygame.Surface((722, 625), pygame.SRCALPHA)
+        pygame.draw.rect(hero_panel, (12, 16, 23, 65), hero_panel.get_rect(), border_radius=12)
+        self.surface.blit(hero_panel, (510, 100))
         pygame.draw.rect(self.surface, BORDER, (510, 100, 722, 625), 1, border_radius=12)
         self.label("FEATURED CIRCUIT", 540, 126, 14, EMPHASIS)
         preview_name = self.circuit.name.upper()
         while self.fonts[30].size(preview_name)[0] > 650 and len(preview_name) > 1:
             preview_name = preview_name[:-1]
         self.label(preview_name, 538, 150, 30, TEXT)
-        self.label("TRACK PREVIEW", 1086, 130, 14, MUTED)
-        self.draw_menu_circuit((550, 204, 645, 405))
+        self.label("TRACK PREVIEW", 1070, 130, 14, TEXT)
+        preview = pygame.Surface((320, 210), pygame.SRCALPHA)
+        pygame.draw.rect(preview, (8, 12, 18, 215), preview.get_rect(), border_radius=8)
+        self.surface.blit(preview, (880, 410))
+        pygame.draw.rect(self.surface, BORDER, (880, 410, 320, 210), 1, border_radius=8)
+        self.draw_menu_circuit((895, 425, 290, 180))
         pygame.draw.line(self.surface, BORDER, (540, 629), (1202, 629))
         self.label(f"{len(self.circuit.checkpoints):02}", 540, 651, 24, TEXT)
         self.label("CHECKPOINTS", 540, 682, 14, MUTED)

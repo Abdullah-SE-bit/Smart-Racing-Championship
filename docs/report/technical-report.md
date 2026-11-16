@@ -263,13 +263,12 @@ packaged-game verification and the demo and viva remain before submission.
 
 ## Acknowledgements
 
-The project uses Python, Pygame, pytest, Matplotlib, and optional PyInstaller and
-ReportLab; dependency declarations and version ranges are in `pyproject.toml`,
-and the measured study environment records installed versions. Circuit data and
-the prototype graphics are authored in this repository. The interface asks the
-operating system for Segoe UI and does not distribute that font. No external art
-or audio is included in the current prototype. Attribute any third-party art,
-fonts or audio added later according to their licenses.
+The project uses Python, Pygame, pytest, Matplotlib, PyInstaller and ReportLab;
+versions are documented in `pyproject.toml` and the study environment. Circuit
+data and interface graphics are project-authored. The pit-lane background was
+generated with OpenAI's image generation tool; its prompt and provenance are in
+`assets/images/README.md`. Segoe UI is requested from the operating system and
+is not distributed. No external audio is included.
 
 Reference material: the assignment transcription in `docs/assignment-specification.md`;
 Python documentation at https://docs.python.org/3/; Pygame documentation at
