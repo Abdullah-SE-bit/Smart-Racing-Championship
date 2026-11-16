@@ -11,6 +11,11 @@ race events select from sorted existing road IDs. This keeps events deterministi
 for authored, generated, and saved tracks with nonconsecutive IDs. Validation
 reports unknown main-route vertices before accessing adjacency lists.
 
+Seeded generation can optionally emit plain-data stage records. The circuit
+workshop reveals those records, including validation rejection and retry reasons,
+without adding presentation dependencies to the generator. The invalid-track
+demonstration validates a copy with its shortcut flags removed.
+
 - `core/graph.py` contains Pygame-independent vertices, edges, adjacency lists
   and non-negative cost profiles. Algorithms receive these objects and return
   plain results and traces. They do not import the presentation layer.

@@ -65,8 +65,13 @@ def test_all_screens_render_and_primary_navigation():
 
 def test_seeded_generated_circuits_are_repeatable(tmp_path):
     first, second = generate_circuit(42), generate_circuit(42)
+    trace = []
+    observed = generate_circuit(42, trace=trace)
     assert first.graph.vertices == second.graph.vertices
     assert first.graph.edges == second.graph.edges
+    assert observed.graph.vertices == first.graph.vertices
+    assert observed.graph.edges == first.graph.edges
+    assert trace[-1]["stage"] == "accepted"
     assert len(first.checkpoints) == 10
     assert sum(edge.shortcut for edge in first.graph.edges.values()) >= 2
     path = tmp_path / "generated.json"
@@ -123,6 +128,43 @@ def test_generation_retries_are_bounded_and_deterministic(monkeypatch):
     attempts.clear()
     with pytest.raises(ValueError, match="after 1 attempts"):
         generator.generate_circuit(42, max_attempts=1)
+
+
+def test_generation_trace_records_actual_rejection_and_retry(monkeypatch):
+    original = generator._generate_candidate
+
+    def fail_once(seed, attempt, trace=None):
+        if attempt == 0:
+            raise ValueError("candidate violates spacing")
+        return original(seed, attempt, trace)
+
+    monkeypatch.setattr(generator, "_generate_candidate", fail_once)
+    trace = []
+    circuit = generator.generate_circuit(42, max_attempts=2, trace=trace)
+    assert circuit.name == "Generated 42"
+    assert any(step == {"stage": "rejected", "detail": "candidate violates spacing"} for step in trace)
+    assert [step["stage"] for step in trace].count("attempt") == 2
+    assert {"checkpoints", "services", "backbone", "roads", "obstacles", "accepted"}.issubset(
+        {step["stage"] for step in trace})
+
+
+def test_generated_circuit_workshop_shows_stages_and_validation():
+    app = App()
+    try:
+        app.generate()
+        assert app.screen == "generation"
+        assert app.generation_trace[-1]["stage"] == "accepted"
+        app.reduced_motion = True
+        app.background()
+        app.draw_generation()
+        app.demonstrate_rejection()
+        assert app.validation_message.startswith("Rejected:")
+        app.draw_generation()
+        app.go("planner")
+        app.start_planned_race()
+        assert app.race.circuit.name == app.circuit.name
+    finally:
+        pygame.quit()
 
 
 def test_complete_three_race_championship():

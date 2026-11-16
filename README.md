@@ -69,6 +69,8 @@ each race in the fixed three-circuit season; results carry forward between races
 The planner can compare presets with an animated reveal of each computed route, switch to
 an ordered checkpoint plan, generate a seeded circuit, show an invalid candidate,
 inspect bounded endpoint alternatives, and save a circuit for later selection.
+The circuit workshop shows the seed and the actual checkpoint, service, backbone,
+road, obstacle and validation stages; it can also demonstrate a rejected track.
 Generated circuits are available for quick races. Saved circuits are stored in
 `%USERPROFILE%\SmartRacingChampionship\circuits`.
 Run the current automated tests with `.\.venv\Scripts\python.exe -m pytest`.
