@@ -25,7 +25,10 @@ later runs must be checked separately.
 The Windows run for PR #257 passed **108 tests**, `pip check`, preview rendering,
 and a separately built executable's headless smoke test. All ten generated
 screen previews from the prior preview workflow were visually inspected. The
-local executable remains blocked by Application Control.
+local executable remains blocked by Application Control. The package-smoke job
+also checks the executable after extraction from a temporary executable-only
+test archive. That archive is not the final submission package and does not
+verify group-specific naming or the complete submission contents.
 Saved circuits with nonconsecutive IDs are exercised through selection,
 planning, and scheduled race events.
 The planner's alternative-route view and its state, route-count, and path-length

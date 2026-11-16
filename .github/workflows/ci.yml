@@ -69,19 +69,27 @@ jobs:
       - name: Build Windows executable
         shell: pwsh
         run: .\scripts\build.ps1
-      - name: Run packaged application smoke test
+      - name: Run built and extracted executable smoke tests
         shell: pwsh
         run: |
           $env:SDL_VIDEODRIVER = "dummy"
           $env:SDL_AUDIODRIVER = "dummy"
+          function Invoke-ApplicationSmoke([string] $executable) {
+            $process = Start-Process -FilePath $executable -ArgumentList "--smoke-test" -WindowStyle Hidden -PassThru
+            if (-not $process.WaitForExit(60000)) {
+              $process.Kill()
+              throw "Packaged application smoke test timed out."
+            }
+            $process.Refresh()
+            if ($process.ExitCode -ne 0) {
+              throw "Packaged application smoke test exited with code $($process.ExitCode)."
+            }
+          }
           $executable = Join-Path $PWD "dist/SmartRacingChampionship.exe"
-          $process = Start-Process -FilePath $executable -ArgumentList "--smoke-test" -WindowStyle Hidden -PassThru
-          if (-not $process.WaitForExit(60000)) {
-            $process.Kill()
-            throw "Packaged application smoke test timed out."
-          }
-          $process.Refresh()
-          if ($process.ExitCode -ne 0) {
-            throw "Packaged application smoke test exited with code $($process.ExitCode)."
-          }
-          Write-Host "Packaged application smoke test passed."
+          Invoke-ApplicationSmoke $executable
+          $archivePath = Join-Path $env:RUNNER_TEMP "executable-smoke.zip"
+          $extractDir = Join-Path $env:RUNNER_TEMP "executable-smoke-extracted"
+          Compress-Archive -LiteralPath $executable -DestinationPath $archivePath
+          Expand-Archive -LiteralPath $archivePath -DestinationPath $extractDir
+          Invoke-ApplicationSmoke (Join-Path $extractDir "SmartRacingChampionship.exe")
+          Write-Host "Built and extracted executable smoke tests passed."
