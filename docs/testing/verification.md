@@ -39,6 +39,9 @@ seeds do not establish success for every possible seed.
 The blocked-road feedback update passed **117 tests** locally, including a
 selected parallel road closing before entry and visible warnings for an
 unavailable route and insufficient fuel.
+The mixed-graph cycle fix passed **119 tests** locally. Its regression cases
+include parallel one-way and two-way roads, blocked roads and 300 seeded small
+graphs compared with an independent exhaustive cycle search.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

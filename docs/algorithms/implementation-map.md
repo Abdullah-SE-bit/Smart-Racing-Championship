@@ -47,3 +47,10 @@ reports when a bound is reached and the result may be incomplete. Parallel roads
 produce one vertex sequence, displayed using the cheapest available road for the
 selected cost profile. This view compares endpoints and does not enforce the
 checkpoint order required by an ordered lap.
+
+Mixed-graph cycle detection first traverses undirected roads, detecting a cycle
+and assigning undirected connected components. A directed road inside one such
+component closes a cycle. The remaining directed roads form a component graph,
+on which a directed DFS detects cycles. This handles parallel directed and
+undirected roads without counting the reverse traversal of a single undirected
+road as a cycle. Both passes take O(V+E) time and O(V+E) auxiliary space.

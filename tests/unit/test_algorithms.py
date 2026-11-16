@@ -40,6 +40,43 @@ def test_traversals_reachability_and_simple_paths():
     assert bfs(graph, 0).path_to(2) == [0, 1, 2]
 
 
+def test_cycle_detection_handles_mixed_parallel_roads_and_closures():
+    graph = Graph()
+    graph.add_vertex(Vertex(0, 0, 0))
+    graph.add_vertex(Vertex(1, 1, 0))
+    graph.add_edge(Edge(0, 0, 1, 1, 1, 1))
+    assert not has_cycle(graph)
+    graph.add_edge(Edge(1, 0, 1, 1, 1, 1, directed=True))
+    assert has_cycle(graph)
+    graph.edges[1].status = "blocked"
+    assert not has_cycle(graph)
+
+
+def test_mixed_cycle_detection_matches_exhaustive_small_graphs():
+    def exhaustive(graph):
+        def search(start, current, visited, used_roads):
+            for neighbor, road in graph.neighbors(current):
+                if road.id in used_roads:
+                    continue
+                if neighbor == start:
+                    return True
+                if neighbor not in visited and search(start, neighbor, visited | {neighbor}, used_roads | {road.id}):
+                    return True
+            return False
+        return any(search(start, start, {start}, set()) for start in graph.vertices)
+
+    rng = Random(20261205)
+    for _ in range(300):
+        graph = Graph()
+        for vertex in range(4):
+            graph.add_vertex(Vertex(vertex, vertex, 0))
+        for road_id in range(rng.randrange(9)):
+            graph.add_edge(Edge(road_id, rng.randrange(4), rng.randrange(4), 1, 1, 1,
+                                status="blocked" if rng.randrange(5) == 0 else "open",
+                                directed=bool(rng.randrange(2))))
+        assert has_cycle(graph) == exhaustive(graph)
+
+
 def test_bounded_alternative_paths_report_limits_and_avoid_parallel_duplicates():
     graph = sample_graph()
     graph.add_edge(Edge(9, 0, 1, 2, 2, 2))
