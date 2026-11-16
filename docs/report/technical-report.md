@@ -158,7 +158,9 @@ the root by moving the last element to the root and sifting downward. These
 operations preserve the parent-before-children invariant. Event keys include
 trigger time, priority and insertion sequence, so extracting the minimum gives
 the specified deterministic order. Cancellation is lazy and temporary effects
-have independent expiration events.
+have independent expiration events. A closure takes precedence over oil and
+speed restrictions; an explicit temporary shortcut opening changes the
+baseline only for its duration, while an overlapping closure still wins.
 
 **Merge Sort.** Recursively split the entries, sort each half, and merge by the
 shared championship key. Both halves are sorted by induction, and repeatedly
