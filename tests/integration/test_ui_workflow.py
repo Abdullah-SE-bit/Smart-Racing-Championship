@@ -278,6 +278,30 @@ def test_route_comparison_animation_uses_actual_vertices_and_respects_reduced_mo
         pygame.quit()
 
 
+def test_route_presets_recompute_exact_costs_after_a_road_closes():
+    app = App()
+    try:
+        graph = app.circuit.graph
+        app.source, app.target = app.circuit.start, app.circuit.checkpoints[3]
+        original = {name: app.planned_route(profile) for name, profile in PROFILES.items()}
+        assert len({tuple(route.vertices) for route in original.values()}) > 1
+        blocked_edge = original["Balanced"].edges[-1]
+        graph.edges[blocked_edge].status = "blocked"
+        for name, profile in PROFILES.items():
+            route = app.planned_route(profile)
+            assert route.vertices and blocked_edge not in route.edges
+            assert route.cost == pytest.approx(sum(profile.cost(graph.edges[edge]) for edge in route.edges))
+            assert route.cost == pytest.approx(shortest_path(graph, app.source, app.target, profile, "astar").cost)
+        app.ordered_plan = True
+        for profile in PROFILES.values():
+            route = app.planned_route(profile)
+            assert route.vertices and blocked_edge not in route.edges
+            assert [vertex for vertex in route.vertices if vertex in app.circuit.checkpoints] == app.circuit.checkpoints
+        app.draw_comparison()
+    finally:
+        pygame.quit()
+
+
 def test_live_championship_leaders_follow_changed_results_and_every_k():
     app = App()
     try:
