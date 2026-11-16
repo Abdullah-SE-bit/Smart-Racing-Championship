@@ -25,15 +25,19 @@ from smart_racing.tracks.generator import _assign_checkpoints, _ring_compatible,
 
 WIDTH, HEIGHT = 1280, 800
 PLANNER_MAP = (60, 242, 760, 400)
-BACKGROUND = (17, 31, 27)
-PANEL = (21, 33, 32)
-PANEL_LIGHT = (40, 57, 47)
-TEXT = (246, 239, 220)
-MUTED = (174, 185, 167)
-ACCENT = (215, 224, 128)
-GOLD = (237, 139, 91)
-PINK = (232, 159, 145)
-CAR_COLORS = (ACCENT, GOLD, PINK, (151, 183, 192))
+BACKGROUND = (12, 14, 19)
+PANEL = (23, 26, 33)
+PANEL_LIGHT = (40, 44, 53)
+TEXT = (244, 245, 248)
+MUTED = (183, 190, 201)
+ACCENT = (115, 196, 239)  # Suggested route and checkpoint progress.
+GOLD = (245, 84, 79)  # Selected road and key race feedback.
+PINK = (255, 180, 113)  # Warnings and hazards.
+PRIMARY = (197, 35, 43)
+EMPHASIS = (255, 102, 100)
+BORDER = (65, 72, 84)
+GAUGE_TRACK = (54, 61, 72)
+CAR_COLORS = (ACCENT, GOLD, PINK, (185, 170, 235))
 ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[3]))
 PROFILES = {
     "Balanced": CostProfile(),
@@ -103,7 +107,7 @@ class App:
     def label(self, text, x, y, size=18, color=TEXT):
         self.surface.blit(self.fonts[size].render(str(text), True, color), (int(x), int(y)))
 
-    def card(self, rect, color=PANEL, radius=12, border=(58, 73, 68)):
+    def card(self, rect, color=PANEL, radius=12, border=BORDER):
         pygame.draw.rect(self.surface, color, rect, border_radius=radius)
         pygame.draw.rect(self.surface, border, rect, width=1, border_radius=radius)
 
@@ -124,9 +128,9 @@ class App:
 
     def header(self, eyebrow, title, description):
         self.draw_pit_background()
-        self.label(f"RACE CONTROL  /  {eyebrow.upper()}", 48, 98, 14, (246, 125, 84))
-        self.label(title.upper(), 45, 118, 42, (247, 242, 228))
-        self.label(description, 48, 176, 16, (170, 182, 172))
+        self.label(f"RACE CONTROL  /  {eyebrow.upper()}", 48, 98, 14, EMPHASIS)
+        self.label(title.upper(), 45, 118, 42, TEXT)
+        self.label(description, 48, 176, 16, MUTED)
 
     def nav(self):
         self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
@@ -239,11 +243,11 @@ class App:
         rect = pygame.Rect(rect)
         hover = rect.collidepoint(self.logical_position(pygame.mouse.get_pos()))
         focused = self.keyboard_focus and self.focused_button == len(self.buttons)
-        fill = (242, 103, 64) if primary else (34, 42, 44) if hover else (26, 32, 34)
-        border = (255, 187, 145) if focused else (255, 132, 92) if primary else (65, 76, 75)
+        fill = PRIMARY if primary else (46, 51, 61) if hover else (32, 36, 44)
+        border = (169, 218, 246) if focused else EMPHASIS if primary else BORDER
         pygame.draw.rect(self.surface, fill, rect, border_radius=8)
         pygame.draw.rect(self.surface, border, rect, 2 if focused else 1, border_radius=8)
-        ink = (27, 28, 26) if primary else (244, 239, 225)
+        ink = TEXT if primary else TEXT
         if rect.width <= 60:
             self.label(title, rect.centerx - 5, rect.y + 9, 20, ink)
         else:
@@ -253,7 +257,7 @@ class App:
             self.label(title, rect.x + 18, rect.y + 9, size, ink)
         if detail:
             self.label(detail, rect.x + 18, rect.y + 35, 14,
-                       (79, 43, 32) if primary else (159, 171, 164))
+                       (255, 224, 224) if primary else MUTED)
         if rect.width >= 250:
             self.label("›", rect.right - 28, rect.centery - 14, 24, ink)
         self.buttons.append((rect, action))
@@ -266,14 +270,14 @@ class App:
         # Secondary roads are deliberately quieter than the main circuit.
         for edge in graph.edges.values():
             a, b = positions[edge.source], positions[edge.target]
-            pygame.draw.line(self.surface, (49, 65, 64), a, b, 8)
-            pygame.draw.line(self.surface, (84, 100, 94) if edge.shortcut else (36, 49, 48), a, b, 3)
+            pygame.draw.line(self.surface, (48, 56, 67), a, b, 8)
+            pygame.draw.line(self.surface, (91, 105, 122) if edge.shortcut else (35, 42, 51), a, b, 3)
         if len(route) < 2:
             return
         # Layered roads and rounded junctions evoke a physical circuit while
         # preserving the topology of the stored main route.
-        for width, color in ((30, (17, 26, 26)), (25, (209, 110, 76)),
-                             (20, (56, 68, 67)), (15, (42, 52, 52))):
+        for width, color in ((30, (16, 20, 25)), (25, (196, 58, 62)),
+                             (20, (70, 78, 88)), (15, (45, 52, 61))):
             pygame.draw.lines(self.surface, color, False, route, width)
             for point in route:
                 pygame.draw.circle(self.surface, color, point, width // 2)
@@ -284,73 +288,73 @@ class App:
             for offset in range(0, int(length), 25):
                 start = offset / length
                 end = min(offset + 10, length) / length
-                pygame.draw.line(self.surface, (132, 145, 133),
+                pygame.draw.line(self.surface, (153, 164, 177),
                                  (a[0] + (b[0] - a[0]) * start, a[1] + (b[1] - a[1]) * start),
                                  (a[0] + (b[0] - a[0]) * end, a[1] + (b[1] - a[1]) * end), 1)
         start = positions[self.circuit.start]
-        pygame.draw.circle(self.surface, (244, 239, 225), start, 6)
-        pygame.draw.circle(self.surface, (20, 29, 28), start, 3)
+        pygame.draw.circle(self.surface, TEXT, start, 6)
+        pygame.draw.circle(self.surface, (18, 23, 29), start, 3)
         # The preview is decorative: moving markers do not affect race state.
         lengths = [math.dist(a, b) for a, b in zip(route, route[1:])]
         total = sum(lengths)
         if total:
-            for index, color in enumerate(((247, 111, 66), (232, 226, 201), (127, 177, 158))):
+            for index, color in enumerate((GOLD, TEXT, ACCENT)):
                 distance = ((0 if self.reduced_motion else self.time * 38) + index * total / 3) % total
                 for segment, length in enumerate(lengths):
                     if distance <= length and length:
                         a, b = route[segment], route[segment + 1]
                         t = distance / length
                         point = (round(a[0] + (b[0] - a[0]) * t), round(a[1] + (b[1] - a[1]) * t))
-                        pygame.draw.circle(self.surface, (12, 20, 19), point, 8)
+                        pygame.draw.circle(self.surface, BACKGROUND, point, 8)
                         pygame.draw.circle(self.surface, color, point, 5)
                         break
                     distance -= length
 
     def draw_pit_background(self):
-        self.surface.fill((13, 20, 20))
-        pygame.draw.rect(self.surface, (18, 27, 26), (0, 0, WIDTH, 70))
-        pygame.draw.line(self.surface, (53, 65, 61), (0, 69), (WIDTH, 69))
-        pygame.draw.polygon(self.surface, (244, 103, 64), [(48, 22), (59, 34), (48, 46), (37, 34)])
-        self.label("PADDOCK", 72, 18, 24, (247, 242, 228))
-        self.label("SMART RACING CHAMPIONSHIP", 218, 25, 14, (140, 155, 145))
-        self.label("SEASON 01   /   RACE CONTROL", 1018, 25, 14, (159, 171, 160))
+        self.surface.fill(BACKGROUND)
+        pygame.draw.rect(self.surface, (20, 23, 29), (0, 0, WIDTH, 70))
+        pygame.draw.line(self.surface, BORDER, (0, 69), (WIDTH, 69))
+        pygame.draw.polygon(self.surface, PRIMARY, [(48, 22), (59, 34), (48, 46), (37, 34)])
+        self.label("PADDOCK", 72, 18, 24, TEXT)
+        self.label("SMART RACING CHAMPIONSHIP", 218, 25, 14, MUTED)
+        self.label("SEASON 01   /   RACE CONTROL", 1018, 25, 14, MUTED)
 
     def draw_menu(self):
         self.draw_pit_background()
-        self.label("THE GRID IS READY", 48, 108, 14, (246, 125, 84))
-        self.label("OWN THE", 44, 137, 62, (248, 244, 231))
-        self.label("RACING LINE.", 44, 205, 42, (246, 125, 84))
-        self.label("Choose your route. Make every move count.", 48, 268, 18, (170, 182, 172))
+        self.label("THE GRID IS READY", 48, 108, 14, EMPHASIS)
+        self.label("OWN THE", 44, 137, 62, TEXT)
+        self.label("RACING LINE.", 44, 205, 42, EMPHASIS)
+        self.label("Choose your route. Make every move count.", 48, 268, 18, MUTED)
         self.menu_button((48, 319, 420, 65), "CHAMPIONSHIP", "Three circuits  /  one champion", self.prepare_championship, True)
         self.menu_button((48, 396, 420, 65), "QUICK RACE", "Head straight to the starting grid", lambda: self.start_race(False))
         self.menu_button((48, 473, 204, 50), "ROUTE PLANNER", None, self.open_quick_planner)
         self.menu_button((264, 473, 204, 50), "ALGORITHM LAB", None, lambda: self.go("lab"))
         self.menu_button((48, 535, 420, 50), "CONTROLS & SETTINGS", None, lambda: self.go("settings"))
-        self.label("SELECT CIRCUIT", 48, 623, 14, (153, 168, 158))
+        self.label("SELECT CIRCUIT", 48, 623, 14, MUTED)
         self.menu_button((48, 654, 58, 50), "‹", None, lambda: self.set_track(-1))
         self.menu_button((410, 654, 58, 50), "›", None, lambda: self.set_track(1))
-        self.label(f"{self.track_index + 1:02} / {len(self.circuit_paths):02}", 122, 660, 14, (246, 125, 84))
+        self.label(f"{self.track_index + 1:02} / {len(self.circuit_paths):02}", 122, 660, 14, EMPHASIS)
         name = self.circuit.name.upper()
         while self.fonts[20].size(name)[0] > 260 and len(name) > 1:
             name = name[:-1]
-        self.label(name, 122, 679, 20, (247, 242, 228))
+        self.label(name, 122, 679, 20, TEXT)
 
-        pygame.draw.rect(self.surface, (21, 33, 32), (510, 100, 722, 625), border_radius=12)
-        pygame.draw.rect(self.surface, (58, 73, 68), (510, 100, 722, 625), 1, border_radius=12)
-        self.label("FEATURED CIRCUIT", 540, 126, 14, (246, 125, 84))
+        pygame.draw.rect(self.surface, PANEL, (510, 100, 722, 625), border_radius=12)
+        pygame.draw.rect(self.surface, BORDER, (510, 100, 722, 625), 1, border_radius=12)
+        self.label("FEATURED CIRCUIT", 540, 126, 14, EMPHASIS)
         preview_name = self.circuit.name.upper()
         while self.fonts[30].size(preview_name)[0] > 650 and len(preview_name) > 1:
             preview_name = preview_name[:-1]
-        self.label(preview_name, 538, 150, 30, (247, 242, 228))
-        self.label("TRACK PREVIEW", 1086, 130, 14, (146, 165, 154))
+        self.label(preview_name, 538, 150, 30, TEXT)
+        self.label("TRACK PREVIEW", 1086, 130, 14, MUTED)
         self.draw_menu_circuit((550, 204, 645, 405))
-        pygame.draw.line(self.surface, (59, 74, 69), (540, 629), (1202, 629))
-        self.label(f"{len(self.circuit.checkpoints):02}", 540, 651, 24, (247, 242, 228))
-        self.label("CHECKPOINTS", 540, 682, 14, (153, 168, 158))
-        self.label(f"{sum(edge.shortcut for edge in self.circuit.graph.edges.values()):02}", 750, 651, 24, (247, 242, 228))
-        self.label("SHORTCUTS", 750, 682, 14, (153, 168, 158))
-        self.label("04", 945, 651, 24, (247, 242, 228))
-        self.label("RACERS", 945, 682, 14, (153, 168, 158))
+        pygame.draw.line(self.surface, BORDER, (540, 629), (1202, 629))
+        self.label(f"{len(self.circuit.checkpoints):02}", 540, 651, 24, TEXT)
+        self.label("CHECKPOINTS", 540, 682, 14, MUTED)
+        self.label(f"{sum(edge.shortcut for edge in self.circuit.graph.edges.values()):02}", 750, 651, 24, TEXT)
+        self.label("SHORTCUTS", 750, 682, 14, MUTED)
+        self.label("04", 945, 651, 24, TEXT)
+        self.label("RACERS", 945, 682, 14, MUTED)
 
     def map_positions(self, rect, circuit):
         left, top, width, height = rect
@@ -368,18 +372,18 @@ class App:
         selected = set(route or [])
         for edge in circuit.graph.edges.values():
             a, b = positions[edge.source], positions[edge.target]
-            color = (97, 53, 47) if edge.status == "blocked" else ((93, 77, 47) if edge.status == "restricted" else (75, 93, 77))
-            pygame.draw.line(self.surface, (15, 28, 23), a, b, 20 if race_style else 13)
+            color = (97, 53, 47) if edge.status == "blocked" else ((93, 77, 47) if edge.status == "restricted" else (75, 85, 98))
+            pygame.draw.line(self.surface, (15, 19, 25), a, b, 20 if race_style else 13)
             pygame.draw.line(self.surface, color, a, b, 15 if race_style else 8)
             if race_style and edge.status == "open":
-                pygame.draw.line(self.surface, (42, 54, 52), a, b, 10)
+                pygame.draw.line(self.surface, (47, 54, 64), a, b, 10)
             if edge.id == selected_edge:
                 pulse = 0 if self.reduced_motion else int((1 + math.sin(self.time * 5)) / 2 * 2)
                 pygame.draw.line(self.surface, GOLD, a, b, 6 + pulse)
             elif edge.id in selected:
                 pygame.draw.line(self.surface, ACCENT, a, b, 5)
             elif edge.shortcut:
-                pygame.draw.line(self.surface, (188, 142, 89), a, b, 3)
+                pygame.draw.line(self.surface, (184, 157, 115), a, b, 3)
             middle = ((a[0] + b[0]) // 2, (a[1] + b[1]) // 2)
             if edge.directed and a != b:
                 angle = math.atan2(b[1] - a[1], b[0] - a[0])
@@ -390,7 +394,7 @@ class App:
                 right = (middle[0] - 5 * forward[0] - 4 * side[0], middle[1] - 5 * forward[1] - 4 * side[1])
                 pygame.draw.polygon(self.surface, TEXT, (tip, left, right))
             if edge.obstacle:
-                pygame.draw.polygon(self.surface, GOLD, [(middle[0], middle[1] - 6),
+                pygame.draw.polygon(self.surface, PINK, [(middle[0], middle[1] - 6),
                                                          (middle[0] + 6, middle[1]),
                                                          (middle[0], middle[1] + 6),
                                                          (middle[0] - 6, middle[1])])
@@ -401,7 +405,7 @@ class App:
                                  (middle[0] - 6, middle[1] + 6), 3)
         for vertex in circuit.graph.vertices.values():
             x, y = positions[vertex.id]
-            color = GOLD if vertex.kind == "fuel" else PINK if vertex.kind == "nitro" else ACCENT if vertex.id in visited else MUTED
+            color = (160, 222, 194) if vertex.kind == "fuel" else (222, 190, 244) if vertex.kind == "nitro" else ACCENT if vertex.id in visited else MUTED
             radius = 7 if vertex.kind in {"start", "checkpoint"} else 6
             pygame.draw.circle(self.surface, BACKGROUND, (x, y), radius + 4)
             pygame.draw.circle(self.surface, color, (x, y), radius, 2 if vertex.id not in visited else 0)
@@ -435,9 +439,9 @@ class App:
                 # racer position; decoration does not change simulation state.
                 body = [car_point(9, 0), car_point(6, 5), car_point(-7, 5),
                         car_point(-9, 3), car_point(-9, -3), car_point(-7, -5), car_point(6, -5)]
-                pygame.draw.polygon(self.surface, (9, 16, 15), body, 4)
+                pygame.draw.polygon(self.surface, (9, 12, 17), body, 4)
                 pygame.draw.polygon(self.surface, CAR_COLORS[racer.id % len(CAR_COLORS)], body)
-                pygame.draw.polygon(self.surface, (28, 38, 37),
+                pygame.draw.polygon(self.surface, (26, 32, 42),
                                     [car_point(3, 3), car_point(-3, 3), car_point(-3, -3), car_point(3, -3)])
                 continue
             points = [(x + 10 * forward[0], y + 10 * forward[1]),
@@ -450,11 +454,11 @@ class App:
 
     def draw_planner(self):
         self.draw_pit_background()
-        self.label("RACE CONTROL  /  ROUTE PLANNER", 48, 98, 14, (246, 125, 84))
-        self.label("TRACK EXPLORER", 45, 118, 42, (247, 242, 228))
-        self.label("Select vertices on the map or use the arrow keys.", 48, 176, 16, (170, 182, 172))
+        self.label("RACE CONTROL  /  ROUTE PLANNER", 48, 98, 14, EMPHASIS)
+        self.label("TRACK EXPLORER", 45, 118, 42, TEXT)
+        self.label("Select vertices on the map or use the arrow keys.", 48, 176, 16, MUTED)
         self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
-        self.card((40, 220, 800, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.card((40, 220, 800, 530), PANEL, 12, BORDER)
         self.menu_button((630, 160, 180, 42), "COMPARE", None, lambda: self.go("compare"))
         self.menu_button((820, 160, 190, 42), "ORDERED: ON" if self.ordered_plan else "ORDERED: OFF", None, self.toggle_ordered_plan)
         profile_name = list(PROFILES)[self.profile_index]
@@ -470,15 +474,15 @@ class App:
                    f"DFS {len(depth.order)}   "
                    f"Components: {len(weak_components(graph))}   Cycles: {'yes' if has_cycle(graph) else 'no'}   "
                    f"Dead ends: {len(dead_ends(graph, self.circuit.start))}", 75, 715, 14, MUTED)
-        self.card((860, 220, 380, 530), (21, 33, 32), 12, (58, 73, 68))
-        self.label("ROUTE INTELLIGENCE", 885, 246, 14, (246, 125, 84))
+        self.card((860, 220, 380, 530), PANEL, 12, BORDER)
+        self.label("ROUTE INTELLIGENCE", 885, 246, 14, EMPHASIS)
         circuit_name = self.circuit.name
         while self.fonts[24].size(circuit_name)[0] > 330 and len(circuit_name) > 1:
             circuit_name = circuit_name[:-1]
-        self.label(circuit_name, 885, 275, 24, (247, 242, 228))
-        self.label(f"From {self.source}   →   {'ordered lap' if self.ordered_plan else f'To {self.target}'}", 885, 322, 18, (218, 224, 211))
-        self.label(f"Optimized cost   {route.cost:.3f}" if route.vertices else "Destination unreachable", 885, 358, 18, (246, 125, 84))
-        self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", 885, 391, 14, (153, 168, 158))
+        self.label(circuit_name, 885, 275, 24, TEXT)
+        self.label(f"From {self.source}   →   {'ordered lap' if self.ordered_plan else f'To {self.target}'}", 885, 322, 18, (220, 225, 233))
+        self.label(f"Optimized cost   {route.cost:.3f}" if route.vertices else "Destination unreachable", 885, 358, 18, EMPHASIS)
+        self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", 885, 391, 14, MUTED)
         self.menu_button((885, 430, 330, 48), f"PRESET: {profile_name.upper()}", None, self.cycle_profile)
         self.menu_button((885, 488, 330, 48), f"ALGORITHM: {self.route_algorithm.upper()}", None, self.toggle_route_algorithm)
         self.menu_button((885, 546, 330, 48), "FIXED SEASON ORDER" if self.pending_championship else "GENERATE CIRCUIT", None, self.generate)
@@ -550,8 +554,8 @@ class App:
         self.nav()
         self.card((40, 220, 1200, 530))
         route, stops = self.refuel_stops()
-        self.card((635, 245, 550, 370), (26, 38, 36), 8, (58, 73, 68))
-        self.label("SELECTED ROUTE", 655, 260, 14, (246, 125, 84))
+        self.card((635, 245, 550, 370), (29, 33, 40), 8, BORDER)
+        self.label("SELECTED ROUTE", 655, 260, 14, EMPHASIS)
         self.draw_map((650, 280, 520, 315), self.circuit, route.edges, route.vertices)
         if not route.vertices:
             self.label("The selected destination is unreachable.", 75, 270, 20, GOLD)
@@ -608,7 +612,7 @@ class App:
                        key=lambda edge: (profile.cost(edge), edge.id))
             roads.append(road)
         self.draw_map((60, 242, 760, 480), self.circuit, [road.id for road in roads], route)
-        self.label("LIME  /  SELECTED ALTERNATIVE", 75, 715, 14, MUTED)
+        self.label("BLUE  /  SELECTED ALTERNATIVE", 75, 715, 14, MUTED)
         self.card((860, 220, 380, 530))
         self.label(f"FROM {self.source}  TO {self.target}", 885, 246, 14, ACCENT)
         minimum = breadth.path_to(self.target)
@@ -631,15 +635,15 @@ class App:
 
     def draw_settings(self):
         self.draw_pit_background()
-        self.label("RACE CONTROL  /  SETUP", 48, 101, 14, (246, 125, 84))
-        self.label("CONTROLS & SETTINGS", 45, 124, 42, (247, 242, 228))
-        self.label("Get comfortable before the lights go out.", 48, 183, 18, (170, 182, 172))
+        self.label("RACE CONTROL  /  SETUP", 48, 101, 14, EMPHASIS)
+        self.label("CONTROLS & SETTINGS", 45, 124, 42, TEXT)
+        self.label("Get comfortable before the lights go out.", 48, 183, 18, MUTED)
         self.menu_button((1040, 113, 190, 50), "‹  MAIN MENU", None, lambda: self.go("menu"))
         for rect in ((48, 225, 680, 525), (748, 225, 484, 525)):
-            pygame.draw.rect(self.surface, (21, 33, 32), rect, border_radius=12)
-            pygame.draw.rect(self.surface, (58, 73, 68), rect, 1, border_radius=12)
-        self.label("01   /   DRIVER CONTROLS", 76, 250, 14, (246, 125, 84))
-        self.label("Know your inputs", 76, 278, 24, (247, 242, 228))
+            pygame.draw.rect(self.surface, PANEL, rect, border_radius=12)
+            pygame.draw.rect(self.surface, BORDER, rect, 1, border_radius=12)
+        self.label("01   /   DRIVER CONTROLS", 76, 250, 14, EMPHASIS)
+        self.label("Know your inputs", 76, 278, 24, TEXT)
         controls = (("←  /  →", "Select a road at a junction"),
                     ("ENTER", "Drive along the selected road"),
                     ("N", "Use one nitro charge"),
@@ -649,23 +653,23 @@ class App:
                     ("TAB", "Move between buttons; Enter activates"))
         for index, (key, description) in enumerate(controls):
             y = 328 + index * 47
-            pygame.draw.rect(self.surface, (37, 49, 47), (76, y, 104, 34), border_radius=5)
-            pygame.draw.rect(self.surface, (75, 91, 83), (76, y, 104, 34), 1, border_radius=5)
-            self.label(key, 86, y + 6, 16, (247, 242, 228))
-            self.label(description, 200, y + 7, 18, (218, 224, 211))
-        self.label("Race actions are also available on screen.", 76, 680, 16, (153, 168, 158))
-        self.label("Planner: arrows select destination; Shift + arrows select start.", 76, 704, 16, (153, 168, 158))
+            pygame.draw.rect(self.surface, (39, 45, 54), (76, y, 104, 34), border_radius=5)
+            pygame.draw.rect(self.surface, (75, 84, 96), (76, y, 104, 34), 1, border_radius=5)
+            self.label(key, 86, y + 6, 16, TEXT)
+            self.label(description, 200, y + 7, 18, (220, 225, 233))
+        self.label("Race actions are also available on screen.", 76, 680, 16, MUTED)
+        self.label("Planner: arrows select destination; Shift + arrows select start.", 76, 704, 16, MUTED)
 
-        self.label("02   /   RACE OPTIONS", 780, 250, 14, (246, 125, 84))
-        self.label("Your race, your pace", 780, 278, 24, (247, 242, 228))
-        self.label("LAPS PER RACE", 780, 330, 14, (153, 168, 158))
+        self.label("02   /   RACE OPTIONS", 780, 250, 14, EMPHASIS)
+        self.label("Your race, your pace", 780, 278, 24, TEXT)
+        self.label("LAPS PER RACE", 780, 330, 14, MUTED)
         self.menu_button((780, 354, 420, 53), f"{self.laps_setting} LAPS", None, self.toggle_laps)
-        self.label("RACE TIME LIMIT", 780, 427, 14, (153, 168, 158))
+        self.label("RACE TIME LIMIT", 780, 427, 14, MUTED)
         self.menu_button((780, 451, 420, 53), f"{self.limit_setting} SECONDS", None, self.toggle_limit)
-        self.label("INTERFACE MOTION", 780, 524, 14, (153, 168, 158))
+        self.label("INTERFACE MOTION", 780, 524, 14, MUTED)
         self.menu_button((780, 548, 420, 53), "REDUCED" if self.reduced_motion else "FULL", None, self.toggle_motion)
-        self.label("Select an option to change it.", 780, 627, 16, (153, 168, 158))
-        self.label("Race rules apply equally to all drivers.", 780, 652, 16, (153, 168, 158))
+        self.label("Select an option to change it.", 780, 627, 16, MUTED)
+        self.label("Race rules apply equally to all drivers.", 780, 652, 16, MUTED)
 
     def toggle_laps(self):
         self.laps_setting = 3 if self.laps_setting == 2 else 2
@@ -735,7 +739,7 @@ class App:
                       f"{sum(edge.obstacle for edge in edges):.1f}",
                       f"{route.cost:.3f}" if route.vertices else "unreachable"]
             y = 340 + index * 65
-            pygame.draw.line(self.surface, (69, 85, 69), (75, y - 10), (1195, y - 10))
+            pygame.draw.line(self.surface, BORDER, (75, y - 10), (1195, y - 10))
             for value, x in zip(values, (75, 245, 390, 520, 655, 805, 950)):
                 self.label(value, x, y, 18, ACCENT if index == self.profile_index else TEXT)
             self.label(self.comparison_path(route.vertices, index), 75, y + 27, 14, MUTED)
@@ -843,9 +847,9 @@ class App:
 
     def draw_lab(self):
         self.draw_pit_background()
-        self.label("RACE CONTROL  /  ALGORITHM LAB", 48, 98, 14, (246, 125, 84))
-        self.label("ALGORITHM LAB", 45, 118, 42, (247, 242, 228))
-        self.label("Explore real algorithm steps from the selected circuit.", 48, 176, 16, (170, 182, 172))
+        self.label("RACE CONTROL  /  ALGORITHM LAB", 48, 98, 14, EMPHASIS)
+        self.label("ALGORITHM LAB", 45, 118, 42, TEXT)
+        self.label("Explore real algorithm steps from the selected circuit.", 48, 176, 16, MUTED)
         self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
         trace, description = self.lab_result()
         count = min(int(self.lab_step), len(trace))
@@ -860,27 +864,27 @@ class App:
         else:
             visited = [step["vertex"] for step in steps if "vertex" in step]
         roads = [step["edge"] for step in steps if "edge" in step]
-        self.card((40, 220, 800, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.card((40, 220, 800, 530), PANEL, 12, BORDER)
         self.draw_map((60, 242, 760, 375), self.circuit, roads, visited)
-        self.card((75, 630, 730, 78), (26, 38, 36), 8, (58, 73, 68))
+        self.card((75, 630, 730, 78), (29, 33, 40), 8, BORDER)
         if steps:
             current = steps[-1]
-            self.label(str(current.get("action", "step")).upper(), 95, 642, 16, (246, 125, 84))
+            self.label(str(current.get("action", "step")).upper(), 95, 642, 16, EMPHASIS)
             detail = "   ".join(f"{key}: {value}" for key, value in current.items() if key != "action")
             self.label(detail[:90], 95, 672, 14, MUTED)
         else:
-            self.label("READY TO PLAY", 95, 642, 16, (246, 125, 84))
+            self.label("READY TO PLAY", 95, 642, 16, EMPHASIS)
             self.label("Start playback or step forward to inspect the trace.", 95, 672, 14, MUTED)
-        self.card((860, 220, 380, 530), (21, 33, 32), 12, (58, 73, 68))
-        self.label(f"ALGORITHM {LAB_ALGORITHMS.index(self.lab_algorithm) + 1} / {len(LAB_ALGORITHMS)}", 885, 245, 14, (246, 125, 84))
-        self.label(self.lab_algorithm, 885, 276, 30, (247, 242, 228))
+        self.card((860, 220, 380, 530), PANEL, 12, BORDER)
+        self.label(f"ALGORITHM {LAB_ALGORITHMS.index(self.lab_algorithm) + 1} / {len(LAB_ALGORITHMS)}", 885, 245, 14, EMPHASIS)
+        self.label(self.lab_algorithm, 885, 276, 30, TEXT)
         while self.fonts[14].size(description)[0] > 330 and len(description) > 1:
             description = description[:-1]
         self.label(description, 885, 326, 14, MUTED)
-        self.label(f"STEP  {count} / {len(trace)}", 885, 365, 18, (246, 125, 84))
-        pygame.draw.rect(self.surface, (52, 66, 61), (885, 397, 330, 4), border_radius=2)
+        self.label(f"STEP  {count} / {len(trace)}", 885, 365, 18, EMPHASIS)
+        pygame.draw.rect(self.surface, GAUGE_TRACK, (885, 397, 330, 4), border_radius=2)
         if trace:
-            pygame.draw.rect(self.surface, (246, 125, 84), (885, 397, round(330 * count / len(trace)), 4), border_radius=2)
+            pygame.draw.rect(self.surface, EMPHASIS, (885, 397, round(330 * count / len(trace)), 4), border_radius=2)
         self.menu_button((885, 411, 157, 48), "PREVIOUS", None, lambda: self.change_lab(-1))
         self.menu_button((1055, 411, 160, 48), "NEXT", None, lambda: self.change_lab(1))
         self.menu_button((885, 469, 157, 48), "PAUSE" if self.lab_playing else "PLAY", None, self.toggle_lab)
@@ -913,14 +917,14 @@ class App:
     def draw_race(self):
         race = self.race
         self.draw_pit_background()
-        self.label("RACE CONTROL  /  LIVE RACE", 48, 98, 14, (246, 125, 84))
+        self.label("RACE CONTROL  /  LIVE RACE", 48, 98, 14, EMPHASIS)
         race_name = self.circuit.name.upper()
         while self.fonts[42].size(race_name)[0] > 740 and len(race_name) > 1:
             race_name = race_name[:-1]
-        self.label(race_name, 45, 118, 42, (247, 242, 228))
-        self.label("Choose a road at each junction and follow the checkpoints in order.", 48, 176, 16, (170, 182, 172))
+        self.label(race_name, 45, 118, 42, TEXT)
+        self.label("Choose a road at each junction and follow the checkpoints in order.", 48, 176, 16, MUTED)
         self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
-        self.card((40, 220, 800, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.card((40, 220, 800, 530), PANEL, 12, BORDER)
         human = race.racers[0]
         options = race.options(human) if human.edge_id is None and not human.finished and not human.dnf else []
         if options:
@@ -935,23 +939,23 @@ class App:
                       selected_edge=selected_edge, service_active=race.service_active, race_style=True)
         if not route.vertices and not human.finished and not human.dnf:
             self.label("ROUTE UNAVAILABLE: wait for reopening or choose another road.", 75, 683, 14, PINK)
-        self.label("LIME  /  SUGGESTED ROUTE     ORANGE  /  SELECTED ROAD", 75, 715, 14, MUTED)
-        self.card((860, 220, 380, 530), (21, 33, 32), 12, (58, 73, 68))
-        self.label(f"LAP {min(human.laps + 1, race.laps_required)} / {race.laps_required}", 884, 246, 20, (246, 125, 84))
-        self.label(f"{race.elapsed:06.1f}s", 1075, 243, 24, (247, 242, 228))
-        self.label(f"FUEL     {human.fuel:05.1f} / 100", 885, 297, 18, (218, 224, 211))
-        pygame.draw.rect(self.surface, (52, 66, 61), (885, 330, 325, 8), border_radius=4)
-        pygame.draw.rect(self.surface, (244, 103, 64) if human.fuel > 25 else PINK, (885, 330, int(325 * max(human.fuel, 0) / 100), 8), border_radius=4)
-        self.label(f"NITRO {human.nitro}/3  [N] BOOST  [F] REFUEL", 885, 353, 16, (246, 125, 84))
+        self.label("BLUE  /  SUGGESTED ROUTE     RED  /  SELECTED ROAD", 75, 715, 14, MUTED)
+        self.card((860, 220, 380, 530), PANEL, 12, BORDER)
+        self.label(f"LAP {min(human.laps + 1, race.laps_required)} / {race.laps_required}", 884, 246, 20, EMPHASIS)
+        self.label(f"{race.elapsed:06.1f}s", 1075, 243, 24, TEXT)
+        self.label(f"FUEL     {human.fuel:05.1f} / 100", 885, 297, 18, (220, 225, 233))
+        pygame.draw.rect(self.surface, GAUGE_TRACK, (885, 330, 325, 8), border_radius=4)
+        pygame.draw.rect(self.surface, PRIMARY if human.fuel > 25 else PINK, (885, 330, int(325 * max(human.fuel, 0) / 100), 8), border_radius=4)
+        self.label(f"NITRO {human.nitro}/3  [N] BOOST  [F] REFUEL", 885, 353, 16, EMPHASIS)
         for charge in range(3):
-            color = (246, 125, 84) if charge < human.nitro else (52, 66, 61)
+            color = EMPHASIS if charge < human.nitro else GAUGE_TRACK
             pygame.draw.rect(self.surface, color, (1148 + charge * 21, 360, 16, 8), border_radius=2)
         checkpoint_count = len(race.circuit.checkpoints)
         self.label(f"NEXT CHECKPOINT   {human.next_checkpoint + 1 if human.next_checkpoint < checkpoint_count else 'FINISH'}", 885, 391, 16, MUTED)
         for checkpoint in range(checkpoint_count):
             left = 885 + round(checkpoint * 325 / checkpoint_count)
             right = 885 + round((checkpoint + 1) * 325 / checkpoint_count) - 3
-            color = (215, 224, 128) if checkpoint < human.next_checkpoint else (52, 66, 61)
+            color = ACCENT if checkpoint < human.next_checkpoint else GAUGE_TRACK
             pygame.draw.rect(self.surface, color, (left, 417, max(1, right - left), 4), border_radius=2)
         if options:
             target, edge = options[self.selected_road]
@@ -968,7 +972,7 @@ class App:
         self.label("LIVE POSITIONS", 885, 529, 14, MUTED)
         for index, racer in enumerate(race.results()):
             if racer.id == human.id:
-                pygame.draw.rect(self.surface, (35, 50, 45), (879, 554 + 27 * index, 335, 24), border_radius=4)
+                pygame.draw.rect(self.surface, (38, 45, 55), (879, 554 + 27 * index, 335, 24), border_radius=4)
             self.label(f"{index + 1:02}   {racer.name:<8}   CP {min(racer.next_checkpoint, checkpoint_count):02}",
                        885, 558 + 27 * index, 16, CAR_COLORS[racer.id])
         if race.event_log:
@@ -1009,12 +1013,12 @@ class App:
 
     def draw_dashboard(self):
         self.draw_pit_background()
-        self.label("RACE CONTROL  /  CLASSIFICATION", 48, 98, 14, (246, 125, 84))
-        self.label("RACE RESULTS", 45, 118, 42, (247, 242, 228))
-        self.label("The chequered flag is out. Here is how the field finished.", 48, 176, 16, (170, 182, 172))
+        self.label("RACE CONTROL  /  CLASSIFICATION", 48, 98, 14, EMPHASIS)
+        self.label("RACE RESULTS", 45, 118, 42, TEXT)
+        self.label("The chequered flag is out. Here is how the field finished.", 48, 176, 16, MUTED)
         self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
-        self.card((40, 220, 1200, 530), (21, 33, 32), 12, (58, 73, 68))
-        self.label("RACE CLASSIFICATION", 75, 253, 14, (246, 125, 84))
+        self.card((40, 220, 1200, 530), PANEL, 12, BORDER)
+        self.label("RACE CLASSIFICATION", 75, 253, 14, EMPHASIS)
         self.label("RACER", 170, 299, 14, MUTED)
         self.label("RESULT", 475, 299, 14, MUTED)
         self.label("FASTEST LAP", 700, 299, 14, MUTED)
@@ -1022,10 +1026,10 @@ class App:
         by_id = {entry.racer_id: entry for entry in self.entries}
         for index, racer in enumerate(self.race.results()):
             y = 342 + index * 65
-            pygame.draw.rect(self.surface, (31, 44, 41) if index == 0 else (24, 37, 35),
+            pygame.draw.rect(self.surface, (38, 43, 52) if index == 0 else (27, 31, 38),
                              (75, y - 10, 1120, 53), border_radius=5)
             if index == 0:
-                pygame.draw.rect(self.surface, (246, 125, 84), (75, y - 10, 4, 53), border_radius=2)
+                pygame.draw.rect(self.surface, EMPHASIS, (75, y - 10, 4, 53), border_radius=2)
             self.label(f"{index + 1:02}", 90, y, 24, CAR_COLORS[racer.id])
             self.label(racer.name, 170, y + 3, 20)
             self.label(f"{racer.finish_time:.1f}s" if racer.finished else "DNF", 475, y + 3, 18)
@@ -1043,22 +1047,22 @@ class App:
 
     def draw_standings(self):
         self.draw_pit_background()
-        self.label("RACE CONTROL  /  CHAMPIONSHIP", 48, 98, 14, (246, 125, 84))
-        self.label("CHAMPIONSHIP STANDINGS", 45, 118, 42, (247, 242, 228))
-        self.label("Follow the title race and compare the full field.", 48, 176, 16, (170, 182, 172))
+        self.label("RACE CONTROL  /  CHAMPIONSHIP", 48, 98, 14, EMPHASIS)
+        self.label("CHAMPIONSHIP STANDINGS", 45, 118, 42, TEXT)
+        self.label("Follow the title race and compare the full field.", 48, 176, 16, MUTED)
         self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
-        self.card((40, 220, 1200, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.card((40, 220, 1200, 530), PANEL, 12, BORDER)
         top = leaders(self.entries, min(self.top_k_count, len(self.entries)))
-        self.label(f"LIVE TOP {len(top)}", 75, 250, 14, (246, 125, 84))
+        self.label(f"LIVE TOP {len(top)}", 75, 250, 14, EMPHASIS)
         self.menu_button((760, 236, 220, 42), f"SORT: {self.sort_method.upper()}", None, self.change_sort)
         self.menu_button((1000, 236, 195, 42), f"CHANGE K: {self.top_k_count}", None, self.change_top_k)
         width = min(330, 1100 // max(1, len(top)) - 20)
         for index, entry in enumerate(top):
             x = 75 + index * (width + 20)
-            self.card((x, 285, width, 100), (29, 43, 40), 8, (65, 79, 72))
+            self.card((x, 285, width, 100), (31, 36, 45), 8, BORDER)
             self.label(f"#{index + 1}  {entry.name}", x + 20, 300, 20, CAR_COLORS[entry.racer_id])
             self.label(f"{entry.total_points} POINTS  /  {entry.wins} WINS", x + 20, 340, 14, MUTED)
-        self.label("FULL STANDINGS", 75, 423, 14, (246, 125, 84))
+        self.label("FULL STANDINGS", 75, 423, 14, EMPHASIS)
         method = {"Merge": merge_sort, "Quick": quick_sort, "Heap": heap_sort}[self.sort_method]
         ranking = method(self.entries, key=ranking_key)
         agrees = all(sort(self.entries, key=ranking_key) == ranking for sort in (merge_sort, quick_sort, heap_sort))

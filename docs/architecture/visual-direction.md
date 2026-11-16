@@ -1,7 +1,8 @@
 # Visual and motion direction
 
-The screens use a dark pit-wall palette, warm white type and vivid orange
-primary actions. The menu's featured circuit is drawn from the selected track's
+The screens use a motorsport broadcast palette inspired by Drive to Survive:
+carbon black and graphite surfaces, cool white type and racing red primary
+actions. The menu's featured circuit is drawn from the selected track's
 stored main route and roads; the moving markers are decorative and never feed
 the race engine. Reduced motion holds these markers still. Settings groups
 keyboard inputs and race options into separate panels. The planner keeps its
@@ -14,8 +15,8 @@ and playback progress without overlaying the circuit. Results and championship
 standings use the race's real classifications and points. The refuelling view
 includes the selected route alongside the calculated stops.
 
-The circuit uses muted road colors, pale lime for the recommended line, and
-orange for the selected road and race hazards. Racer colors remain distinct
+The circuit uses muted road colors, blue for the recommended line, red for the
+selected road, and amber for hazards. Racer colors remain distinct
 from one another. Flat surfaces and thin outlines keep the track legible.
 
 Large, short headings establish hierarchy. Compact labels and tabular race data
