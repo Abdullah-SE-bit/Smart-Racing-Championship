@@ -32,6 +32,10 @@ and rejection of a route through a later checkpoint.
 The road-identity change passed **116 tests** locally, including parallel
 directed and undirected roads, a selected road closing before entry, and an
 opponent taking a designated shortcut that shares its endpoints.
+After adding one-way generated roads, **116 tests** passed locally. A separate
+check generated and validated seeds 0 through 99 and confirmed that each track
+contains two roads traversable only in their declared direction. These sampled
+seeds do not establish success for every possible seed.
 The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
 with Python 3.12 and found no broken requirements. Later changes require a new run.
 The run for PR #254 subsequently passed **105 tests** on Windows with Python

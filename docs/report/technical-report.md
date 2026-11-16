@@ -142,6 +142,9 @@ validation, with bounded retries. Kruskal sorts undirected candidate roads by
 weight and adds an edge only when union-find places its endpoints in different
 components. The cut property yields a minimum spanning forest; connected
 candidates yield a spanning tree. Extra roads supply laps and alternatives.
+The generated circuit then adds two one-way roads and validates the resulting
+directed track. In the Lab, Kruskal uses the selected track's undirected
+subgraph and reports the excluded one-way roads.
 
 **Binary heap and event queue.** Insert by appending and sifting upward; remove
 the root by moving the last element to the root and sifting downward. These
@@ -208,9 +211,10 @@ of asymptotic complexity.
 
 ## Advanced challenges and observed checks
 
-Generated circuits use a seeded Kruskal backbone and bounded backtracking. A
-separate local check generated and validated seeds 0 through 99; the automated
-suite also completes races on five generated tracks. These checks do not prove
+Generated circuits use a seeded Kruskal backbone, bounded backtracking and
+two additional one-way roads. A separate local check generated and validated
+seeds 0 through 99 with both roads restricted to their declared direction; the
+automated suite also completes races on five generated tracks. These checks do not prove
 that every possible seed or layout will succeed. The generator retries invalid
 candidates up to its documented limit, and the interface can save a valid track.
 

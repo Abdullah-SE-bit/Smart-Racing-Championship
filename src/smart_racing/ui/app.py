@@ -14,7 +14,7 @@ from smart_racing.algorithms.routing.shortest import checkpoint_route, shortest_
 from smart_racing.algorithms.sorting.rankings import heap_sort, merge_sort, quick_sort, top_k
 from smart_racing.algorithms.structures.heap import MinHeap
 from smart_racing.championship.standings import ChampionshipEntry, award_results, leaders, ranking_key, standings
-from smart_racing.core.graph import CostProfile
+from smart_racing.core.graph import CostProfile, Graph
 from smart_racing.events.queue import Event
 from smart_racing.game.race import Race
 from smart_racing.game.clock import SimulationClock
@@ -290,6 +290,14 @@ class App:
             elif edge.shortcut:
                 pygame.draw.line(self.surface, (188, 142, 89), a, b, 3)
             middle = ((a[0] + b[0]) // 2, (a[1] + b[1]) // 2)
+            if edge.directed and a != b:
+                angle = math.atan2(b[1] - a[1], b[0] - a[0])
+                forward = (math.cos(angle), math.sin(angle))
+                side = (-forward[1], forward[0])
+                tip = (middle[0] + 6 * forward[0], middle[1] + 6 * forward[1])
+                left = (middle[0] - 5 * forward[0] + 4 * side[0], middle[1] - 5 * forward[1] + 4 * side[1])
+                right = (middle[0] - 5 * forward[0] - 4 * side[0], middle[1] - 5 * forward[1] - 4 * side[1])
+                pygame.draw.polygon(self.surface, TEXT, (tip, left, right))
             if edge.obstacle:
                 pygame.draw.polygon(self.surface, GOLD, [(middle[0], middle[1] - 6),
                                                          (middle[0] + 6, middle[1]),
@@ -314,7 +322,7 @@ class App:
             if vertex.kind == "checkpoint":
                 self.label(str(vertex.checkpoint_order), x + 9, y - 15, 14, TEXT)
             elif vertex.kind in {"fuel", "nitro"}:
-                self.label("F" if vertex.kind == "fuel" else "N", x + 9, y - 15, 14, color)
+                self.label(f"{'F' if vertex.kind == 'fuel' else 'N'}{vertex.id}", x + 9, y - 15, 14, color)
         for racer in racers:
             x, y = positions[racer.vertex]
             heading = -math.pi / 2
@@ -576,7 +584,8 @@ class App:
         visible = self.generation_trace[:count][-7:]
         for index, step in enumerate(visible):
             y = 285 + index * 45
-            self.label(step["stage"].upper(), 885, y, 14, GOLD if step["stage"] == "rejected" else ACCENT)
+            self.label(step["stage"].replace("_", " ").upper(), 885, y, 14,
+                       GOLD if step["stage"] == "rejected" else ACCENT)
             self.label(step["detail"][:46], 885, y + 19, 14, MUTED)
         self.label(self.validation_message, 885, 611, 14, GOLD)
         self.button((885, 638, 330, 42), "TEST INVALID TRACK", self.demonstrate_rejection)
@@ -671,8 +680,17 @@ class App:
             description = f"Generator example: {len(result)} placements"
         elif self.lab_algorithm == "Kruskal":
             try:
-                result = kruskal(self.circuit.graph, trace)
-                description = f"Accepted {len(result)} roads for the backbone"
+                graph = Graph()
+                for vertex in self.circuit.graph.vertices.values():
+                    graph.add_vertex(vertex)
+                directed_count = 0
+                for edge in self.circuit.graph.edges.values():
+                    if edge.directed:
+                        directed_count += 1
+                    else:
+                        graph.add_edge(edge)
+                result = kruskal(graph, trace)
+                description = f"Accepted {len(result)} roads; excluded {directed_count} one-way"
             except ValueError as error:
                 trace = []
                 description = str(error)
