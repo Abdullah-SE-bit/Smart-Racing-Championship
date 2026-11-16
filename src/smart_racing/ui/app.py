@@ -310,7 +310,7 @@ class App:
                         break
                     distance -= length
 
-    def draw_menu(self):
+    def draw_pit_background(self):
         self.surface.fill((13, 20, 20))
         pygame.draw.rect(self.surface, (18, 27, 26), (0, 0, WIDTH, 70))
         pygame.draw.line(self.surface, (53, 65, 61), (0, 69), (WIDTH, 69))
@@ -319,6 +319,8 @@ class App:
         self.label("SMART RACING CHAMPIONSHIP", 218, 25, 14, (140, 155, 145))
         self.label("SEASON 01   /   RACE CONTROL", 1018, 25, 14, (159, 171, 160))
 
+    def draw_menu(self):
+        self.draw_pit_background()
         self.label("THE GRID IS READY", 48, 108, 14, (246, 125, 84))
         self.label("OWN THE", 44, 137, 62, (248, 244, 231))
         self.label("RACING LINE.", 44, 205, 42, (246, 125, 84))
@@ -607,30 +609,42 @@ class App:
         self.button((885, 657, 330, 48), "BACK TO PLANNER", lambda: self.go("planner"))
 
     def draw_settings(self):
-        self.header("00 / Race setup", "Controls & settings", "Tune the race and learn the controls before you head to the grid.")
-        self.nav()
-        self.card((40, 220, 700, 530))
-        self.label("DRIVING CONTROLS", 70, 250, 14, ACCENT)
-        for index, text in enumerate(("← / →      Choose the next road at a junction",
-                                      "ENTER      Drive along the selected road",
-                                      "N                Activate nitro (one charge)",
-                                      "F                Refuel at an available station",
-                                      "SPACE       Pause / resume the simulation",
-                                      "ESC            Return to the main menu",
-                                      "TAB / ENTER  Navigate and activate buttons")):
-            self.label(text, 70, 300 + index * 50, 18)
-        self.label("Pass checkpoints in order and return to the start to complete a lap.", 70, 650, 16, MUTED)
-        self.label("Planner: arrow keys choose destination; Shift + arrows choose start.", 70, 680, 16, MUTED)
-        self.label("Race actions are also available as on-screen buttons.", 70, 710, 16, MUTED)
-        self.card((760, 220, 480, 530))
-        self.label("RACE SETTINGS", 790, 250, 14, ACCENT)
-        self.label("Laps per race", 790, 305, 20)
-        self.button((790, 345, 350, 52), f"{self.laps_setting} LAPS  /  CHANGE", self.toggle_laps)
-        self.label("Race time limit", 790, 425, 20)
-        self.button((790, 465, 350, 52), f"{self.limit_setting} SECONDS  /  CHANGE", self.toggle_limit)
-        self.button((790, 535, 350, 52), "MOTION: REDUCED" if self.reduced_motion else "MOTION: FULL", self.toggle_motion)
-        self.label("All racers share the same rules.", 790, 615, 16, MUTED)
-        self.button((790, 665, 350, 52), "BACK TO MAIN MENU", lambda: self.go("menu"))
+        self.draw_pit_background()
+        self.label("RACE CONTROL  /  SETUP", 48, 101, 14, (246, 125, 84))
+        self.label("CONTROLS & SETTINGS", 45, 124, 42, (247, 242, 228))
+        self.label("Get comfortable before the lights go out.", 48, 183, 18, (170, 182, 172))
+        self.menu_button((1040, 113, 190, 50), "‹  MAIN MENU", None, lambda: self.go("menu"))
+        for rect in ((48, 225, 680, 525), (748, 225, 484, 525)):
+            pygame.draw.rect(self.surface, (21, 33, 32), rect, border_radius=12)
+            pygame.draw.rect(self.surface, (58, 73, 68), rect, 1, border_radius=12)
+        self.label("01   /   DRIVER CONTROLS", 76, 250, 14, (246, 125, 84))
+        self.label("Know your inputs", 76, 278, 24, (247, 242, 228))
+        controls = (("←  /  →", "Select a road at a junction"),
+                    ("ENTER", "Drive along the selected road"),
+                    ("N", "Use one nitro charge"),
+                    ("F", "Refuel at an available station"),
+                    ("SPACE", "Pause or resume the race"),
+                    ("ESC", "Return to the main menu"),
+                    ("TAB", "Move between buttons; Enter activates"))
+        for index, (key, description) in enumerate(controls):
+            y = 328 + index * 47
+            pygame.draw.rect(self.surface, (37, 49, 47), (76, y, 104, 34), border_radius=5)
+            pygame.draw.rect(self.surface, (75, 91, 83), (76, y, 104, 34), 1, border_radius=5)
+            self.label(key, 86, y + 6, 16, (247, 242, 228))
+            self.label(description, 200, y + 7, 18, (218, 224, 211))
+        self.label("Race actions are also available on screen.", 76, 680, 16, (153, 168, 158))
+        self.label("Planner: arrows select destination; Shift + arrows select start.", 76, 704, 16, (153, 168, 158))
+
+        self.label("02   /   RACE OPTIONS", 780, 250, 14, (246, 125, 84))
+        self.label("Your race, your pace", 780, 278, 24, (247, 242, 228))
+        self.label("LAPS PER RACE", 780, 330, 14, (153, 168, 158))
+        self.menu_button((780, 354, 420, 53), f"{self.laps_setting} LAPS", None, self.toggle_laps)
+        self.label("RACE TIME LIMIT", 780, 427, 14, (153, 168, 158))
+        self.menu_button((780, 451, 420, 53), f"{self.limit_setting} SECONDS", None, self.toggle_limit)
+        self.label("INTERFACE MOTION", 780, 524, 14, (153, 168, 158))
+        self.menu_button((780, 548, 420, 53), "REDUCED" if self.reduced_motion else "FULL", None, self.toggle_motion)
+        self.label("Select an option to change it.", 780, 627, 16, (153, 168, 158))
+        self.label("Race rules apply equally to all drivers.", 780, 652, 16, (153, 168, 158))
 
     def toggle_laps(self):
         self.laps_setting = 3 if self.laps_setting == 2 else 2

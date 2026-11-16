@@ -47,6 +47,26 @@ def test_menu_track_selection_navigation_and_reduced_motion():
         pygame.quit()
 
 
+def test_settings_screen_changes_options_and_returns_to_menu():
+    app = App()
+    try:
+        app.go("settings")
+        app.buttons = []
+        app.draw_settings()
+        for position in ((900, 380), (900, 480), (900, 575)):
+            app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=position))
+        assert app.laps_setting == 3
+        assert app.limit_setting == 360
+        assert app.reduced_motion
+        app.buttons = []
+        app.draw_settings()
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_TAB, mod=0))
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, mod=0))
+        assert app.screen == "menu"
+    finally:
+        pygame.quit()
+
+
 def test_all_screens_render_and_primary_navigation():
     app = App()
     try:
