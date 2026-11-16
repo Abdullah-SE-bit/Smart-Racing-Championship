@@ -10,7 +10,8 @@ clear and enjoyable to play.
 3. Create a short-lived branch from `main`, such as `feature/animated-dashboard`
    or `fix/checkpoint-order`.
 4. Open a pull request to `main` when the change is ready for teammate feedback.
-   The Python CI check must pass before merging; no approval is required.
+   The `checks` and `package-smoke` CI jobs must pass before merging; no approval
+   is required.
 5. Include relevant test results. For UI work, add a screenshot or recording.
 6. Merge the pull request and delete the temporary branch.
 
