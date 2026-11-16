@@ -74,6 +74,8 @@ The circuit workshop shows the seed and the actual checkpoint, service, backbone
 road, obstacle and validation stages; it can also demonstrate a rejected track.
 Generated circuits are available for quick races. Saved circuits are stored in
 `%USERPROFILE%\SmartRacingChampionship\circuits`.
+The Algorithm Lab uses the selected track and, when available, current
+championship standings for its shared-algorithm demonstrations.
 Run the current automated tests with `.\.venv\Scripts\python.exe -m pytest`.
 
 To build a Windows executable after installing the optional packaging tools, run

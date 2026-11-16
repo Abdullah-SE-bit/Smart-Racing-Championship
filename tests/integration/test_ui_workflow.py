@@ -348,6 +348,34 @@ def test_race_hud_uses_actual_checkpoint_count_and_shows_feedback():
         pygame.quit()
 
 
+def test_algorithm_lab_uses_current_track_and_championship_data():
+    app = App()
+    try:
+        app.lab_algorithm = "Knapsack"
+        trace, description = app.lab_result()
+        pickup = next(vertex.id for vertex in app.circuit.graph.vertices.values() if vertex.kind == "nitro")
+        assert trace and trace[0]["item"] == pickup
+        assert f"Pickup {pickup}" in description
+
+        app.lab_algorithm = "Merge sort"
+        _, description = app.lab_result()
+        assert description.startswith("Track checkpoints:")
+        app.prepare_championship()
+        app.entries[2].total_points = 25
+        trace, description = app.lab_result()
+        assert trace and description.startswith("Standings: BLAZE")
+
+        app.lab_algorithm = "Event heap"
+        trace, description = app.lab_result()
+        assert trace and "Track road times" in description
+        app.lab_algorithm = "Kruskal"
+        next(iter(app.circuit.graph.edges.values())).directed = True
+        trace, description = app.lab_result()
+        assert not trace and "undirected" in description
+    finally:
+        pygame.quit()
+
+
 def test_module_entry_point_runs_headless_smoke_check():
     env = os.environ.copy()
     env["SDL_VIDEODRIVER"] = "dummy"

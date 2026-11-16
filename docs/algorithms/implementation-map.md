@@ -23,6 +23,13 @@ extractions; bottom-up heap construction is included in elapsed time but is not
 counted as insertions. Experiment timing conventions are in the generated
 `experiments/results/analysis.md`.
 
+The Lab uses the selected circuit's reachable pickup suggestion for the DP and
+greedy demonstrations and its road attributes for the heap example. Sorting
+uses current championship entries when available and the selected circuit's
+checkpoint IDs otherwise. Backtracking shows the generator's placement example
+using the current checkpoint IDs. Kruskal reports unsupported directed input
+or disconnected candidates rather than failing the interface.
+
 Merge Sort keeps the left entry first on equal keys, and this Quick Sort builds
 stable lower/equal/greater partitions around the middle-element pivot; both
 preserve input order for equal keys. Heap Sort can reorder equal keys. In the
