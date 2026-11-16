@@ -66,7 +66,8 @@ after extraction, and the extracted executable and report matched their source
 hashes. The host blocked the local built executable, so this did not verify
 its launch. The CI package-smoke workflow is configured to perform the full
 test-archive check and launch from the extracted directory on its Windows
-runner. Neither test archive is the final group-specific submission.
+runner, using a report rebuilt from the current source. Neither test archive is
+the final group-specific submission.
 Saved circuits with nonconsecutive IDs are exercised through selection,
 planning, and scheduled race events.
 The planner's alternative-route view and its state, route-count, and path-length
