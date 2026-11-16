@@ -217,7 +217,7 @@ def has_cycle(graph: Graph) -> bool:
     """
     component = {}
     component_count = 0
-    for start in sorted(graph.vertices):
+    for start in graph.vertices:
         if start in component:
             continue
         component[start] = component_count
