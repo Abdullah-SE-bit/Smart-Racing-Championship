@@ -106,6 +106,30 @@ def test_race_presentation_does_not_advance_simulation():
         pygame.quit()
 
 
+def test_lab_playback_controls_show_real_trace_progress():
+    app = App()
+    try:
+        app.go("lab")
+        app.lab_playing = False
+        app.lab_step = 0
+        app.buttons = []
+        app.draw_lab()
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(1100, 490)))
+        assert app.lab_step == 1 and not app.lab_playing
+        trace, _ = app.lab_result()
+        assert trace
+        labels = []
+        app.label = lambda text, *args, **kwargs: labels.append(str(text))
+        app.buttons = []
+        app.draw_lab()
+        assert f"STEP  1 / {len(trace)}" in labels
+        assert str(trace[0].get("action", "step")).upper() in labels
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(950, 550)))
+        assert app.lab_step == 0
+    finally:
+        pygame.quit()
+
+
 def test_all_screens_render_and_primary_navigation():
     app = App()
     try:
