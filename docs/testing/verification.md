@@ -17,6 +17,8 @@ The latest recorded local run used Python 3.12.16 on Windows and reported
 **90 passed**. Rerun the suite after further changes; the count and outcome may
 change. `pip check` reported no broken requirements. A separate check generated
 and validated 100 seeds; five seeded tracks were also raced in automated tests.
+The latest recorded GitHub Actions run for PR #247 passed **94 tests** on Windows
+with Python 3.12 and found no broken requirements. Later changes require a new run.
 Saved circuits with nonconsecutive IDs are exercised through selection,
 planning, and scheduled race events.
 The planner's alternative-route view and its state, route-count, and path-length
