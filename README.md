@@ -78,6 +78,8 @@ The circuit workshop shows the seed and the actual checkpoint, service, backbone
 road, obstacle and validation stages; it can also demonstrate a rejected track.
 Generated circuits are available for quick races. Saved circuits are stored in
 `%USERPROFILE%\SmartRacingChampionship\circuits`.
+An arrow on a road marks its permitted direction; fuel and nitro stations show
+their vertex IDs so they can be matched to the resource plan.
 The window can be resized. Tab and Shift+Tab move between buttons and Enter
 activates the focused button. In the planner, arrow keys change the destination;
 hold Shift with an arrow key to change the starting vertex.

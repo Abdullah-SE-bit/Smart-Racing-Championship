@@ -73,8 +73,15 @@ def test_seeded_generated_circuits_are_repeatable(tmp_path):
     assert observed.graph.vertices == first.graph.vertices
     assert observed.graph.edges == first.graph.edges
     assert trace[-1]["stage"] == "accepted"
+    assert any(step["stage"] == "one_way" for step in trace)
     assert len(first.checkpoints) == 10
     assert sum(edge.shortcut for edge in first.graph.edges.values()) >= 2
+    directed = [edge for edge in first.graph.edges.values() if edge.directed]
+    assert len(directed) == 2
+    for edge in directed:
+        assert any(road.id == edge.id and target == edge.target
+                   for target, road in first.graph.neighbors(edge.source))
+        assert not any(road.id == edge.id for _, road in first.graph.neighbors(edge.target))
     path = tmp_path / "generated.json"
     save_circuit(first, path)
     assert load_circuit(path).graph.edges == first.graph.edges
@@ -403,9 +410,13 @@ def test_algorithm_lab_uses_current_track_and_championship_data():
         trace, description = app.lab_result()
         assert trace and "Track road times" in description
         app.lab_algorithm = "Kruskal"
-        next(iter(app.circuit.graph.edges.values())).directed = True
+        app.circuit = generate_circuit(42)
         trace, description = app.lab_result()
-        assert not trace and "undirected" in description
+        assert trace and "excluded 2 one-way" in description
+        for edge in app.circuit.graph.edges.values():
+            edge.directed = True
+        trace, description = app.lab_result()
+        assert not trace and "disconnected" in description
     finally:
         pygame.quit()
 

@@ -156,6 +156,23 @@ def _generate_candidate(seed: int, attempt: int, trace: list[dict] | None = None
         trace.append({"stage": "obstacles", "detail": f"Placed {len(obstacles)} spaced non-bridge obstacles"})
     for edge_id in obstacles:
         graph.edges[edge_id].obstacle = 1.0
+
+    # The MST and lap remain undirected. Add distinct one-way service roads
+    # afterwards so directed routing is exercised without changing the backbone.
+    occupied = {frozenset((edge.source, edge.target)) for edge in graph.edges.values()}
+    directed_candidates = [(source, target) for source in range(11)
+                           for target in sorted(service_locations)
+                           if frozenset((source, target)) not in occupied]
+    rng.shuffle(directed_candidates)
+    if len(directed_candidates) < 2:
+        raise ValueError("Unable to place one-way roads")
+    for source, target in directed_candidates[:2]:
+        first, second = graph.vertices[source], graph.vertices[target]
+        length = hypot(first.x - second.x, first.y - second.y) / 20
+        graph.add_edge(Edge(len(graph.edges), source, target, length, length / 8, length / 15,
+                            difficulty=2, directed=True))
+    if trace is not None:
+        trace.append({"stage": "one_way", "detail": "Added 2 one-way roads after the MST"})
     return Circuit(f"Generated {seed}", graph, 0, checkpoints, main_route)
 
 

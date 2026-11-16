@@ -27,8 +27,10 @@ The Lab uses the selected circuit's reachable pickup suggestion for the DP and
 greedy demonstrations and its road attributes for the heap example. Sorting
 uses current championship entries when available and the selected circuit's
 checkpoint IDs otherwise. Backtracking shows the generator's placement example
-using the current checkpoint IDs. Kruskal reports unsupported directed input
-or disconnected candidates rather than failing the interface.
+using the current checkpoint IDs. For Kruskal, the Lab applies the shared
+implementation to the selected track's undirected roads and reports how many
+one-way roads were excluded. It reports a disconnected undirected candidate
+instead of displaying a forest as a spanning tree.
 
 Merge Sort keeps the left entry first on equal keys, and this Quick Sort builds
 stable lower/equal/greater partitions around the middle-element pivot; both

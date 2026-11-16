@@ -41,6 +41,10 @@ candidate sets and retry limit bound work in the current generator.
   edge-disjoint obstacle roads that are not bridges or part of the main loop.
   The ring constraint prunes placements that cannot form this generated loop;
   bridge and spacing checks protect connectivity and separate the obstacles.
+  After building this undirected structure, generation adds two seeded one-way
+  roads from loop vertices to service-area vertices without duplicating an
+  existing road. The ordinary directed-graph validator checks the final
+  circuit, including checkpoint order, lap return, alternatives and fuel.
   Candidate generation retries at most five deterministic seed variants by
   default and reports failure rather than exposing an invalid circuit.
 - The planner, lab and experiments invoke the same algorithm functions. The
