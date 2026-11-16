@@ -560,30 +560,45 @@ class App:
             return result.trace, f"Expanded {result.expanded} vertices  •  relaxed {result.relaxed} roads"
         trace = []
         if self.lab_algorithm in {"Knapsack", "Greedy"}:
-            items = [Pickup(1, 6, 30), Pickup(2, 5, 24), Pickup(3, 5, 24), Pickup(4, 0, 4)]
+            suggestions = pickup_suggestions(self.circuit.graph, self.source, self.target)
+            if not suggestions:
+                return [], "No feasible pickup on this track"
+            # The gameplay planner evaluates these alternatives independently.
+            suggestion = suggestions[0]
+            items = [Pickup(suggestion.vertex, suggestion.detour, suggestion.benefit)]
             result = (knapsack if self.lab_algorithm == "Knapsack" else greedy)(items, 10, trace)
-            description = f"Budget 10  •  cost {result.cost}  •  benefit {result.benefit}"
+            description = f"Pickup {suggestion.vertex}  •  cost {result.cost}  •  benefit {result.benefit}"
         elif self.lab_algorithm == "Backtracking":
             result = _assign_checkpoints([3, 8, 10, 2, 7, 1, 9, 4, 6, 5], 10, trace, _ring_compatible)
-            description = f"Placed {len(result)} ordered checkpoints"
+            for step in trace:
+                step["vertex"] = self.circuit.checkpoints[step["vertex"] - 1]
+            description = f"Generator example: {len(result)} placements"
         elif self.lab_algorithm == "Kruskal":
-            result = kruskal(self.circuit.graph, trace)
-            description = f"Accepted {len(result)} roads for the backbone"
+            try:
+                result = kruskal(self.circuit.graph, trace)
+                description = f"Accepted {len(result)} roads for the backbone"
+            except ValueError as error:
+                trace = []
+                description = str(error)
         elif self.lab_algorithm == "Event heap":
             heap = MinHeap(trace=trace)
-            for item in ((2, 1, 0), (1, 4, 1), (1, 2, 2), (3, 1, 3)):
-                heap.push(item)
+            roads = sorted(self.circuit.graph.edges.values(), key=lambda edge: edge.id)[:8]
+            for sequence, edge in enumerate(roads):
+                heap.push((edge.base_time, edge.difficulty, sequence))
             while heap:
                 heap.pop()
-            description = "Ordered by trigger time, priority and sequence"
+            description = "Track road times / difficulty / sequence"
         else:
-            values = [25, 18, 15, 12, 10, 8, 6, 4]
+            values = self.entries if self.entries else self.circuit.checkpoints
+            key = ranking_key if self.entries else lambda value: value
             if self.lab_algorithm == "Top-k":
-                result = top_k(values, 3, key=lambda value: -value, trace=trace)
+                result = top_k(values, min(3, len(values)), key=key, trace=trace)
             else:
                 method = {"Merge sort": merge_sort, "Quick sort": quick_sort, "Heap sort": heap_sort}[self.lab_algorithm]
-                result = method(values[::-1], key=lambda value: -value, trace=trace)
-            description = f"Result: {', '.join(map(str, result))}"
+                result = method(values[::-1], key=key, trace=trace)
+            names = [entry.name for entry in result] if self.entries else list(map(str, result))
+            label = "Standings" if self.entries else "Track checkpoints"
+            description = f"{label}: {', '.join(names[:4])}"
         return trace, description
 
     def draw_lab(self):
