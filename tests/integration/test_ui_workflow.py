@@ -18,6 +18,35 @@ from smart_racing.core.graph import Edge, Graph, Vertex
 from smart_racing.ui.app import ACCENT, MUTED, PANEL, TEXT, App, LAB_ALGORITHMS, PROFILES
 
 
+def test_menu_track_selection_navigation_and_reduced_motion():
+    app = App()
+    try:
+        def render_menu(time):
+            app.time = time
+            app.buttons = []
+            app.draw_menu()
+            return pygame.image.tostring(app.surface, "RGB")
+
+        app.reduced_motion = True
+        still = render_menu(0)
+        assert render_menu(10) == still
+        app.reduced_motion = False
+        assert render_menu(10) != render_menu(0)
+
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(438, 679)))
+        assert app.track_index == 1
+        assert render_menu(0) != still
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(150, 498)))
+        assert app.screen == "planner"
+        app.go("menu")
+        render_menu(0)
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_TAB, mod=0))
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, mod=0))
+        assert app.screen == "planner" and app.pending_championship
+    finally:
+        pygame.quit()
+
+
 def test_all_screens_render_and_primary_navigation():
     app = App()
     try:
@@ -208,7 +237,7 @@ def test_mouse_and_keyboard_start_and_drive_a_quick_race():
         app.buttons = []
         app.background()
         app.draw_menu()
-        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(100, 480)))
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(100, 425)))
         assert app.screen == "race"
         human = app.race.racers[0]
         initial_vertex = human.vertex
@@ -230,7 +259,7 @@ def test_championship_menu_plans_first_circuit_and_preserves_season_order():
     app = App()
     try:
         app.draw_menu()
-        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(100, 400)))
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(100, 350)))
         assert app.screen == "planner" and app.pending_championship
         first = app.circuit.name
         app.generate()
@@ -534,10 +563,10 @@ def test_resized_window_maps_mouse_to_logical_controls():
     app = App()
     try:
         app.window = pygame.display.set_mode((960, 600), pygame.RESIZABLE)
-        assert app.logical_position((75, 360)) == pytest.approx((100, 480))
+        assert app.logical_position((75, 321)) == pytest.approx((100, 428))
         app.draw_menu()
         app.present()
-        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(75, 360)))
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(75, 321)))
         assert app.screen == "race" and not app.championship
     finally:
         pygame.quit()

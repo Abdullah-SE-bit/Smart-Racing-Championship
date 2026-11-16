@@ -241,27 +241,118 @@ class App:
         else:
             self.start_race(championship=False)
 
+    def menu_button(self, rect, title, detail, action, primary=False):
+        """Draw a large menu action using the same input and focus system."""
+        rect = pygame.Rect(rect)
+        hover = rect.collidepoint(self.logical_position(pygame.mouse.get_pos()))
+        focused = self.keyboard_focus and self.focused_button == len(self.buttons)
+        fill = (242, 103, 64) if primary else (34, 42, 44) if hover else (26, 32, 34)
+        border = (255, 187, 145) if focused else (255, 132, 92) if primary else (65, 76, 75)
+        pygame.draw.rect(self.surface, fill, rect, border_radius=8)
+        pygame.draw.rect(self.surface, border, rect, 2 if focused else 1, border_radius=8)
+        ink = (27, 28, 26) if primary else (244, 239, 225)
+        if rect.width <= 60:
+            self.label(title, rect.centerx - 5, rect.y + 9, 20, ink)
+        else:
+            self.label(title, rect.x + 18, rect.y + 9, 18 if rect.width < 250 else 20, ink)
+        if detail:
+            self.label(detail, rect.x + 18, rect.y + 35, 14,
+                       (79, 43, 32) if primary else (159, 171, 164))
+        if rect.width >= 250:
+            self.label("›", rect.right - 28, rect.centery - 14, 24, ink)
+        self.buttons.append((rect, action))
+
+    def draw_menu_circuit(self, rect):
+        """Draw a stylized preview from the selected circuit's actual roads."""
+        positions = self.map_positions(rect, self.circuit)
+        graph = self.circuit.graph
+        route = [positions[vertex] for vertex in self.circuit.main_route]
+        # Secondary roads are deliberately quieter than the main circuit.
+        for edge in graph.edges.values():
+            a, b = positions[edge.source], positions[edge.target]
+            pygame.draw.line(self.surface, (49, 65, 64), a, b, 8)
+            pygame.draw.line(self.surface, (84, 100, 94) if edge.shortcut else (36, 49, 48), a, b, 3)
+        if len(route) < 2:
+            return
+        # Layered roads and rounded junctions evoke a physical circuit while
+        # preserving the topology of the stored main route.
+        for width, color in ((30, (17, 26, 26)), (25, (209, 110, 76)),
+                             (20, (56, 68, 67)), (15, (42, 52, 52))):
+            pygame.draw.lines(self.surface, color, False, route, width)
+            for point in route:
+                pygame.draw.circle(self.surface, color, point, width // 2)
+        for a, b in zip(route, route[1:]):
+            length = math.dist(a, b)
+            if not length:
+                continue
+            for offset in range(0, int(length), 25):
+                start = offset / length
+                end = min(offset + 10, length) / length
+                pygame.draw.line(self.surface, (132, 145, 133),
+                                 (a[0] + (b[0] - a[0]) * start, a[1] + (b[1] - a[1]) * start),
+                                 (a[0] + (b[0] - a[0]) * end, a[1] + (b[1] - a[1]) * end), 1)
+        start = positions[self.circuit.start]
+        pygame.draw.circle(self.surface, (244, 239, 225), start, 6)
+        pygame.draw.circle(self.surface, (20, 29, 28), start, 3)
+        # The preview is decorative: moving markers do not affect race state.
+        lengths = [math.dist(a, b) for a, b in zip(route, route[1:])]
+        total = sum(lengths)
+        if total:
+            for index, color in enumerate(((247, 111, 66), (232, 226, 201), (127, 177, 158))):
+                distance = ((0 if self.reduced_motion else self.time * 38) + index * total / 3) % total
+                for segment, length in enumerate(lengths):
+                    if distance <= length and length:
+                        a, b = route[segment], route[segment + 1]
+                        t = distance / length
+                        point = (round(a[0] + (b[0] - a[0]) * t), round(a[1] + (b[1] - a[1]) * t))
+                        pygame.draw.circle(self.surface, (12, 20, 19), point, 8)
+                        pygame.draw.circle(self.surface, color, point, 5)
+                        break
+                    distance -= length
+
     def draw_menu(self):
-        self.label("SMART RACING CHAMPIONSHIP  /  SEASON 01", 50, 113, 14, ACCENT)
-        self.label("FIND YOUR", 45, 150, 62)
-        self.label("RACING LINE.", 45, 229, 42, ACCENT)
-        self.label("Ten checkpoints. Changing roads. One finish line.", 50, 309, 18, MUTED)
-        self.button((50, 375, 360, 70), "START CHAMPIONSHIP", self.prepare_championship, subtitle="Three circuits  /  one champion")
-        self.button((50, 457, 360, 70), "QUICK RACE", lambda: self.start_race(False), subtitle="Jump straight onto the circuit")
-        self.button((50, 539, 172, 52), "ROUTE PLANNER", self.open_quick_planner)
-        self.button((238, 539, 172, 52), "ALGORITHM LAB", lambda: self.go("lab"))
-        self.button((50, 600, 360, 38), "CONTROLS & SETTINGS", lambda: self.go("settings"))
-        self.label("CHOOSE CIRCUIT", 50, 642, 14, MUTED)
-        self.button((50, 670, 50, 46), "‹", lambda: self.set_track(-1))
-        self.button((112, 670, 236, 46), self.circuit.name.upper(), self.open_quick_planner)
-        self.button((360, 670, 50, 46), "›", lambda: self.set_track(1))
-        self.card((480, 100, 750, 630), (25, 41, 34), 22)
-        self.label("CIRCUIT PREVIEW", 510, 124, 14, ACCENT)
-        self.label(self.circuit.name.upper(), 510, 150, 30)
-        self.draw_map((510, 215, 690, 430), self.circuit)
-        self.label(f"{len(self.circuit.checkpoints):02} CHECKPOINTS", 510, 677, 14, TEXT)
-        self.label(f"{sum(edge.shortcut for edge in self.circuit.graph.edges.values()):02} SHORTCUTS", 690, 677, 14, TEXT)
-        self.label("04 RACERS", 850, 677, 14, TEXT)
+        self.surface.fill((13, 20, 20))
+        pygame.draw.rect(self.surface, (18, 27, 26), (0, 0, WIDTH, 70))
+        pygame.draw.line(self.surface, (53, 65, 61), (0, 69), (WIDTH, 69))
+        pygame.draw.polygon(self.surface, (244, 103, 64), [(48, 22), (59, 34), (48, 46), (37, 34)])
+        self.label("PADDOCK", 72, 18, 24, (247, 242, 228))
+        self.label("SMART RACING CHAMPIONSHIP", 218, 25, 14, (140, 155, 145))
+        self.label("SEASON 01   /   RACE CONTROL", 1018, 25, 14, (159, 171, 160))
+
+        self.label("THE GRID IS READY", 48, 108, 14, (246, 125, 84))
+        self.label("OWN THE", 44, 137, 62, (248, 244, 231))
+        self.label("RACING LINE.", 44, 205, 42, (246, 125, 84))
+        self.label("Choose your route. Make every move count.", 48, 268, 18, (170, 182, 172))
+        self.menu_button((48, 319, 420, 65), "CHAMPIONSHIP", "Three circuits  /  one champion", self.prepare_championship, True)
+        self.menu_button((48, 396, 420, 65), "QUICK RACE", "Head straight to the starting grid", lambda: self.start_race(False))
+        self.menu_button((48, 473, 204, 50), "ROUTE PLANNER", None, self.open_quick_planner)
+        self.menu_button((264, 473, 204, 50), "ALGORITHM LAB", None, lambda: self.go("lab"))
+        self.menu_button((48, 535, 420, 50), "CONTROLS & SETTINGS", None, lambda: self.go("settings"))
+        self.label("SELECT CIRCUIT", 48, 623, 14, (153, 168, 158))
+        self.menu_button((48, 654, 58, 50), "‹", None, lambda: self.set_track(-1))
+        self.menu_button((410, 654, 58, 50), "›", None, lambda: self.set_track(1))
+        self.label(f"{self.track_index + 1:02} / {len(self.circuit_paths):02}", 122, 660, 14, (246, 125, 84))
+        name = self.circuit.name.upper()
+        while self.fonts[20].size(name)[0] > 260 and len(name) > 1:
+            name = name[:-1]
+        self.label(name, 122, 679, 20, (247, 242, 228))
+
+        pygame.draw.rect(self.surface, (21, 33, 32), (510, 100, 722, 625), border_radius=12)
+        pygame.draw.rect(self.surface, (58, 73, 68), (510, 100, 722, 625), 1, border_radius=12)
+        self.label("FEATURED CIRCUIT", 540, 126, 14, (246, 125, 84))
+        preview_name = self.circuit.name.upper()
+        while self.fonts[30].size(preview_name)[0] > 650 and len(preview_name) > 1:
+            preview_name = preview_name[:-1]
+        self.label(preview_name, 538, 150, 30, (247, 242, 228))
+        self.label("TRACK PREVIEW", 1086, 130, 14, (146, 165, 154))
+        self.draw_menu_circuit((550, 204, 645, 405))
+        pygame.draw.line(self.surface, (59, 74, 69), (540, 629), (1202, 629))
+        self.label(f"{len(self.circuit.checkpoints):02}", 540, 651, 24, (247, 242, 228))
+        self.label("CHECKPOINTS", 540, 682, 14, (153, 168, 158))
+        self.label(f"{sum(edge.shortcut for edge in self.circuit.graph.edges.values()):02}", 750, 651, 24, (247, 242, 228))
+        self.label("SHORTCUTS", 750, 682, 14, (153, 168, 158))
+        self.label("04", 945, 651, 24, (247, 242, 228))
+        self.label("RACERS", 945, 682, 14, (153, 168, 158))
 
     def map_positions(self, rect, circuit):
         left, top, width, height = rect
