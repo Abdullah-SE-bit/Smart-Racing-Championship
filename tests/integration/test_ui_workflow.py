@@ -130,6 +130,28 @@ def test_lab_playback_controls_show_real_trace_progress():
         pygame.quit()
 
 
+def test_standings_controls_preserve_ranking_and_return_to_results():
+    app = App()
+    try:
+        app.prepare_championship()
+        app.entries[1].total_points = 25
+        app.entries[2].total_points = 18
+        app.go("standings")
+        app.buttons = []
+        app.draw_standings()
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(800, 255)))
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(1050, 255)))
+        assert app.sort_method == "Quick" and app.top_k_count == 4
+        assert [entry.racer_id for entry in leaders(app.entries, 4)] == [
+            entry.racer_id for entry in standings(app.entries)]
+        app.buttons = []
+        app.draw_standings()
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(1000, 650)))
+        assert app.screen == "dashboard"
+    finally:
+        pygame.quit()
+
+
 def test_all_screens_render_and_primary_navigation():
     app = App()
     try:
