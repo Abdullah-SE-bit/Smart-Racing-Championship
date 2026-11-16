@@ -75,7 +75,7 @@ jobs:
           $env:SDL_VIDEODRIVER = "dummy"
           $env:SDL_AUDIODRIVER = "dummy"
           function Invoke-ApplicationSmoke([string] $executable) {
-            $process = Start-Process -FilePath $executable -ArgumentList "--smoke-test" -WindowStyle Hidden -PassThru
+            $process = Start-Process -FilePath $executable -ArgumentList "--smoke-test" -WindowStyle Hidden -PassThru -WorkingDirectory (Split-Path -Parent $executable)
             if (-not $process.WaitForExit(60000)) {
               $process.Kill()
               throw "Packaged application smoke test timed out."
@@ -92,4 +92,31 @@ jobs:
           Compress-Archive -LiteralPath $executable -DestinationPath $archivePath
           Expand-Archive -LiteralPath $archivePath -DestinationPath $extractDir
           Invoke-ApplicationSmoke (Join-Path $extractDir "SmartRacingChampionship.exe")
-          Write-Host "Built and extracted executable smoke tests passed."
+          .\.venv\Scripts\python.exe scripts\package_submission.py --registration TEST-1 --section TEST-SECTION
+          if ($LASTEXITCODE -ne 0) { throw "Test submission archive creation failed." }
+          $submissionArchive = Join-Path $PWD "dist/TEST-1_TEST-SECTION.zip"
+          $submissionExtract = Join-Path $env:RUNNER_TEMP "submission-test-extracted"
+          Expand-Archive -LiteralPath $submissionArchive -DestinationPath $submissionExtract
+          $requiredFiles = @(
+            "SmartRacingChampionship.exe", "technical-report.pdf", "source/README.md",
+            "source/pyproject.toml", "source/src/smart_racing/__main__.py",
+            "source/data/circuits/circuit_1.json", "source/data/circuits/circuit_2.json",
+            "source/data/circuits/circuit_3.json", "source/assets/fonts/.gitkeep",
+            "source/docs/assignment-specification.md", "source/experiments/results/analysis.md",
+            "source/experiments/results/studies.json"
+          )
+          foreach ($relativePath in $requiredFiles) {
+            if (-not (Test-Path -LiteralPath (Join-Path $submissionExtract $relativePath) -PathType Leaf)) {
+              throw "Test submission archive is missing $relativePath"
+            }
+          }
+          foreach ($pair in @(
+            @($executable, (Join-Path $submissionExtract "SmartRacingChampionship.exe")),
+            @((Join-Path $PWD "output/pdf/technical-report.pdf"), (Join-Path $submissionExtract "technical-report.pdf"))
+          )) {
+            if ((Get-FileHash -LiteralPath $pair[0]).Hash -ne (Get-FileHash -LiteralPath $pair[1]).Hash) {
+              throw "Extracted test submission file differs from its source."
+            }
+          }
+          Invoke-ApplicationSmoke (Join-Path $submissionExtract "SmartRacingChampionship.exe")
+          Write-Host "Built executable, executable-only archive and full test submission archive smoke tests passed."
