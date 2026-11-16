@@ -20,7 +20,7 @@ guide, not a set of gates; consult the code and tests for actual progress.
    decisions and tuned rules in `docs/architecture/`.
 4. Work on a short-lived branch from `main`, connect related changes to their
    issue, and open a pull request. The protected `main` branch requires the
-   Python CI check to pass before merging, including for administrators; no
+   `checks` and `package-smoke` CI jobs to pass before merging, including for administrators; no
    approval is required. Agent commits and pushes require explicit permission.
 5. Include meaningful tests with implemented behavior, update documentation, and
    share screenshots or a recording for visual changes. Explain what was actually

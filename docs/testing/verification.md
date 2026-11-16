@@ -22,6 +22,10 @@ with Python 3.12 and found no broken requirements. Later changes require a new r
 The run for PR #254 subsequently passed **105 tests** on Windows with Python
 3.12. The local Python executable was blocked by Windows Application Control;
 later runs must be checked separately.
+The Windows run for PR #257 passed **108 tests**, `pip check`, preview rendering,
+and a separately built executable's headless smoke test. All ten generated
+screen previews from the prior preview workflow were visually inspected. The
+local executable remains blocked by Application Control.
 Saved circuits with nonconsecutive IDs are exercised through selection,
 planning, and scheduled race events.
 The planner's alternative-route view and its state, route-count, and path-length

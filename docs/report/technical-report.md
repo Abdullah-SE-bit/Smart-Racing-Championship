@@ -199,10 +199,12 @@ The fifth study records measured timings for small k and for k close to n.
 ## Limitations and remaining submission work
 
 The prototype needs further review against all assignment requirements, broader
-generation and validation constraints, and human end-to-end play testing. The Windows build command produced
-an executable, but the available host blocked launching it with Application
-Control; successful execution is therefore not verified. Finalize and inspect
-the executable, report and extracted submission ZIP on an allowed machine.
+generation and validation constraints, and human end-to-end play testing. A
+clean Windows CI runner built the executable and successfully launched its
+headless smoke test. The local host blocked Python and the executable with
+Application Control, so local execution and a human playthrough remain
+unverified. Finalize and inspect the executable, report and extracted
+submission ZIP on an allowed machine.
 Add the actual group names, registration numbers and section. Do not treat
 unfinished features or unverified packaging as complete.
 
