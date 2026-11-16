@@ -8,7 +8,8 @@ keyboard inputs and race options into separate panels. The planner keeps its
 map selection unobstructed by placing its resource and alternative-route
 actions below the map. The race view uses wider road geometry and top-down car
 markers derived from the engine's interpolated racer positions. Rendering does
-not advance the simulation. The Lab exposes the actual current trace record
+not advance the simulation. Nitro and checkpoint indicators reflect the current
+racer state, and the live order highlights the player. The Lab exposes the actual current trace record
 and playback progress without overlaying the circuit. Results and championship
 standings use the race's real classifications and points. The refuelling view
 includes the selected route alongside the calculated stops.
