@@ -844,8 +844,11 @@ class App:
         return trace, description
 
     def draw_lab(self):
-        self.header("02 / Observe", "Algorithm lab", "Watch the same search implementations used by the route planner and race engine.")
-        self.nav()
+        self.draw_pit_background()
+        self.label("RACE CONTROL  /  ALGORITHM LAB", 48, 98, 14, (246, 125, 84))
+        self.label("ALGORITHM LAB", 45, 118, 42, (247, 242, 228))
+        self.label("Explore real algorithm steps from the selected circuit.", 48, 176, 16, (170, 182, 172))
+        self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
         trace, description = self.lab_result()
         count = min(int(self.lab_step), len(trace))
         steps = trace[:count]
@@ -859,28 +862,36 @@ class App:
         else:
             visited = [step["vertex"] for step in steps if "vertex" in step]
         roads = [step["edge"] for step in steps if "edge" in step]
-        self.card((40, 220, 800, 530))
-        self.draw_map((60, 242, 760, 480), self.circuit, roads, visited)
-        if steps and self.lab_algorithm not in {"BFS", "DFS", "Dijkstra", "Astar"}:
-            self.card((75, 630, 730, 78), (35, 53, 43), 12)
+        self.card((40, 220, 800, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.draw_map((60, 242, 760, 375), self.circuit, roads, visited)
+        self.card((75, 630, 730, 78), (26, 38, 36), 8, (58, 73, 68))
+        if steps:
             current = steps[-1]
-            self.label(str(current.get("action", "step")).upper(), 95, 642, 16, ACCENT)
+            self.label(str(current.get("action", "step")).upper(), 95, 642, 16, (246, 125, 84))
             detail = "   ".join(f"{key}: {value}" for key, value in current.items() if key != "action")
             self.label(detail[:90], 95, 672, 14, MUTED)
-        self.card((860, 220, 380, 530))
-        self.label(f"ALGORITHM {LAB_ALGORITHMS.index(self.lab_algorithm) + 1} / {len(LAB_ALGORITHMS)}", 885, 245, 14, ACCENT)
-        self.label(self.lab_algorithm, 885, 276, 30)
+        else:
+            self.label("READY TO PLAY", 95, 642, 16, (246, 125, 84))
+            self.label("Start playback or step forward to inspect the trace.", 95, 672, 14, MUTED)
+        self.card((860, 220, 380, 530), (21, 33, 32), 12, (58, 73, 68))
+        self.label(f"ALGORITHM {LAB_ALGORITHMS.index(self.lab_algorithm) + 1} / {len(LAB_ALGORITHMS)}", 885, 245, 14, (246, 125, 84))
+        self.label(self.lab_algorithm, 885, 276, 30, (247, 242, 228))
+        while self.fonts[14].size(description)[0] > 330 and len(description) > 1:
+            description = description[:-1]
         self.label(description, 885, 326, 14, MUTED)
-        self.label(f"STEP  {count} / {len(trace)}", 885, 365, 18, GOLD)
-        self.button((885, 411, 157, 48), "PREVIOUS", lambda: self.change_lab(-1))
-        self.button((1055, 411, 160, 48), "NEXT", lambda: self.change_lab(1))
-        self.button((885, 469, 157, 48), "PAUSE" if self.lab_playing else "PLAY", self.toggle_lab)
-        self.button((1055, 469, 160, 48), "STEP +1", lambda: self.step_lab(1))
-        self.button((885, 527, 157, 48), "RESET", self.reset_lab)
-        self.button((1055, 527, 160, 48), "STEP -1", lambda: self.step_lab(-1))
-        self.button((885, 585, 330, 48), f"SPEED: {self.lab_speed / 3:g}x", self.change_lab_speed)
-        self.label("Algorithms use plain data traces.", 885, 655, 14, MUTED)
-        self.label("No rendering inside the algorithms.", 885, 680, 14, MUTED)
+        self.label(f"STEP  {count} / {len(trace)}", 885, 365, 18, (246, 125, 84))
+        pygame.draw.rect(self.surface, (52, 66, 61), (885, 397, 330, 4), border_radius=2)
+        if trace:
+            pygame.draw.rect(self.surface, (246, 125, 84), (885, 397, round(330 * count / len(trace)), 4), border_radius=2)
+        self.menu_button((885, 411, 157, 48), "PREVIOUS", None, lambda: self.change_lab(-1))
+        self.menu_button((1055, 411, 160, 48), "NEXT", None, lambda: self.change_lab(1))
+        self.menu_button((885, 469, 157, 48), "PAUSE" if self.lab_playing else "PLAY", None, self.toggle_lab)
+        self.menu_button((1055, 469, 160, 48), "STEP +1", None, lambda: self.step_lab(1))
+        self.menu_button((885, 527, 157, 48), "RESET", None, self.reset_lab)
+        self.menu_button((1055, 527, 160, 48), "STEP -1", None, lambda: self.step_lab(-1))
+        self.menu_button((885, 585, 330, 48), f"SPEED: {self.lab_speed / 3:g}x", None, self.change_lab_speed)
+        self.label("The trace comes from the game’s", 885, 655, 14, MUTED)
+        self.label("own algorithm implementations.", 885, 680, 14, MUTED)
 
     def change_lab(self, direction):
         self.lab_algorithm = LAB_ALGORITHMS[(LAB_ALGORITHMS.index(self.lab_algorithm) + direction) % len(LAB_ALGORITHMS)]
