@@ -345,7 +345,7 @@ class App:
         self.surface.blit(header, (0, 0))
         pygame.draw.line(self.surface, BORDER, (0, 69), (WIDTH, 69))
         pygame.draw.polygon(self.surface, PRIMARY, [(48, 22), (59, 34), (48, 46), (37, 34)])
-        self.label("PADDOCK", 72, 18, 24, TEXT)
+        self.label("REDLINE", 72, 18, 24, TEXT)
         self.label("SMART RACING CHAMPIONSHIP", 218, 25, 14, MUTED)
         self.label("SEASON 01   /   RACE CONTROL", 1018, 25, 14, MUTED)
 
@@ -399,7 +399,7 @@ class App:
         pygame.draw.polygon(self.surface, PRIMARY, diamond)
         ring = pygame.Rect(WIDTH // 2 - 31, mark_y - 31, 62, 62)
         pygame.draw.arc(self.surface, (160, 47, 52), ring, elapsed * 2, elapsed * 2 + math.pi * 1.35, 2)
-        titles = (("PADDOCK", 24, TEXT, 271, .15, .55, -28),
+        titles = (("REDLINE", 24, TEXT, 271, .15, .55, -28),
                   ("SMART RACING", 62, TEXT, 343, .35, .7, -120),
                   ("CHAMPIONSHIP", 42, EMPHASIS, 412, .55, .7, 120),
                   ("THE GRID IS READY", 14, MUTED, 465, 1.0, .5, 24))

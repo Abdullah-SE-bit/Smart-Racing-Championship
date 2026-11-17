@@ -1,5 +1,8 @@
 # Smart Racing Championship
 
+The game uses **REDLINE** as its interface branding, with **Smart Racing
+Championship** as the full project title.
+
 A 2D top-down racing game for a Design and Analysis of Algorithms
 course. Players plan routes, manage fuel and nitro, and respond to changing
 roads while racing deterministic opponents. The project combines a polished,
