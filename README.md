@@ -62,7 +62,8 @@ Launch the current prototype with:
 .\.venv\Scripts\python.exe -m smart_racing
 ```
 
-Use the mouse to navigate. In a race, select a road with the left/right arrow
+The game opens with a four-second intro. Press Enter, Space, Escape or click
+to skip it. Use the mouse to navigate. In a race, select a road with the left/right arrow
 keys, press Enter to drive, press N for nitro, and press F at a fuel station to
 refuel. Space pauses the simulation. The race screen also provides clickable
 buttons for these actions. The race HUD reports recent resource and
