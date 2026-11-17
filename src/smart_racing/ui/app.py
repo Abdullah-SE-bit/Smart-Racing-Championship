@@ -362,40 +362,63 @@ class App:
                 self.intro_active = False
 
     def draw_intro(self):
-        """Draw a timed title reveal with starting lights and the pit-lane art."""
+        """Draw a timed title reveal with motion independent of the race."""
         elapsed = self.intro_elapsed
-        x = (WIDTH - self.pit_backdrop.get_width()) // 2
+        progress = min(1.0, max(0.0, elapsed / INTRO_DURATION))
+        x = (WIDTH - self.pit_backdrop.get_width()) // 2 + round(50 * (progress - .5))
         y = (HEIGHT - self.pit_backdrop.get_height()) // 2
         self.surface.blit(self.pit_backdrop, (x, y))
         shade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        shade.fill((5, 8, 13, 172))
+        shade.fill((5, 8, 13, 165))
         self.surface.blit(shade, (0, 0))
 
-        # Light streaks and the title reveal are decorative and never affect
-        # the simulation clock or the selected circuit.
-        for index in range(5):
-            offset = (int(elapsed * 115) + index * 205) % (WIDTH + 350) - 175
-            pygame.draw.line(self.surface, (63, 32, 39), (offset, 0), (offset - 260, HEIGHT), 1)
-        progress = min(1.0, elapsed / INTRO_DURATION)
+        # These moving graphics use only intro time, never the simulation clock.
+        streaks = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        for index in range(7):
+            offset = (int(elapsed * 340) + index * 230) % (WIDTH + 500) - 250
+            pygame.draw.line(streaks, (240, 65, 70, 72), (offset + 260, 0), (offset - 180, HEIGHT), 2)
+        for index in range(4):
+            offset = (int(elapsed * 260) + index * 350) % (WIDTH + 250) - 125
+            pygame.draw.polygon(streaks, (198, 35, 43, 75),
+                                [(offset, 708), (offset + 100, 708),
+                                 (offset + 75, 722), (offset - 25, 722)])
+        self.surface.blit(streaks, (0, 0))
         pygame.draw.rect(self.surface, PRIMARY, (0, 0, 8, HEIGHT))
         pygame.draw.rect(self.surface, (58, 63, 73), (WIDTH // 2 - 150, 596, 300, 3))
         pygame.draw.rect(self.surface, EMPHASIS, (WIDTH // 2 - 150, 596, round(300 * progress), 3))
 
-        mark_x = WIDTH // 2
-        mark_y = 214 - round(18 * max(0.0, 1.0 - elapsed / .8))
-        pygame.draw.polygon(self.surface, PRIMARY, [(mark_x, mark_y - 19), (mark_x + 19, mark_y),
-                                                   (mark_x, mark_y + 19), (mark_x - 19, mark_y)])
-        for text, size, color, cy in (("PADDOCK", 24, TEXT, 271),
-                                      ("SMART RACING", 62, TEXT, 343),
-                                      ("CHAMPIONSHIP", 42, EMPHASIS, 412),
-                                      ("THE GRID IS READY", 14, MUTED, 465)):
+        def reveal(delay, duration):
+            amount = max(0.0, min(1.0, (elapsed - delay) / duration))
+            return 1 - (1 - amount) ** 3
+
+        mark_y = 214 - round(30 * (1 - reveal(.1, .75)))
+        angle = (1 - reveal(.1, .9)) * math.pi / 2
+        diamond = [(WIDTH // 2 + round(19 * math.cos(angle + index * math.pi / 2)),
+                    mark_y + round(19 * math.sin(angle + index * math.pi / 2)))
+                   for index in range(4)]
+        pygame.draw.polygon(self.surface, PRIMARY, diamond)
+        ring = pygame.Rect(WIDTH // 2 - 31, mark_y - 31, 62, 62)
+        pygame.draw.arc(self.surface, (160, 47, 52), ring, elapsed * 2, elapsed * 2 + math.pi * 1.35, 2)
+        titles = (("PADDOCK", 24, TEXT, 271, .15, .55, -28),
+                  ("SMART RACING", 62, TEXT, 343, .35, .7, -120),
+                  ("CHAMPIONSHIP", 42, EMPHASIS, 412, .55, .7, 120),
+                  ("THE GRID IS READY", 14, MUTED, 465, 1.0, .5, 24))
+        exit_amount = reveal(3.2, .7)
+        for text, size, color, cy, delay, duration, offset in titles:
+            amount = reveal(delay, duration)
             image = self.fonts[size].render(text, True, color)
-            self.surface.blit(image, image.get_rect(center=(WIDTH // 2, cy)))
+            image.set_alpha(round(255 * amount * (1 - exit_amount)))
+            position = WIDTH // 2 + round(offset * (1 - amount) - offset * exit_amount)
+            self.surface.blit(image, image.get_rect(center=(position, cy)))
         for index in range(5):
-            active = elapsed >= .55 + index * .42
-            color = EMPHASIS if active else (61, 66, 76)
-            pygame.draw.circle(self.surface, (12, 15, 21), (WIDTH // 2 - 68 + index * 34, 535), 12)
-            pygame.draw.circle(self.surface, color, (WIDTH // 2 - 68 + index * 34, 535), 7)
+            onset = .6 + index * .42
+            active = onset <= elapsed < 3.45
+            center = (WIDTH // 2 - 68 + index * 34, 535)
+            pygame.draw.circle(self.surface, (12, 15, 21), center, 13)
+            if active:
+                pulse = max(0.0, 1.0 - (elapsed - onset) / .35)
+                pygame.draw.circle(self.surface, (100, 35, 40), center, 9 + round(3 * pulse))
+            pygame.draw.circle(self.surface, EMPHASIS if active else (61, 66, 76), center, 7)
         hint = self.fonts[14].render("ENTER / SPACE / ESC / CLICK TO SKIP", True, TEXT)
         self.surface.blit(hint, hint.get_rect(center=(WIDTH // 2, 655)))
 
