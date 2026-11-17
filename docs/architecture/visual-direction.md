@@ -1,5 +1,8 @@
 # Visual and motion direction
 
+The interface and startup sequence use **REDLINE** as the game brand, alongside
+the official **Smart Racing Championship** project title.
+
 The screens use a motorsport broadcast palette inspired by Drive to Survive:
 carbon black and graphite surfaces, cool white type and racing red primary
 actions. The menu's featured circuit is drawn from the selected track's
