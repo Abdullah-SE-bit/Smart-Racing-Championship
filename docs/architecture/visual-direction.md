@@ -18,7 +18,8 @@ and playback progress without overlaying the circuit. Results and championship
 standings use the race's real classifications and points. The refuelling view
 includes the selected route alongside the calculated stops.
 
-At startup, a four-second title reveal and starting-light sequence leads to the
+At startup, a four-second sequence pans the pit-lane artwork and animates speed
+streaks, a rotating emblem, a staggered title reveal and starting lights before the
 main menu. Enter, Space, Escape or a left click skips it; resize and quit remain
 available during the sequence. The intro uses presentation time and does not
 advance the race engine. If reduced motion is already enabled at startup, it is

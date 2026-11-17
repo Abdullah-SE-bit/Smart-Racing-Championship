@@ -1,4 +1,5 @@
 import os
+import hashlib
 import subprocess
 import sys
 from dataclasses import replace
@@ -50,6 +51,22 @@ def test_reduced_motion_skips_startup_intro():
         app.reduced_motion = True
         app.start_intro()
         assert not app.intro_active and app.screen == "menu"
+    finally:
+        pygame.quit()
+
+
+def test_startup_intro_animates_distinct_frames_without_advancing_race():
+    app = App()
+    try:
+        app.start_intro()
+        frames = []
+        for moment in (.7, 1.6, 2.5, 3.5):
+            app.intro_elapsed = moment
+            app.draw_intro()
+            frames.append(hashlib.sha256(pygame.image.tostring(app.surface, "RGB")).digest())
+        assert len(set(frames)) == 4
+        assert app.race is None and app.screen == "menu"
+        assert app.intro_elapsed == 3.5
     finally:
         pygame.quit()
 

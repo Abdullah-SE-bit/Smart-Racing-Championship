@@ -27,6 +27,10 @@ def main():
 
     try:
         app.start_intro()
+        for name, moment in (("00a-intro-reveal", .7), ("00b-intro-lights", 1.6),
+                             ("00c-intro-finale", 3.5)):
+            app.intro_elapsed = moment
+            capture(name, app.draw_intro)
         app.intro_elapsed = 2.5
         capture("00-startup-intro", app.draw_intro)
         app.intro_active = False
