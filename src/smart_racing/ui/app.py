@@ -25,6 +25,7 @@ from smart_racing.tracks.generator import _assign_checkpoints, _ring_compatible,
 
 
 WIDTH, HEIGHT = 1280, 800
+INTRO_DURATION = 4.0
 PLANNER_MAP = (60, 242, 760, 400)
 BACKGROUND = (12, 14, 19)
 PANEL = (23, 26, 33)
@@ -83,6 +84,8 @@ class App:
         self.running = True
         self.time = 0.0
         self.reduced_motion = False
+        self.intro_active = False
+        self.intro_elapsed = 0.0
         self.transition_remaining = 0.0
         self.previous_frame = None
         self.simulation_clock = SimulationClock()
@@ -345,6 +348,61 @@ class App:
         self.label("PADDOCK", 72, 18, 24, TEXT)
         self.label("SMART RACING CHAMPIONSHIP", 218, 25, 14, MUTED)
         self.label("SEASON 01   /   RACE CONTROL", 1018, 25, 14, MUTED)
+
+    def start_intro(self):
+        """Start a presentation-only sequence; reduced motion opens the menu."""
+        self.intro_elapsed = 0.0
+        self.intro_active = not self.reduced_motion
+        self.buttons = []
+
+    def advance_intro(self, delta):
+        if self.intro_active:
+            self.intro_elapsed = min(INTRO_DURATION, self.intro_elapsed + max(0.0, delta))
+            if self.intro_elapsed >= INTRO_DURATION:
+                self.intro_active = False
+
+    def draw_intro(self):
+        """Draw a timed title reveal with starting lights and the pit-lane art."""
+        elapsed = self.intro_elapsed
+        x = (WIDTH - self.pit_backdrop.get_width()) // 2
+        y = (HEIGHT - self.pit_backdrop.get_height()) // 2
+        self.surface.blit(self.pit_backdrop, (x, y))
+        shade = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        shade.fill((5, 8, 13, 172))
+        self.surface.blit(shade, (0, 0))
+
+        # Light streaks and the title reveal are decorative and never affect
+        # the simulation clock or the selected circuit.
+        for index in range(5):
+            offset = (int(elapsed * 115) + index * 205) % (WIDTH + 350) - 175
+            pygame.draw.line(self.surface, (63, 32, 39), (offset, 0), (offset - 260, HEIGHT), 1)
+        progress = min(1.0, elapsed / INTRO_DURATION)
+        pygame.draw.rect(self.surface, PRIMARY, (0, 0, 8, HEIGHT))
+        pygame.draw.rect(self.surface, (58, 63, 73), (WIDTH // 2 - 150, 596, 300, 3))
+        pygame.draw.rect(self.surface, EMPHASIS, (WIDTH // 2 - 150, 596, round(300 * progress), 3))
+
+        mark_x = WIDTH // 2
+        mark_y = 214 - round(18 * max(0.0, 1.0 - elapsed / .8))
+        pygame.draw.polygon(self.surface, PRIMARY, [(mark_x, mark_y - 19), (mark_x + 19, mark_y),
+                                                   (mark_x, mark_y + 19), (mark_x - 19, mark_y)])
+        for text, size, color, cy in (("PADDOCK", 24, TEXT, 271),
+                                      ("SMART RACING", 62, TEXT, 343),
+                                      ("CHAMPIONSHIP", 42, EMPHASIS, 412),
+                                      ("THE GRID IS READY", 14, MUTED, 465)):
+            image = self.fonts[size].render(text, True, color)
+            self.surface.blit(image, image.get_rect(center=(WIDTH // 2, cy)))
+        for index in range(5):
+            active = elapsed >= .55 + index * .42
+            color = EMPHASIS if active else (61, 66, 76)
+            pygame.draw.circle(self.surface, (12, 15, 21), (WIDTH // 2 - 68 + index * 34, 535), 12)
+            pygame.draw.circle(self.surface, color, (WIDTH // 2 - 68 + index * 34, 535), 7)
+        hint = self.fonts[14].render("ENTER / SPACE / ESC / CLICK TO SKIP", True, TEXT)
+        self.surface.blit(hint, hint.get_rect(center=(WIDTH // 2, 655)))
+
+        fade = min(1.0, elapsed / .45, max(0.0, INTRO_DURATION - elapsed) / .38)
+        blackout = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        blackout.fill((0, 0, 0, round(255 * (1 - fade))))
+        self.surface.blit(blackout, (0, 0))
 
     def draw_menu(self):
         self.draw_pit_background()
@@ -1116,8 +1174,16 @@ class App:
     def event(self, event):
         if event.type == pygame.QUIT:
             self.running = False
+            return
         if event.type == pygame.VIDEORESIZE:
             self.window = pygame.display.set_mode(event.size, pygame.RESIZABLE)
+            return
+        if self.intro_active:
+            if ((event.type == pygame.KEYDOWN and event.key in {pygame.K_RETURN, pygame.K_SPACE, pygame.K_ESCAPE})
+                    or (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1)):
+                self.intro_active = False
+                self.buttons = []
+            return
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.keyboard_focus = False
             position = self.logical_position(event.pos)
@@ -1169,11 +1235,20 @@ class App:
                     self.drive_selected()
 
     def run(self):
+        self.start_intro()
         while self.running:
             delta = min(self.clock.tick(60) / 1000, .1)
             self.time += delta
             for event in pygame.event.get():
                 self.event(event)
+            if not self.running:
+                break
+            if self.intro_active:
+                self.advance_intro(delta)
+                if self.intro_active:
+                    self.draw_intro()
+                    self.present()
+                    continue
             if self.screen == "race" and not self.paused:
                 self.simulation_clock.advance(delta, self.race.tick)
             if self.screen == "lab" and self.lab_playing:
@@ -1197,6 +1272,10 @@ class App:
 def main():
     app = App()
     if "--smoke-test" in sys.argv:
+        app.start_intro()
+        app.advance_intro(1.5)
+        app.draw_intro()
+        app.advance_intro(INTRO_DURATION)
         for render in (app.draw_menu, app.draw_settings, app.draw_planner, app.draw_comparison, app.draw_lab):
             app.background()
             render()

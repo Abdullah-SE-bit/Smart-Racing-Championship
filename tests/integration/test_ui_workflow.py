@@ -15,7 +15,66 @@ from smart_racing.tracks.generator import generate_circuit
 from smart_racing.algorithms.routing.shortest import Route, shortest_path
 from smart_racing.championship.standings import leaders, standings
 from smart_racing.core.graph import Edge, Graph, Vertex
-from smart_racing.ui.app import ACCENT, EMPHASIS, GAUGE_TRACK, MUTED, PANEL, PLANNER_MAP, PRIMARY, TEXT, App, LAB_ALGORITHMS, PROFILES
+from smart_racing.ui.app import ACCENT, EMPHASIS, GAUGE_TRACK, INTRO_DURATION, MUTED, PANEL, PLANNER_MAP, PRIMARY, TEXT, App, LAB_ALGORITHMS, PROFILES
+
+
+def test_startup_intro_finishes_and_skip_does_not_activate_menu():
+    app = App()
+    try:
+        app.start_intro()
+        assert app.intro_active and app.screen == "menu" and app.race is None
+        app.advance_intro(INTRO_DURATION - .1)
+        assert app.intro_active and app.race is None
+        app.advance_intro(.1)
+        assert not app.intro_active and app.screen == "menu"
+
+        for event in (pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN),
+                      pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE),
+                      pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE),
+                      pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=(100, 425))):
+            app.start_intro()
+            app.event(event)
+            assert not app.intro_active and app.screen == "menu" and app.race is None
+        app.start_intro()
+        app.event(pygame.event.Event(pygame.VIDEORESIZE, size=(960, 600)))
+        assert app.intro_active and app.window.get_size() == (960, 600)
+        app.event(pygame.event.Event(pygame.QUIT))
+        assert not app.running
+    finally:
+        pygame.quit()
+
+
+def test_reduced_motion_skips_startup_intro():
+    app = App()
+    try:
+        app.reduced_motion = True
+        app.start_intro()
+        assert not app.intro_active and app.screen == "menu"
+    finally:
+        pygame.quit()
+
+
+def test_main_loop_shows_intro_then_menu_without_starting_race(monkeypatch):
+    app = App()
+    frames = []
+
+    class FastClock:
+        def tick(self, fps):
+            return 100
+
+    def events():
+        if len(frames) >= 45:
+            return [pygame.event.Event(pygame.QUIT)]
+        return []
+
+    app.clock = FastClock()
+    monkeypatch.setattr(pygame.event, "get", events)
+    monkeypatch.setattr(app, "draw_intro", lambda: frames.append("intro"))
+    monkeypatch.setattr(app, "draw_menu", lambda: frames.append("menu"))
+    monkeypatch.setattr(app, "present", lambda: None)
+    app.run()
+    assert frames[0] == "intro" and frames[-1] == "menu"
+    assert app.race is None and app.screen == "menu"
 
 
 def test_menu_track_selection_navigation_and_reduced_motion():

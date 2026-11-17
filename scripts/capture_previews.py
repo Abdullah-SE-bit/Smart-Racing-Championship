@@ -26,6 +26,10 @@ def main():
         pygame.image.save(app.surface, str(OUTPUT / f"{name}.png"))
 
     try:
+        app.start_intro()
+        app.intro_elapsed = 2.5
+        capture("00-startup-intro", app.draw_intro)
+        app.intro_active = False
         app.reduced_motion = True
         capture("01-menu", app.draw_menu)
         app.go("settings")

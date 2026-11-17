@@ -18,6 +18,12 @@ and playback progress without overlaying the circuit. Results and championship
 standings use the race's real classifications and points. The refuelling view
 includes the selected route alongside the calculated stops.
 
+At startup, a four-second title reveal and starting-light sequence leads to the
+main menu. Enter, Space, Escape or a left click skips it; resize and quit remain
+available during the sequence. The intro uses presentation time and does not
+advance the race engine. If reduced motion is already enabled at startup, it is
+skipped. The current settings are in-memory and reset when the app closes.
+
 The circuit uses muted road colors, blue for the recommended line, red for the
 selected road, and amber for hazards. Racer colors remain distinct
 from one another. Flat surfaces and thin outlines keep the track legible.
