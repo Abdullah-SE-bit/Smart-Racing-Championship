@@ -364,8 +364,9 @@ class App:
         self.surface.blit(smooth, rect[:2])
 
     def draw_pit_background(self):
-        # Keep the car scene on the home screen; venue art fills the other pages.
-        artwork = None if self.screen == "menu" else circuit_artwork_name(self.circuit)
+        # The menu gets the alpine hero scene; other screens follow their circuit.
+        artwork = ("aurora-circuit-dusk.png" if self.screen == "menu"
+                   else circuit_artwork_name(self.circuit))
         backdrop = load_circuit_backdrop(artwork) if artwork else self.pit_backdrop
         x = (WIDTH - backdrop.get_width()) // 2
         y = (HEIGHT - backdrop.get_height()) // 2

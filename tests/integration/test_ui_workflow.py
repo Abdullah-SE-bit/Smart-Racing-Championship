@@ -71,7 +71,7 @@ def test_startup_intro_animates_distinct_frames_without_advancing_race():
         pygame.quit()
 
 
-def test_original_hero_car_background_is_consistent_across_circuits():
+def test_blue_menu_background_is_consistent_and_venue_screens_follow_track():
     app = App()
     try:
         app.reduced_motion = True
@@ -90,6 +90,26 @@ def test_original_hero_car_background_is_consistent_across_circuits():
             app.draw_pit_background()
             venue_frames.append(hashlib.sha256(pygame.image.tostring(app.surface, "RGB")).digest())
         assert len(set(venue_frames)) == 3
+    finally:
+        pygame.quit()
+
+
+def test_menu_selects_blue_hero_art_while_other_screens_select_venue_art(monkeypatch):
+    import smart_racing.ui.app as app_module
+
+    app = App()
+    requested = []
+    monkeypatch.setattr(app_module, "load_circuit_backdrop",
+                        lambda name: requested.append(name) or app.pit_backdrop)
+    try:
+        app.screen = "menu"
+        app.draw_pit_background()
+        assert requested[-1] == "aurora-circuit-dusk.png"
+
+        app.screen = "planner"
+        app.circuit = load_circuit(app.authored_paths[0])
+        app.draw_pit_background()
+        assert requested[-1] == "neon-harbor-night.png"
     finally:
         pygame.quit()
 
