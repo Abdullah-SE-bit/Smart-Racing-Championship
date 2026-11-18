@@ -71,6 +71,20 @@ def test_startup_intro_animates_distinct_frames_without_advancing_race():
         pygame.quit()
 
 
+def test_original_hero_car_background_is_consistent_across_circuits():
+    app = App()
+    try:
+        app.reduced_motion = True
+        frames = []
+        for path in app.authored_paths:
+            app.circuit = load_circuit(path)
+            app.draw_pit_background()
+            frames.append(hashlib.sha256(pygame.image.tostring(app.surface, "RGB")).digest())
+        assert len(frames) == 3 and len(set(frames)) == 1
+    finally:
+        pygame.quit()
+
+
 def test_main_loop_shows_intro_then_menu_without_starting_race(monkeypatch):
     app = App()
     frames = []
