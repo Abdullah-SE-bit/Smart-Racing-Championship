@@ -342,13 +342,13 @@ def test_refuelling_dp_matches_exhaustive_small_routes():
                         if fuel < 0:
                             break
                     else:
-                        feasible.append(sum(stop_time for amount in purchases if amount))
+                        feasible.append((sum(stop_time for amount in purchases if amount), list(purchases)))
                 result = refuel_plan(list(requirements), list(available), initial,
                                      capacity, purchase_limit, stop_time)
                 if not feasible:
                     assert result is None
                 else:
-                    assert result is not None and result[0] == min(feasible)
+                    assert result == min(feasible)
                     fuel = initial
                     for required, station, amount in zip(requirements, available, result[1]):
                         assert 0 <= amount <= purchase_limit and (station or amount == 0)
@@ -463,6 +463,15 @@ def test_directed_traversal_components_cycles_and_bounded_paths():
         simple_paths(graph, 0, 2, max_length=0)
     graph.add_edge(Edge(4, 2, 0, 1, 1, 1, directed=True))
     assert has_cycle(graph)
+
+
+def test_top_k_stream_bounds_memory_and_preserves_equal_keys_at_cutoff():
+    stream = [(4, "first"), (9, "second"), (4, "third"), (4, "fourth"), (1, "last")]
+    trace = []
+    assert top_k(iter(stream), 3, key=lambda item: item[0], trace=trace) == [
+        (1, "last"), (4, "first"), (4, "third")]
+    assert max(step["value"] for step in trace) == 3
+    assert top_k(iter(stream), 0) == []
 
 
 def test_championship_sorts_and_top_k_use_all_tie_breakers():

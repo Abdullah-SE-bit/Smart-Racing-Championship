@@ -43,13 +43,22 @@ candidate sets and retry limit bound work in the current generator.
   bridge and spacing checks protect connectivity and separate the obstacles.
   After building this undirected structure, generation adds two seeded one-way
   roads from loop vertices to service-area vertices without duplicating an
-  existing road. The ordinary directed-graph validator checks the final
+  existing road. Generated junctions allow at most six incident roads, counting
+  a one-way road at both ends. Additional roads only increase the degree,
+  so endpoints already at six can be skipped safely. If the required backbone
+  and lap alone exceed six, the generator retries the whole layout and keeps
+  the backbone intact. The ordinary directed-graph validator checks the final
   circuit, including checkpoint order, lap return, alternatives and fuel.
   Candidate generation retries at most five deterministic seed variants by
   default and reports failure rather than exposing an invalid circuit.
 - The planner, lab and experiments invoke the same algorithm functions. The
   lab uses their traces; sorting in the standings and heap top-k share
   `championship.standings.ranking_key`.
+- Live top-k, the Lab and study 5 retain at most k records in the manual heap.
+  The root is the worst leader, so comparing a new record against it decides
+  whether to replace it. Reversing the final extraction order gives the
+  standings prefix. This follows the bounded-priority-queue approach in
+  [Princeton's Algorithms, §2.4](https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/TopM.html).
 
 ## Current tuned values and rules
 

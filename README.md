@@ -3,7 +3,7 @@
 The game uses **REDLINE** as its interface branding, with **Smart Racing
 Championship** as the full project title.
 
-A 2D top-down racing game for a Design and Analysis of Algorithms
+A strategy racing game with a projected 3D broadcast camera and a 2D top-down tactical map for a Design and Analysis of Algorithms
 course. Players plan routes, manage fuel and nitro, and respond to changing
 roads while racing deterministic opponents. The project combines a polished,
 animated Pygame interface with algorithms that have real roles in gameplay.
@@ -35,7 +35,7 @@ in [the assignment transcription](docs/assignment-specification.md); use the
 original PDF to resolve any transcription ambiguity. See the
 [development workflow](docs/development-workflow.md) for a detailed delivery map.
 
-## Planned technology
+## Technology
 
 Python 3.12+, Pygame, JSON, pytest and Matplotlib; PyInstaller is available as
 an optional packaging dependency. See [pyproject.toml](pyproject.toml) for the
@@ -65,7 +65,7 @@ Launch the current prototype with:
 .\.venv\Scripts\python.exe -m smart_racing
 ```
 
-The game opens with a four-second intro. Press Enter, Space, Escape or click
+Switch cameras during a race using the view button. Reduced motion is saved between launches. The game opens with a four-second intro. Press Enter, Space, Escape or click
 to skip it. Use the mouse to navigate. In a race, select a road with the left/right arrow
 keys, press Enter to drive, press N for nitro, and press F at a fuel station to
 refuel. Space pauses the simulation. The race screen also provides clickable

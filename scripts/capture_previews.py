@@ -49,6 +49,10 @@ def main():
         app.go("lab")
         app.lab_step = 4
         capture("06-algorithm-lab", app.draw_lab)
+        for algorithm, step in (("Event heap", 9), ("Merge sort", 9), ("Knapsack", 1), ("Top-k", 4)):
+            app.lab_algorithm = algorithm
+            app.lab_step = step
+            capture(f"06-{algorithm.lower().replace(' ', '-')}", app.draw_lab)
         app.time = 2
         app.generate()
         capture("07-generation", app.draw_generation)
@@ -60,9 +64,7 @@ def main():
         if len(route.vertices) > 1:
             race.choose(human.id, route.vertices[1])
         race.tick(.3)
-        capture("08-racing", app.draw_race)
-
-        for _ in range(2400):
+        for tick in range(2400):
             if race.over:
                 break
             if human.edge_id is None and not human.finished and not human.dnf:
@@ -72,6 +74,11 @@ def main():
                 if len(route.vertices) > 1:
                     race.choose(human.id, route.vertices[1])
             race.tick(.1)
+            if tick == 71:
+                capture("08-racing", app.draw_race)
+                app.toggle_race_camera()
+                capture("08-tactical", app.draw_race)
+                app.toggle_race_camera()
         if not race.over:
             raise RuntimeError("Preview race did not finish within the time limit")
         app.finish_race()

@@ -1,47 +1,9 @@
-# Visual and motion direction
+﻿# REDLINE presentation
 
-The interface and startup sequence use **REDLINE** as the game brand, alongside
-the official **Smart Racing Championship** project title.
+The menu pairs original pit-lane artwork with a split-ribbon wordmark, bundled Barlow typefaces and a rotating miniature of the selected circuit. The four-second starting-light sequence supports click, Enter, Space and Escape to skip. Reduced motion persists between interactive launches in the player's preferences.json.
 
-The screens use a motorsport broadcast palette inspired by Drive to Survive:
-carbon black and graphite surfaces, cool white type and racing red primary
-actions. The menu's featured circuit is drawn from the selected track's
-stored main route and roads; the moving markers are decorative and never feed
-the race engine. Original generated pit-lane artwork sits behind the menu and
-appears more subtly behind other screens. Buttons use clipped corners and a
-moving highlight; the backdrop pans slowly. Reduced motion holds the backdrop
-and buttons still along with the circuit markers. Settings groups
-keyboard inputs and race options into separate panels. The planner keeps its
-map selection unobstructed by placing its resource and alternative-route
-actions below the map. The race view uses wider road geometry and top-down car
-markers derived from the engine's interpolated racer positions. Rendering does
-not advance the simulation. Nitro and checkpoint indicators reflect the current
-racer state, and the live order highlights the player. The Lab exposes the actual current trace record
-and playback progress without overlaying the circuit. Results and championship
-standings use the race's real classifications and points. The refuelling view
-includes the selected route alongside the calculated stops.
+The default broadcast camera projects the graph into an elevated orthographic view. Static roads and scenery are painted once per circuit. Cars follow the engine's road IDs and progress. Closures, checkpoints, services and boost update from live state. The camera button switches to the flat tactical map during the same race.
 
-At startup, a four-second sequence pans the pit-lane artwork and animates speed
-streaks, a rotating emblem, a staggered title reveal and starting lights before the
-main menu. Enter, Space, Escape or a left click skips it; resize and quit remain
-available during the sequence. The intro uses presentation time and does not
-advance the race engine. If reduced motion is already enabled at startup, it is
-skipped. The current settings are in-memory and reset when the app closes.
+The planner marks endpoints and compares routes on the same circuit geometry. The Lab records the shared algorithms, then plays their snapshots forward or backward. Heap movement follows array positions, sorting views show the current run or partition, and knapsack columns show the value at each budget. The results flag animates independently of classification and points.
 
-The circuit uses muted road colors, blue for the recommended line, red for the
-selected road, and amber for hazards. Racer colors remain distinct
-from one another. Flat surfaces and thin outlines keep the track legible.
-
-Large, short headings establish hierarchy. Compact labels and tabular race data
-should remain secondary but legible against their background. The map uses
-actual graph geometry, checkpoint numbers, F/N service markers, obstacle
-diamonds and road status marks. A selected road and the recommended route use
-separate colors and are also described in text.
-
-Motion carries information: cars interpolate along the engine's current edge,
-Lab steps show real algorithm traces, and the selected road pulses. A short
-screen transition helps orient navigation. The settings screen offers reduced
-motion, which removes the transition, moving background and pulse while keeping
-the simulation and car positions visible. Animation never decides race state or
-changes simulation timing. Continue checking controls and readability through
-both screenshots and a real playthrough.
+Projection and compositing references include [coordinate systems](https://learnopengl.com/Getting-started/Coordinate-Systems) and [Pygame surfaces](https://www.pygame.org/docs/ref/surface.html). Reduced motion follows [W3C interaction animation guidance](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html). The Lab's tree view uses the conventional [binary heap representation](https://visualgo.net/en/heap).

@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from fractions import Fraction
-from math import isfinite
+from math import inf, isfinite
 from numbers import Real
 
 from smart_racing.algorithms.sorting.rankings import merge_sort
@@ -43,7 +43,7 @@ def knapsack(items: list[Pickup], budget: int, trace: list[dict] | None = None) 
             table[index][capacity] = best
         if trace is not None:
             trace.append({"action": "dp row", "item": item.id, "value": table[index][budget],
-                          "states": index * (budget + 1)})
+                          "states": index * (budget + 1), "capacities": table[index][:]})
     chosen = []
     capacity = budget
     for index in range(len(items), 0, -1):
@@ -70,13 +70,14 @@ def greedy(items: list[Pickup], budget: int, trace: list[dict] | None = None) ->
     spent = 0
     benefit = 0
     for item in ordered:
-        if item.benefit and spent + item.cost <= budget:
+        selected = bool(item.benefit and spent + item.cost <= budget)
+        if selected:
             chosen.append(item)
             spent += item.cost
             benefit += item.benefit
         if trace is not None:
             trace.append({"action": "consider pickup", "item": item.id, "cost": spent,
-                          "value": benefit})
+                          "value": benefit, "selected": selected, "budget": budget})
     return Selection(chosen, benefit, spent)
 
 
@@ -97,19 +98,42 @@ def refuel_plan(distances: list[int], available: list[bool], initial_fuel: int,
         raise ValueError("Invalid refuelling inputs")
     if isinstance(stop_time, bool) or not isinstance(stop_time, Real) or not isfinite(stop_time) or stop_time < 0:
         raise ValueError("Stop time must be finite and non-negative")
-    states = {initial_fuel: (0, [])}
-    for required, station in zip(distances, available):
-        next_states = {}
-        for fuel, (elapsed, purchases) in states.items():
-            maximum = min(capacity - fuel, max_purchase) if station else 0
-            for amount in range(maximum + 1):
-                remaining = fuel + amount - required
-                if remaining < 0:
-                    continue
-                candidate = (elapsed + (stop_time if amount else 0), purchases + [amount])
-                if remaining not in next_states or candidate < next_states[remaining]:
-                    next_states[remaining] = candidate
-        states = next_states
-        if not states:
+    if sum(distances) <= initial_fuel:
+        return 0, [0] * len(distances)
+    if any(required > capacity for required in distances):
+        return None
+
+    # Future stop time never increases with arrival fuel. A full allowed
+    # purchase therefore gives the best future time for a positive stop.
+    # Among purchases giving that time, reconstruct the smallest one.
+    future = [0] * (capacity + 1)
+    choices = []
+    for required, station in reversed(list(zip(distances, available))):
+        earliest = [0] * (capacity + 1)
+        for fuel in range(1, capacity + 1):
+            earliest[fuel] = earliest[fuel - 1] if future[fuel] == future[fuel - 1] else fuel
+
+        current = [inf] * (capacity + 1)
+        buy = [0] * (capacity + 1)
+        for fuel in range(capacity + 1):
+            if fuel >= required:
+                current[fuel] = future[fuel - required]
+            if station:
+                fullest_arrival = min(capacity, fuel + max_purchase) - required
+                if fullest_arrival >= 0 and stop_time + future[fullest_arrival] < current[fuel]:
+                    current[fuel] = stop_time + future[fullest_arrival]
+                    buy[fuel] = required + earliest[fullest_arrival] - fuel
+        if current[capacity] == inf:
             return None
-    return min(states.values()) if states else None
+        choices.append(buy)
+        future = current
+
+    if future[initial_fuel] == inf:
+        return None
+    purchases = []
+    fuel = initial_fuel
+    for required, buy in zip(distances, reversed(choices)):
+        amount = buy[fuel]
+        purchases.append(amount)
+        fuel += amount - required
+    return future[initial_fuel], purchases

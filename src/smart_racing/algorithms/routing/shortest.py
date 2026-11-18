@@ -28,18 +28,23 @@ def shortest_path(graph: Graph, start: int, target: int,
     profile = profile or CostProfile()
     # The smallest cost per geometric unit proves a consistent lower bound even
     # when road lengths do not equal the distance between their endpoints.
-    ratios = []
-    for edge in graph.edges.values():
-        if edge.status == "blocked":
-            continue
-        a, b = graph.vertices[edge.source], graph.vertices[edge.target]
-        geometric = hypot(a.x - b.x, a.y - b.y)
-        if geometric:
-            ratios.append(profile.cost(edge) / geometric)
-    ratio = min(ratios, default=0.0) if algorithm == "astar" else 0.0
+    ratio = 0.0
+    if algorithm == "astar":
+        lower_bound = inf
+        for edge in graph.edges.values():
+            if edge.status == "blocked":
+                continue
+            a, b = graph.vertices[edge.source], graph.vertices[edge.target]
+            geometric = hypot(a.x - b.x, a.y - b.y)
+            if geometric:
+                lower_bound = min(lower_bound, profile.cost(edge) / geometric)
+        if lower_bound != inf:
+            ratio = lower_bound
     destination = graph.vertices[target]
 
     def heuristic(vertex):
+        if ratio == 0:
+            return 0.0
         position = graph.vertices[vertex]
         return ratio * hypot(position.x - destination.x, position.y - destination.y)
 

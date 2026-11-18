@@ -2,15 +2,22 @@
 
 
 class MinHeap:
-    def __init__(self, items=(), trace=None):
+    def __init__(self, items=(), trace=None, trace_key=None):
         self._items = list(items)
         self.operations = 0
         self.trace = trace
+        self.trace_key = trace_key
         # Bottom-up heapify is linear in the number of items.
         for index in range(len(self._items) // 2 - 1, -1, -1):
             self._sift_down(index)
+        self._record("heapify")
+
+    def _record(self, action):
         if self.trace is not None:
-            self.trace.append({"action": "heapify", "value": len(self._items)})
+            step = {"action": action, "value": len(self._items)}
+            if self.trace_key is not None:
+                step["keys"] = [self.trace_key(item) for item in self._items]
+            self.trace.append(step)
 
     def _sift_down(self, index):
         items = self._items
@@ -40,8 +47,7 @@ class MinHeap:
             index = parent
         items[index] = item
         self.operations += 1
-        if self.trace is not None:
-            self.trace.append({"action": "heap insert", "value": len(items)})
+        self._record("heap insert")
 
     def peek(self):
         if not self._items:
@@ -58,8 +64,7 @@ class MinHeap:
             items[0] = last
             self._sift_down(0)
         self.operations += 1
-        if self.trace is not None:
-            self.trace.append({"action": "heap extract", "value": len(items)})
+        self._record("heap extract")
         return result
 
 

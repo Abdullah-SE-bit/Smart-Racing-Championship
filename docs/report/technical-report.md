@@ -1,11 +1,21 @@
 # Smart Racing Championship - Technical Report
 
-## Project information and status
+![REDLINE night pit lane](../../assets/images/pit-lane-night.png)
 
-Course: Design and Analysis of Algorithms. The group registration numbers and
-section have not been supplied in this workspace and must be added before the
-submission ZIP is named. This is a report on the current implementation, not a
-claim that the submission is complete.
+## Design and Analysis of Algorithms
+
+REDLINE models a championship as a changing road network. This report follows
+the player from route planning through the final standings and measures the
+algorithms behind those decisions.
+
+| Project details | |
+| --- | --- |
+| Group members | Awaiting group details |
+| Registration numbers | Awaiting group details |
+| Section | Awaiting group details |
+| Report status | Development draft |
+
+---
 
 ## Problem and objectives
 
@@ -20,7 +30,10 @@ The assignment's precise requirements and constraints are retained in
 
 The shared graph and race engine contain no Pygame rendering. Pygame presents
 the main menu, settings, route explorer, racing screen, Algorithm Lab, results,
-and standings. The Lab consumes the same algorithm functions as the planner,
+and standings. Players can switch between an overhead 3D broadcast and a flat
+tactical view of the same roads, then review the podium and race classification.
+The saved reduced-motion setting applies across screens. The Lab animates sorting,
+heap and resource-planning decisions from the same functions as the planner,
 race and experiments. Authored JSON circuits and seeded generated circuits are
 loaded as adjacency-list graphs. A fixed 1/30-second simulation step separates
 the race clock from animation frame rate. See `docs/architecture/decisions.md`
@@ -72,7 +85,7 @@ scalar score cannot represent all possible trade-offs.
 | DFS | Traversal, with cycle, weak-component, dead-end and bounded path helpers | O(V+E) traversal / O(V); component view uses O(V+E) space; path enumeration can be exponential |
 | Dijkstra | Non-negative route optimization and opponent routing | O((V+E) log V) with a binary heap |
 | A* | Heuristic route search and comparison | Worst case comparable to Dijkstra; depends on heuristic |
-| Dynamic programming | 0/1 pickup choices and discrete fixed-route refuelling | O(mB) for knapsack with reconstruction; direct refuelling O(mC²) |
+| Dynamic programming | 0/1 pickup choices and discrete fixed-route refuelling | O(mB) for knapsack with reconstruction, O(m(C+1)) for fixed-stop-time refuelling |
 | Greedy | Feasible benefit-to-cost pickup comparison | O(m log m) sorting |
 | Backtracking | Ordered checkpoint placement during generation | Exponential worst case |
 | Kruskal | Undirected generated-circuit backbone | O(E log E) with union-find |
@@ -126,16 +139,16 @@ only the previous row, so every item is used at most once and induction on the
 number of items gives the optimal benefit for each budget. Runtime and storage
 are O(mB), where B is the numeric budget, not its bit length.
 
-**Refuelling DP.** Map each reachable discrete fuel amount to its smallest
-accumulated stop time and purchase history. At each route vertex, try permitted
-purchases, subtract the next edge's requirement, and retain the best history
-for each arrival fuel. A state records everything needed for later transitions,
-so discarding a slower history with the same fuel preserves an optimal plan.
-Fuel is discretized in tenths with conservative rounding; the race engine fills
-up to 40 units at the same fixed stop time. This can leave more fuel than the
-minimum DP purchase without invalidating the plan. The planner displays the
-station vertices and planned quantities for the selected route; pickup advice
-for an ordered lap respects its checkpoint sequence and nitro capacity.
+**Refuelling DP.** Work backwards from zero remaining time at the finish.
+At each vertex and fuel level, compare skipping the station with paying a
+fixed stop time and taking up to 40 units. Deduct the next road's requirement.
+More arrival fuel can only preserve or improve the next state's time, so the
+largest permitted purchase gives the best future time for any positive stop.
+A linear scan of each row records the first fuel level achieving each equal
+time. The planner reconstructs the smallest purchases attaining the optimum
+in O(m(C+1)) total time and storage. Impossible states cost infinity. Fuel is
+rounded conservatively to tenths. The game's automatic fill at the same stops
+can leave extra fuel. The resource-planning notes give the full recurrence.
 
 **Greedy pickup choice.** Process positive-benefit zero-cost items first, then
 consider the remaining items in descending exact benefit-to-cost ratio with ID
@@ -179,10 +192,12 @@ O(n log n) but can be O(n^2); the lists used by this implementation take space.
 
 **Heap Sort and top-k.** Heap Sort builds a max-heap, repeatedly swaps its
 root with the final unsorted position, then restores the heap invariant. Each
-extraction fixes the greatest remaining key at the end. Top-k instead heapifies
-the shared championship keys in a min-heap and extracts k entries. Its output
-is the first k entries of the same total ordering, using O(n + k log n) time
-and O(n) storage. The studies compare this with all three full sorts.
+extraction fixes the greatest remaining key at the end. Top-k scans the field
+once, keeping up to k leaders in the shared manual heap with the worst retained
+key at its root. A better arrival replaces that root, so after each input the
+heap contains the best k records seen so far. Reversing the extraction order
+returns them best first. Equal keys retain their original input order. For
+positive k the worst-case time is O(n log(k+1)) and storage is O(k).
 
 The A* heuristic uses straight-line distance times the smallest current edge
 cost per straight-line edge length, giving a consistent lower bound. Zero is a
@@ -196,13 +211,14 @@ Kruskal sorts undirected edges and joins distinct components. The generated
 backbone receives extra roads for a lap and alternative routes. Backtracking
 places consecutive checkpoints on adjacent ring positions, two spaced service
 vertices, and two obstacles on edge-disjoint non-bridge roads outside the main
-lap. These constraints prune invalid placements but restrict generated layouts
-to a ring-based family.
+lap. A junction can have six incident roads. An extra road at a full endpoint
+can only increase its degree, so pruning that candidate preserves every legal
+placement. A backbone that already exceeds six triggers a retry. The generator
+uses a ring-based family.
 Heap events use trigger time, priority and insertion sequence. Cancelled events
 are lazily ignored at extraction; overlapping effects have independent expiry.
-Top-k heapifies all entries before extraction, using O(n) space and
-O(n + k log n) time. Quick Sort uses a middle-element pivot and three-way
-partition. All ranking methods use the same total comparator.
+Quick Sort uses a middle-element pivot and three-way partition. All ranking
+methods use the same total comparator.
 
 ## Verification
 
@@ -232,34 +248,27 @@ that every possible seed or layout will succeed. The generator retries invalid
 candidates up to its documented limit, and the interface can save a valid track.
 
 The balanced, speed, economy and safety profiles combine normalized non-negative
-road attributes with different weights. An automated fixture confirms that
-different presets choose different paths; scores from different profiles do not
-share a common scale. The championship dashboard supports a selectable k and
+road attributes with different weights. On a Copper Canyon ordered lap, Balanced
+drives directly from checkpoint 2 to 3. Safety detours from 2 through service
+vertex 11 to 3 and still visits all ten checkpoints in order. Compare the two
+in the planner's ordered-lap mode. The championship dashboard supports a selectable k and
 the heap leaders use the same comparator as the three full sorting methods.
 The fifth study records measured timings for small k and for k close to n.
 
 ## Limitations and remaining submission work
 
-The prototype needs further review against all assignment requirements, broader
-generation and validation constraints, and human end-to-end play testing. A
-clean Windows CI runner built the executable and successfully launched its
-headless smoke test. The local host blocked the virtual-environment Python and
-the packaged executable with Application Control. A base Python runtime did
-launch the game locally, but a complete human playthrough remains unverified.
-Finalize and inspect the executable, report and extracted
-submission ZIP on an allowed machine.
-Add the actual group names, registration numbers and section. Do not treat
-unfinished features or unverified packaging as complete.
+Generated tracks share a ring-based family. The five studies cover a single
+machine and finite input samples. Windows CI has launched the packaged game
+headlessly after extraction. The local host's Application Control blocked that
+executable, and the source game launched using base Python. A full human season,
+group details, final archive verification, demonstration and viva remain.
 
 ## Conclusion
 
-The prototype connects graph search, route optimization, resource planning,
-event scheduling, track generation and championship ranking to a playable
-racing workflow. The automated checks and five measured studies provide
-evidence for the tested cases and show how the algorithms behave on the
-recorded inputs. They do not establish correctness for every possible circuit
-or replace a full human playthrough. Final requirement review, group details,
-packaged-game verification and the demo and viva remain before submission.
+The player can follow a computed route, spend fuel, adapt to a closure and see
+the resulting points update the championship order. The Lab exposes the shared
+algorithms at each stage, and the five studies quantify their behavior on the
+recorded inputs.
 
 ## Acknowledgements
 
@@ -267,8 +276,9 @@ The project uses Python, Pygame, pytest, Matplotlib, PyInstaller and ReportLab;
 versions are documented in `pyproject.toml` and the study environment. Circuit
 data and interface graphics are project-authored. The pit-lane background was
 generated with OpenAI's image generation tool; its prompt and provenance are in
-`assets/images/README.md`. Segoe UI is requested from the operating system and
-is not distributed. No external audio is included.
+`assets/images/README.md`. The REDLINE monogram is original. Barlow and Barlow
+Condensed by the Barlow Project Authors are bundled with their SIL Open Font
+License 1.1 in the fonts folder.
 
 Reference material: the assignment transcription in `docs/assignment-specification.md`;
 Python documentation at https://docs.python.org/3/; Pygame documentation at

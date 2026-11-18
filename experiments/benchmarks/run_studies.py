@@ -22,6 +22,8 @@ from smart_racing.algorithms.sorting.rankings import heap_sort, merge_sort, quic
 from smart_racing.core.graph import Edge, Graph, Vertex
 from smart_racing.championship.standings import ChampionshipEntry, ranking_key
 from smart_racing.events.queue import Event, EventQueue
+from smart_racing.game.race import Race
+from smart_racing.tracks.circuits import load_circuit
 
 
 SEED = 20261205
@@ -139,12 +141,14 @@ def resource_study():
         best = max(sum(item.benefit for item in subset) for count in range(len(items) + 1)
                    for subset in combinations(items, count) if sum(item.cost for item in subset) <= budget)
         assert knapsack(items, budget).benefit == best
+    samples = examples.copy()
     for size, budget in ((10, 30), (30, 60), (60, 100)):
-        items = [Pickup(i, rng.randint(1, 12), rng.randint(1, 30)) for i in range(size)]
+        samples.append(([Pickup(i, rng.randint(1, 12), rng.randint(1, 30)) for i in range(size)], budget))
+    for items, budget in samples:
         for name, algorithm in (("dp", knapsack), ("greedy", greedy)):
             result = algorithm(items, budget)
             assert result.cost <= budget
-            rows.append({"items": size, "budget": budget, "algorithm": name,
+            rows.append({"items": len(items), "budget": budget, "algorithm": name,
                          "input_items": [{"id": item.id, "cost": item.cost, "benefit": item.benefit}
                                          for item in items],
                          "benefit": result.benefit, "selected": [i.id for i in result.items],
@@ -160,23 +164,44 @@ def queue_study():
         rng = random.Random(SEED + size)
         values = [(rng.randrange(12), rng.randrange(1, 7)) for _ in range(size)]
 
-        def prepare():
+        def insert():
             queue = EventQueue()
             for index, (time, priority) in enumerate(values):
                 queue.schedule(Event(index, time, priority, "block", 0))
+            return queue
+
+        def prepare_extraction():
+            queue = insert()
             for index in range(0, size, 11):
                 queue.cancel(index)
             return queue
 
-        queue = prepare()
+        queue = prepare_extraction()
         events = list(queue.due(20))
         operations = queue.heap.operations
         expected = sorted((time, priority, index) for index, (time, priority) in enumerate(values) if index % 11)
         assert [(event.time, event.priority, event.id) for event in events] == expected
         rows.append({"events": size, "cancelled": size - len(events), "heap_operations": operations,
-                     "insert_and_cancel_timing": measure(prepare),
-                     "extraction_timing": measure_prepared(prepare, lambda item: list(item.due(20)))})
+                     "insertion_timing": measure(insert),
+                     "extraction_timing": measure_prepared(prepare_extraction, lambda item: list(item.due(20)))})
     return rows
+
+
+def expiration_check():
+    """Verify the queue expirations that the game creates when effects overlap."""
+    circuit = load_circuit(sorted((ROOT / "data" / "circuits").glob("*.json"))[0])
+    road = circuit.graph.edges[0]
+    race = Race(circuit)
+    race.schedule(Event(10, 1, 1, "block", road.id, 2))
+    race.schedule(Event(11, 1, 1, "block", road.id, 5))
+    observations = []
+    for delta in (1, 2, 3):
+        race.tick(delta)
+        observations.append({"time": race.elapsed, "road": road.status,
+                             "active": sorted(race.active_effects)})
+    assert [(step["road"], step["active"]) for step in observations] == [
+        ("blocked", [10, 11]), ("blocked", [11]), ("open", [])]
+    return {"circuit": circuit.name, "road_id": road.id, "observations": observations}
 
 
 def sorting_study():
@@ -249,8 +274,8 @@ def write_analysis(output):
               "and its setup is timed, so A* need not be faster or expand fewer vertices in every case. "
               "These instances alone do not establish general performance.", "", "## 3. Dynamic programming and greedy", "",
               "Objective: compare 0/1 pickup benefit and runtime as item count and budget vary. "
-              "Seeded item costs and benefits are generated before timing. Three small counterexamples "
-              "are separately checked against exhaustive search.", "",
+              "All cases, including the assignment example and two team counterexamples, are timed. "
+              "Each counterexample is checked against exhaustive search before timing.", "",
               "| Items | Budget | Method | Benefit | DP states | Mean ms |",
               "| ---: | ---: | --- | ---: | ---: | ---: |"]
     for row in output["resources"]["rows"]:
@@ -261,15 +286,16 @@ def write_analysis(output):
         "The selected IDs and input cases are saved in the raw JSON. DP is pseudo-polynomial in "
         "budget; greedy is feasible but need not be optimal. These small instances do not establish "
         "the performance of larger multi-resource planners.", "", "## 4. Event priority queue", "",
-        "Objective: measure insertion/cancellation and extraction separately for seeded event queues. "
-        "Inputs contain tied timestamps and priorities; every eleventh event is lazily cancelled. "
-        "The result order is checked against time, priority and insertion sequence. Independent "
-        "effect expiration is exercised by the automated race tests.", "",
-        "| Events | Cancelled | Heap operations | Insert + cancel ms | Extraction ms |",
+        "Objective: measure insertion and extraction separately for seeded queues. Timestamps and "
+        "priorities include ties. Before extraction, every eleventh event is lazily cancelled. "
+        "The reference order uses trigger time, priority and insertion sequence. In a separate race "
+        "check, two closures start at t=1. The road stays blocked after one expires at t=3 and opens "
+        "at t=6. The raw results record the surviving effects at each time.", "",
+        "| Events | Cancelled | Heap operations | Insertion ms | Extraction ms |",
         "| ---: | ---: | ---: | ---: | ---: |"]
     for row in output["events"]:
         lines.append(f"| {row['events']} | {row['cancelled']} | {row['heap_operations']} | "
-                     f"{row['insert_and_cancel_timing']['mean_ms']:.4f} | {row['extraction_timing']['mean_ms']:.4f} |")
+                     f"{row['insertion_timing']['mean_ms']:.4f} | {row['extraction_timing']['mean_ms']:.4f} |")
     lines += ["", "Extraction timing excludes preparing the queue; insertion includes queue creation. "
               "Lazy cancellation keeps entries in memory until extraction, so the benchmark reports "
               "operations for cancelled entries as well.", "", "## 5. Sorting and top-k", "",
@@ -280,10 +306,16 @@ def write_analysis(output):
     for row in output["sorting"]:
         lines.append(f"| {row['size']} | {row['input']} | {row['algorithm']} | {row.get('k', '-')} | "
                      f"{row['timing']['mean_ms']:.4f} |")
-    lines += ["", "Top-k uses bottom-up heap construction followed by k extractions: O(n + k log n), "
-              "with O(n) storage. Full sorting and retrieval have different output sizes, so comparisons "
-              "should consider k relative to n. These measurements include comparator and heap setup; "
-              "comparison counters are not currently instrumented.", ""]
+    largest = max(row["size"] for row in output["sorting"])
+    random_rows = [row for row in output["sorting"] if row["size"] == largest and row["input"] == "random"]
+    merge_ms = next(row["timing"]["mean_ms"] for row in random_rows if row["algorithm"] == "merge")
+    small, large = [row for row in random_rows if row["algorithm"] == "top_k"]
+    lines += ["", f"For {largest} random records, the bounded heap averaged {small['timing']['mean_ms']:.4f} ms "
+              f"for k={small['k']} and {large['timing']['mean_ms']:.4f} ms for k={large['k']}. "
+              f"Merge Sort ranked the entire field in {merge_ms:.4f} ms. The heap retains at most k "
+              "entries and runs in O(n log(k+1)) time with O(k) storage. As k approaches n, its "
+              "memory and extraction costs approach those of a full ranking. These timings include "
+              "comparator and heap setup and depend on the input order and machine.", ""]
     (ROOT / "experiments" / "results" / "analysis.md").write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -299,7 +331,8 @@ def main():
                               "dependencies": dependencies,
                               "timing": "perf_counter; milliseconds; one warm-up; algorithm initialization included except prepared event extraction; input generation, correctness checks, I/O and rendering excluded"},
               "traversal": traversal_study(), "routing": routing_study(),
-              "resources": resource_study(), "events": queue_study(), "sorting": sorting_study()}
+              "resources": resource_study(), "events": queue_study(), "event_expiration": expiration_check(),
+              "sorting": sorting_study()}
     destination = ROOT / "experiments" / "results" / "studies.json"
     destination.write_text(json.dumps(output, indent=2) + "\n", encoding="utf-8")
     write_analysis(output)

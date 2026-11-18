@@ -1,5 +1,7 @@
 """Three manual sorting methods and heap top-k with a shared key."""
 
+from dataclasses import dataclass
+
 from smart_racing.algorithms.structures.heap import MinHeap
 
 
@@ -22,7 +24,7 @@ def merge_sort(items, key=lambda x: x, trace=None):
     result.extend(left[i:])
     result.extend(right[j:])
     if trace is not None:
-        trace.append({"action": "merge", "values": [str(key(item)) for item in result]})
+        trace.append({"action": "merge", "values": [key(item) for item in result]})
     return result
 
 
@@ -41,7 +43,8 @@ def quick_sort(items, key=lambda x: x, trace=None):
         else:
             equal.append(item)
     if trace is not None:
-        trace.append({"action": "partition", "values": [str(key(item)) for item in less + equal + greater]})
+        trace.append({"action": "partition", "values": [key(item) for item in less + equal + greater],
+                      "pivot": pivot})
     return quick_sort(less, key, trace) + equal + quick_sort(greater, key, trace)
 
 
@@ -65,12 +68,39 @@ def heap_sort(items, key=lambda x: x, trace=None):
         values[0], values[end] = values[end], values[0]
         sift(0, end)
         if trace is not None:
-            trace.append({"action": "extract maximum", "values": [str(key(item)) for item in values]})
+            trace.append({"action": "extract maximum", "values": [key(item) for item in values],
+                          "sorted_from": end})
     return values
+
+
+@dataclass(slots=True)
+class _RankedCandidate:
+    """Reverse the ranking in the heap so the worst retained entry is its root."""
+
+    key: object
+    sequence: int
+    item: object
+
+    def __lt__(self, other):
+        return (self.key, self.sequence) > (other.key, other.sequence)
+
+    def __le__(self, other):
+        return (self.key, self.sequence) >= (other.key, other.sequence)
 
 
 def top_k(items, k: int, key=lambda x: x, trace=None):
     if k < 0:
         raise ValueError("k cannot be negative")
-    heap = MinHeap(((key(item), sequence, item) for sequence, item in enumerate(items)), trace=trace)
-    return [heap.pop()[2] for _ in range(min(k, len(heap)))]
+    if k == 0:
+        return []
+    retained = MinHeap(trace=trace, trace_key=lambda candidate: candidate.key)
+    for sequence, item in enumerate(items):
+        item_key = key(item)
+        if len(retained) == k:
+            if item_key >= retained.peek().key:
+                continue
+            retained.pop()
+        retained.push(_RankedCandidate(item_key, sequence, item))
+    leaders = [retained.pop().item for _ in range(len(retained))]
+    leaders.reverse()
+    return leaders
