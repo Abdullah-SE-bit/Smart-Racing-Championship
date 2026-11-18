@@ -95,6 +95,8 @@ class App:
         self.running = True
         self.time = 0.0
         self.menu_entered = None
+        self.setup_entered = 0.0
+        self.setup_indicators = {}
         self.settings_file = settings_file
         self.reduced_motion = self.load_motion_preference()
         self.intro_active = False
@@ -175,6 +177,9 @@ class App:
         if screen != self.screen:
             self.buttons = []
             self.focused_button = 0
+            if screen == "settings":
+                self.setup_entered = self.time
+                self.setup_indicators.clear()
             if screen == "menu":
                 self.menu_entered = None
         self.screen = screen
@@ -733,41 +738,92 @@ class App:
 
     def draw_settings(self):
         self.draw_pit_background()
-        self.label("RACE CONTROL  /  SETUP", 48, 101, 14, EMPHASIS)
-        self.label("CONTROLS & SETTINGS", 45, 124, 42, TEXT)
-        self.label("Get comfortable before the lights go out.", 48, 183, 18, MUTED)
-        self.menu_button((1040, 113, 190, 50), "‹  MAIN MENU", None, lambda: self.go("menu"))
-        for rect in ((48, 225, 680, 525), (748, 225, 484, 525)):
-            pygame.draw.rect(self.surface, PANEL, rect, border_radius=12)
-            pygame.draw.rect(self.surface, BORDER, rect, 1, border_radius=12)
-        self.label("01   /   DRIVER CONTROLS", 76, 250, 14, EMPHASIS)
-        self.label("Know your inputs", 76, 278, 24, TEXT)
-        controls = (("←  /  →", "Select a road at a junction"),
-                    ("ENTER", "Drive along the selected road"),
-                    ("N", "Use one nitro charge"),
-                    ("F", "Refuel at an available station"),
-                    ("SPACE", "Pause or resume the race"),
-                    ("ESC", "Return to the main menu"),
-                    ("TAB", "Move between buttons; Enter activates"))
-        for index, (key, description) in enumerate(controls):
-            y = 328 + index * 47
-            pygame.draw.rect(self.surface, (39, 45, 54), (76, y, 104, 34), border_radius=5)
-            pygame.draw.rect(self.surface, (75, 84, 96), (76, y, 104, 34), 1, border_radius=5)
-            self.label(key, 86, y + 6, 16, TEXT)
-            self.label(description, 200, y + 7, 18, (220, 225, 233))
-        self.label("Race actions are also available on screen.", 76, 680, 16, MUTED)
-        self.label("Planner: arrows select destination; Shift + arrows select start.", 76, 704, 16, MUTED)
+        elapsed = self.time - self.setup_entered
+        reveal = 1 if self.reduced_motion else ease_out(elapsed / .5)
+        self.label("CONTROLS & SETTINGS", 46, 102, 42, TEXT)
+        self.menu_button((1040, 109, 192, 48), "‹  MAIN MENU", None, lambda: self.go("menu"))
+        pygame.draw.line(self.surface, BORDER, (48, 177), (1232, 177))
+        pygame.draw.line(self.surface, EMPHASIS, (48, 177), (48 + round(214 * reveal), 177), 3)
 
-        self.label("02   /   RACE OPTIONS", 780, 250, 14, EMPHASIS)
-        self.label("Your race, your pace", 780, 278, 24, TEXT)
-        self.label("LAPS PER RACE", 780, 330, 14, MUTED)
-        self.menu_button((780, 354, 420, 53), f"{self.laps_setting} LAPS", None, self.toggle_laps)
-        self.label("RACE TIME LIMIT", 780, 427, 14, MUTED)
-        self.menu_button((780, 451, 420, 53), f"{self.limit_setting} SECONDS", None, self.toggle_limit)
-        self.label("INTERFACE MOTION", 780, 524, 14, MUTED)
-        self.menu_button((780, 548, 420, 53), "REDUCED" if self.reduced_motion else "FULL", None, self.toggle_motion)
-        self.label("Select an option to change it.", 780, 627, 16, MUTED)
-        self.label("Race rules apply equally to all drivers.", 780, 652, 16, MUTED)
+        for x, width, title in ((48, 680, "Driver controls"), (748, 484, "Race setup")):
+            self.card((x, 210, width, 520), PANEL, 5, BORDER)
+            pygame.draw.rect(self.surface, (34, 40, 50), (x + 1, 211, width - 2, 65))
+            pygame.draw.rect(self.surface, EMPHASIS, (x, 228, 4, 31))
+            self.label(title.upper(), x + 24, 223, 30, TEXT)
+
+        bindings = (
+            (("←", "→"), "Select a road at a junction"),
+            (("ENTER",), "Drive along the selected road"),
+            (("N",), "Use a nitro charge"),
+            (("F",), "Refuel at an active station"),
+            (("SPACE",), "Pause or resume the race"),
+        )
+        for index, (keys, action) in enumerate(bindings):
+            y = 288 + index * 54
+            for column, key in enumerate(keys):
+                width = 48 if len(keys) > 1 else 104
+                self.draw_keycap(key, 72 + column * 56, y + 4, width)
+            phase = 1 if self.reduced_motion else ease_out((elapsed - index * .045) / .28)
+            self.label(action, 204 + round(12 * (1 - phase)), y + 8, 18, TEXT)
+            pygame.draw.line(self.surface, BORDER, (72, y + 48), (704, y + 48))
+
+        self.label("ROUTE PLANNER", 72, 582, 20, ACCENT)
+        self.label("Left / Right", 72, 623, 18, TEXT)
+        self.label("Change destination", 258, 623, 18, MUTED)
+        self.label("Shift + Left / Right", 72, 665, 18, TEXT)
+        self.label("Change starting vertex", 258, 665, 18, MUTED)
+
+        options = (
+            ("LAPS PER RACE", ("2 laps", "3 laps"), self.laps_setting - 2, self.toggle_laps),
+            ("RACE TIME LIMIT", ("180 s", "240 s", "360 s"), (180, 240, 360).index(self.limit_setting), self.toggle_limit),
+            ("INTERFACE MOTION", ("Full", "Reduced"), int(self.reduced_motion), self.toggle_motion),
+        )
+        for index, (title, choices, selected, action) in enumerate(options):
+            y = 307 + 99 * index
+            self.label(title, 772, y, 16, MUTED)
+            self.draw_setup_selector(title, choices, selected, action, y + 29)
+        pygame.draw.line(self.surface, BORDER, (772, 620), (1208, 620))
+        self.label("Select a setting to cycle its value.", 772, 637, 16, TEXT)
+        self.label("Reduced motion also skips the startup sequence.", 772, 670, 16, MUTED)
+
+        for x, key, description in ((48, "TAB", "Focus"), (197, "ENTER", "Activate"), (377, "ESC", "Main menu")):
+            self.draw_keycap(key, x, 751, 64)
+            self.label(description, x + 76, 758, 16, MUTED)
+
+    def draw_keycap(self, key, x, y, width):
+        rect = pygame.Rect(x, y, width, 34)
+        pygame.draw.rect(self.surface, BORDER, rect, border_radius=4)
+        pygame.draw.rect(self.surface, PANEL_LIGHT, rect.inflate(-2, -4).move(0, -1), border_radius=4)
+        font = self.symbol_fonts[18] if key in ("←", "→") else self.fonts[20]
+        glyph = font.render(key, True, TEXT)
+        self.surface.blit(glyph, glyph.get_rect(center=rect.center))
+
+    def draw_setup_selector(self, title, choices, selected, action, y):
+        rect = pygame.Rect(772, y, 436, 54)
+        focused = self.keyboard_focus and self.focused_button == len(self.buttons)
+        hovered = rect.collidepoint(self.logical_position(pygame.mouse.get_pos()))
+        pygame.draw.rect(self.surface, PANEL_LIGHT, rect, border_radius=4)
+        slot = 76 / len(choices)
+        destination = selected * slot
+        old, origin, started = self.setup_indicators.get(title, (selected, destination, self.time))
+        phase = 1 if self.reduced_motion else ease_out((self.time - started) / .20)
+        position = origin + (old * slot - origin) * phase
+        if old != selected:
+            self.setup_indicators[title] = (selected, position, self.time)
+        elif title not in self.setup_indicators:
+            self.setup_indicators[title] = (selected, destination, self.time)
+        if self.reduced_motion:
+            position = destination
+            self.setup_indicators[title] = (selected, position, self.time)
+        self.label(choices[selected].upper(), rect.x + 16, rect.y + 9, 30, TEXT)
+        rail = rect.right - 141
+        for index in range(len(choices)):
+            pygame.draw.rect(self.surface, BORDER, (rail + round(index * slot), y + 25, round(slot) - 4, 5))
+        pygame.draw.rect(self.surface, EMPHASIS, (rail + round(position), y + 24, round(slot) - 4, 7))
+        x, middle = rect.right - 25, rect.centery
+        pygame.draw.lines(self.surface, TEXT, False, [(x - 3, middle - 5), (x + 2, middle), (x - 3, middle + 5)], 2)
+        pygame.draw.rect(self.surface, ACCENT if focused or hovered else BORDER, rect, 2 if focused else 1, border_radius=4)
+        self.buttons.append((rect, action))
 
     def toggle_laps(self):
         self.laps_setting = 3 if self.laps_setting == 2 else 2
