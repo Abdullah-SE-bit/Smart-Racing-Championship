@@ -96,7 +96,7 @@ class App:
         self.screen_veil.fill((6, 9, 14, 148))
         self.clock = pygame.time.Clock()
         reading_face = str(ROOT / "assets" / "fonts" / "Barlow-Regular.ttf")
-        self.fonts = {size: pygame.font.Font(reading_face, size) for size in (14, 16, 18)}
+        self.fonts = {size: pygame.font.Font(reading_face, size) for size in (12, 14, 16, 18)}
         self.fonts.update({size: self.broadcast.compact[size] for size in (20, 24, 30)})
         self.fonts[42] = self.broadcast.title[42]
         self.symbol_fonts = {size: pygame.font.SysFont("segoeuisymbol,dejavusans", size) for size in self.fonts}
@@ -640,24 +640,70 @@ class App:
         panel_x, text_x = 860 + panel_dx, 885 + panel_dx
         self.card((panel_x, 220, 380, 530), PANEL, 12, BORDER)
         self.label("ROUTE INTELLIGENCE", text_x, 246, 14, EMPHASIS)
+        mode_text = "ORDERED LAP" if self.ordered_plan else "DIRECT ROUTE"
+        mode_rect = pygame.Rect(text_x + 203, 240, 127, 24)
+        pygame.draw.rect(self.surface, (33, 43, 53), mode_rect, border_radius=4)
+        pygame.draw.rect(self.surface, ACCENT, mode_rect, 1, border_radius=4)
+        mode_width = self.fonts[14].size(mode_text)[0]
+        self.label(mode_text, mode_rect.centerx - mode_width // 2, mode_rect.y + 4, 14, ACCENT)
         circuit_name = self.circuit.name
         while self.fonts[24].size(circuit_name)[0] > 330 and len(circuit_name) > 1:
             circuit_name = circuit_name[:-1]
-        self.label(circuit_name, text_x, 275, 24, TEXT)
-        self.label(f"From {self.source}   →   {'ordered lap' if self.ordered_plan else f'To {self.target}'}", text_x, 322, 18, (220, 225, 233))
-        self.label(f"Optimized cost   {route.cost:.3f}" if route.vertices else "Destination unreachable", text_x, 358, 18, EMPHASIS)
-        self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", text_x, 391, 14, MUTED)
+        self.label(circuit_name, text_x, 273, 24, TEXT)
+        destination_label = "ORDERED LAP" if self.ordered_plan else f"TO {self.target}"
+        self.label(f"FROM {self.source}   →   {destination_label}", text_x, 305, 14, MUTED)
+
         if route.vertices:
             roads = [graph.edges[i] for i in route.edges]
             distance = sum(road.distance for road in roads)
             travel_time = sum(road.base_time * (1.5 if road.status == "restricted" else 1) for road in roads)
-            self.label(f"Distance {distance:.1f}   /   Est. {travel_time:.2f}s", text_x, 409, 14, MUTED)
-        self.menu_button((text_x, 430, 330, 48), f"PRESET: {profile_name.upper()}", None, self.cycle_profile)
-        self.menu_button((text_x, 488, 330, 48), f"ALGORITHM: {self.route_algorithm.upper()}", None, self.toggle_route_algorithm)
-        self.menu_button((text_x, 546, 330, 48), "FIXED SEASON ORDER" if self.pending_championship else "GENERATE CIRCUIT", None, self.generate)
+            distance_text, time_text = f"{distance:.1f} km", f"{travel_time:.2f} s"
+            cost_text = f"{route.cost:.3f}"
+        else:
+            distance_text = time_text = cost_text = "—"
+
+        cost_card = pygame.Rect(text_x - 3, 326, 336, 78)
+        pygame.draw.rect(self.surface, (28, 34, 43), cost_card, border_radius=7)
+        pygame.draw.rect(self.surface, BORDER, cost_card, 1, border_radius=7)
+        pygame.draw.rect(self.surface, EMPHASIS, (cost_card.x, cost_card.y + 8, 3, 30), border_radius=1)
+        self.label("OPTIMIZED COST", text_x + 12, 333, 14, MUTED)
+        self.label(cost_text, text_x + 10, 350, 42, ACCENT)
+        self.label(profile_name.upper(), text_x + 228, 338, 14, EMPHASIS)
+        self.label("LOWER IS BETTER", text_x + 228, 359, 14, MUTED)
+
+        stats = (("DISTANCE", distance_text), ("EST. TIME", time_text),
+                 ("EXPANDED", str(route.expanded)), ("RELAXED", str(route.relaxed)))
+        for index, (title, value) in enumerate(stats):
+            column, row = index % 2, index // 2
+            rect = pygame.Rect(text_x + column * 171, 412 + row * 43, 160, 38)
+            pygame.draw.rect(self.surface, PANEL_LIGHT, rect, border_radius=4)
+            pygame.draw.rect(self.surface, BORDER, rect, 1, border_radius=4)
+            self.label(title, rect.x + 8, rect.y + 3, 12, MUTED)
+            self.label(value, rect.x + 8, rect.y + 16, 18, TEXT)
+
+        self.label("COST PROFILES", text_x, 500, 14, MUTED)
+        self.label("COMPARE ROUTES", text_x + 207, 500, 14, ACCENT)
+        candidates = [(name, profile, self.planned_route(profile))
+                      for name, profile in PROFILES.items()]
+        finite_costs = [candidate.cost for _, _, candidate in candidates
+                        if math.isfinite(candidate.cost)]
+        cost_ceiling = max(finite_costs, default=1.0) or 1.0
+        for index, (name, _profile, candidate) in enumerate(candidates):
+            column, row = index % 2, index // 2
+            self.draw_planner_profile_chip(
+                name, candidate.cost, self.profile_index == index,
+                pygame.Rect(text_x + column * 171, 518 + row * 35, 160, 30),
+                min(1.0, candidate.cost / cost_ceiling) if math.isfinite(candidate.cost) else 1.0,
+                lambda selected=index: self.select_profile(selected),
+            )
+
+        self.menu_button((text_x, 592, 160, 39), f"ALGORITHM: {self.route_algorithm.upper()}",
+                         None, self.toggle_route_algorithm)
+        self.menu_button((text_x + 170, 592, 160, 39),
+                         "SEASON ORDER" if self.pending_championship else "NEW CIRCUIT", None, self.generate)
         race_label = (f"START RACE {self.track_index + 1} / {len(self.authored_paths)}"
                       if self.pending_championship else "START QUICK RACE")
-        self.menu_button((text_x, 604, 330, 48), race_label, None, self.start_planned_race, True)
+        self.menu_button((text_x, 640, 330, 48), race_label, None, self.start_planned_race, True)
         destinations = self.ordered_destinations() if self.ordered_plan else [self.target]
         pickup_key = (self.source, tuple(destinations), self.resource_graph_signature())
         if pickup_key not in self._pickup_cache:
@@ -667,17 +713,33 @@ class App:
         selected = [item for item in suggestions if item.dp_selected]
         recommendation = (f"PICKUP {selected[0].vertex} / DP {selected[0].benefit} / GREEDY {int(selected[0].greedy_selected)}"
                           if selected else "NITRO: no feasible pickup within budget")
-        self.label((self.validation_message or recommendation)[:42], text_x, 675, 14, GOLD)
+        self.label((self.validation_message or recommendation)[:44], text_x, 695, 14, GOLD)
         route_key = (tuple(route.vertices), tuple(route.edges), self.resource_graph_signature())
         if route.vertices and route_key not in self._refuel_cache:
             self._refuel_cache[route_key] = route_refuelling(self.circuit.graph, route.vertices, route.edges)
         refuelling = self._refuel_cache.get(route_key)
         fuel_message = f"REFUEL PLAN: {refuelling[0] // 3} stop(s), 0.1-unit model" if refuelling is not None else "REFUEL PLAN: no feasible route"
-        self.label(fuel_message, text_x, 691, 14, MUTED)
-        for index, (name, profile) in enumerate(PROFILES.items()):
-            candidate = self.planned_route(profile)
-            self.label(f"{name}: {candidate.cost:.2f}", text_x + (index % 2) * 160,
-                       711 + (index // 2) * 18, 14, MUTED)
+        stop_count = refuelling[0] // 3 if refuelling is not None else "—"
+        self.label(f"FUEL PLAN  /  {stop_count} STOPS  /  0.1-UNIT MODEL", text_x, 713, 14, MUTED)
+
+    def draw_planner_profile_chip(self, name, cost, selected, rect, ratio, action):
+        fill = (37, 48, 59) if selected else PANEL_LIGHT
+        border = ACCENT if selected else BORDER
+        pygame.draw.rect(self.surface, fill, rect, border_radius=4)
+        pygame.draw.rect(self.surface, border, rect, 1, border_radius=4)
+        self.label(name.upper(), rect.x + 8, rect.y + 2, 14, TEXT if selected else MUTED)
+        value = f"{cost:.2f}" if math.isfinite(cost) else "—"
+        value_width = self.fonts[16].size(value)[0]
+        self.label(value, rect.right - value_width - 8, rect.y + 2, 16, ACCENT if selected else TEXT)
+        pygame.draw.rect(self.surface, GAUGE_TRACK, (rect.x + 8, rect.y + 24, rect.width - 16, 2), border_radius=1)
+        if math.isfinite(cost):
+            color = ACCENT if selected else (112, 125, 139)
+            pygame.draw.rect(self.surface, color,
+                             (rect.x + 8, rect.y + 24, round((rect.width - 16) * ratio), 2), border_radius=1)
+        self.buttons.append((rect, action))
+
+    def select_profile(self, index):
+        self.profile_index = index
 
     def draw_planner_route_marker(self, route, positions, visible_edge_count, elapsed):
         """Animate a beacon along the visible route without advancing graph state."""
