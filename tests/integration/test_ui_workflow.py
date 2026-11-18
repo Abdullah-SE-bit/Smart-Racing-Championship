@@ -242,6 +242,39 @@ def test_planner_map_selection_and_separate_tools():
         pygame.quit()
 
 
+def test_planner_route_and_intelligence_panel_animate_without_reduced_motion():
+    app = App()
+    try:
+        app.go("planner")
+        frames = []
+        for moment in (0.0, .45, 1.0):
+            app.time = moment
+            app.buttons = []
+            app.background()
+            app.draw_planner()
+            frames.append(hashlib.sha256(pygame.image.tostring(app.surface, "RGB")).digest())
+        assert len(set(frames)) == len(frames)
+    finally:
+        pygame.quit()
+
+
+def test_reduced_motion_keeps_planner_route_and_panel_static():
+    app = App()
+    try:
+        app.reduced_motion = True
+        app.go("planner")
+        frames = []
+        for moment in (.1, .8):
+            app.time = moment
+            app.buttons = []
+            app.background()
+            app.draw_planner()
+            frames.append(hashlib.sha256(pygame.image.tostring(app.surface, "RGB")).digest())
+        assert frames[0] == frames[1]
+    finally:
+        pygame.quit()
+
+
 def test_race_presentation_does_not_advance_simulation():
     app = App()
     try:
