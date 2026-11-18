@@ -1101,7 +1101,7 @@ class App:
 
     def step_lab(self, amount):
         self.lab_playing = False
-        self.lab_step = max(0, min(self.lab_step, len(self.lab_result()[0])) + amount)
+        self.lab_step = max(0, min(len(self.lab_result()[0]), self.lab_step + amount))
 
     def reset_lab(self):
         self.lab_playing = False
