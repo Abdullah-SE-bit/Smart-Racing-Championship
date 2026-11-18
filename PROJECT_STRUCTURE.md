@@ -38,8 +38,9 @@ checked against the supplied PDF. The user has authorized implementation.
 | Directory | Intended responsibility |
 | --- | --- |
 | `assets/` | Versioned presentation assets included in the Windows build. |
-| `assets/images/` | Original generated pit-lane artwork and its provenance. |
-| `assets/sprites/`, `assets/fonts/`, `assets/sounds/` | Bundled Barlow typefaces and OFL license in fonts. Sprite and sound directories are reserved. |
+| `assets/images/` | Original pit-lane artwork and three generated circuit-specific scene backdrops with provenance. |
+| `assets/audio/` | Original synthesized ambience and UI/race cues with reproducible source script and provenance. |
+| `assets/sprites/`, `assets/fonts/` | Reserved sprite directory; bundled Barlow typefaces and OFL license in fonts. |
 | `data/` | Versioned JSON inputs and configuration. |
 | `data/circuits/` | Definitions for the three circuits and their checkpoints and shortcuts. |
 | `data/configurations/`, `data/experiments/` | Reserved input directories; current settings and study inputs are defined in code. |
@@ -57,6 +58,7 @@ checked against the supplied PDF. The user has authorized implementation.
 | `docs/testing/` | Test strategy and verification documentation. |
 | `docs/report/` | Assignment report sources and submission material. |
 | `scripts/` | Build, preview, report and local submission-packaging scripts. |
+| `scripts/generate_audio_assets.py`, `scripts/generate_circuit_art.py` | Reproducible generators for original sound and venue artwork. |
 
 Empty non-package directories contain `.gitkeep` so Git preserves them. Circuit
 JSON lives outside the Python package in source checkouts. The PyInstaller build

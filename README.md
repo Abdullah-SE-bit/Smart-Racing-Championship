@@ -65,7 +65,7 @@ Double-click **Play.cmd** in the project folder, or run it in the VS Code PowerS
 .\Play.cmd
 ```
 
-Switch cameras during a race using the view button. Reduced motion is saved between launches. The game opens with a four-second intro. Press Enter, Space, Escape or click
+Switch cameras during a race using the view button. Reduced motion and sound level are saved between launches; choose Mute, Quiet, Balanced, or Loud in Settings. The game opens with a four-second intro. Press Enter, Space, Escape or click
 to skip it. Use the mouse to navigate. In a race, select a road with the left/right arrow
 keys, press Enter to drive, press N for nitro, and press F at a fuel station to
 refuel. Space pauses the simulation. The race screen also provides clickable

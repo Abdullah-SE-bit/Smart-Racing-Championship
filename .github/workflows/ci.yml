@@ -106,6 +106,15 @@ jobs:
             "source/data/circuits/circuit_3.json", "source/assets/fonts/OFL.txt", "source/assets/fonts/Barlow-Regular.ttf",
             "source/assets/fonts/BarlowCondensed-BoldItalic.ttf", "source/assets/fonts/BarlowCondensed-SemiBold.ttf",
             "source/assets/images/pit-lane-night.png",
+            "source/assets/images/neon-harbor.png", "source/assets/images/copper-canyon.png",
+            "source/assets/images/aurora-night.png", "source/assets/audio/README.md",
+            "source/assets/audio/menu-ambience.wav", "source/assets/audio/race-ambience.wav",
+            "source/assets/audio/race-rev.wav", "source/assets/audio/race-boost.wav",
+            "source/assets/audio/focus.wav", "source/assets/audio/confirm.wav",
+            "source/assets/audio/transition.wav", "source/assets/audio/countdown.wav",
+            "source/assets/audio/launch.wav", "source/assets/audio/nitro.wav",
+            "source/assets/audio/checkpoint.wav", "source/assets/audio/warning.wav",
+            "source/assets/audio/finish.wav",
             "source/docs/assignment-specification.md", "source/experiments/results/analysis.md",
             "source/experiments/results/studies.json"
           )
