@@ -79,6 +79,11 @@ def load_circuit_backdrop(filename):
                                                 round(image.get_height() * scale)))
 
 
+def circuit_artwork_name(circuit):
+    return {"neon harbor": "neon-harbor.png", "copper canyon": "copper-canyon.png",
+            "aurora circuit": "aurora-night.png"}.get(circuit.name.casefold())
+
+
 class App:
     def __init__(self, *, settings_file=None):
         pygame.init()
@@ -343,7 +348,15 @@ class App:
         width, height = rect[2:]
         render_scale = 3
         preview = pygame.Surface((width * render_scale, height * render_scale))
-        preview.fill((18, 22, 29))
+        artwork = circuit_artwork_name(self.circuit)
+        if artwork:
+            backdrop = pygame.transform.smoothscale(load_circuit_backdrop(artwork), preview.get_size())
+            preview.blit(backdrop, (0, 0))
+            shade = pygame.Surface(preview.get_size(), pygame.SRCALPHA)
+            shade.fill((8, 12, 18, 155))
+            preview.blit(shade, (0, 0))
+        else:
+            preview.fill((18, 22, 29))
         high_resolution_rect = (0, 0, width * render_scale, height * render_scale)
         draw_circuit_model(preview, high_resolution_rect, self.circuit,
                            0 if self.reduced_motion else self.time)
@@ -351,9 +364,8 @@ class App:
         self.surface.blit(smooth, rect[:2])
 
     def draw_pit_background(self):
-        venue = {"neon harbor": "neon-harbor.png", "copper canyon": "copper-canyon.png",
-                 "aurora circuit": "aurora-night.png"}.get(self.circuit.name.casefold())
-        backdrop = load_circuit_backdrop(venue) if venue else self.pit_backdrop
+        # Keep the original hero-car scene as the consistent application backdrop.
+        backdrop = self.pit_backdrop
         x = (WIDTH - backdrop.get_width()) // 2
         y = (HEIGHT - backdrop.get_height()) // 2
         if not self.reduced_motion and self.screen != "menu":
@@ -391,9 +403,7 @@ class App:
         """A four-second lights-out title sequence, driven only by presentation time."""
         elapsed = self.intro_elapsed
         progress = max(0.0, min(1.0, elapsed / INTRO_DURATION))
-        venue = {"neon harbor": "neon-harbor.png", "copper canyon": "copper-canyon.png",
-                 "aurora circuit": "aurora-night.png"}.get(self.circuit.name.casefold())
-        backdrop = load_circuit_backdrop(venue) if venue else self.pit_backdrop
+        backdrop = self.pit_backdrop
         x = (WIDTH - backdrop.get_width()) // 2 + round(50 * (progress - .5))
         y = (HEIGHT - backdrop.get_height()) // 2
         self.surface.blit(backdrop, (x, y))
