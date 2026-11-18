@@ -59,10 +59,10 @@ dependencies. To add the optional packaging tools later:
 .\.venv\Scripts\python.exe -m pip install -e ".[packaging]"
 ```
 
-Launch the current prototype with:
+Double-click **Play.cmd** in the project folder, or run it in the VS Code PowerShell terminal:
 
 ```powershell
-.\.venv\Scripts\python.exe -m smart_racing
+.\Play.cmd
 ```
 
 Switch cameras during a race using the view button. Reduced motion is saved between launches. The game opens with a four-second intro. Press Enter, Space, Escape or click
