@@ -65,13 +65,13 @@ def test_sound_preference_bounds_and_invalid_saved_values(tmp_path):
 
 
 def test_circuit_venue_backdrops_are_packaged_and_loaded():
-    expected = ("neon-harbor.png", "copper-canyon.png", "aurora-night.png")
+    expected = ("neon-harbor-night.png", "copper-canyon-dusk.png", "aurora-circuit-dusk.png")
     try:
         for name in expected:
             image = ROOT / "assets" / "images" / name
             assert image.is_file() and image.stat().st_size > 10_000
             loaded = pygame.image.load(str(image))
-            assert loaded.get_size() == (1600, 1000)
+            assert loaded.get_size() == (1586, 992)
     finally:
         pygame.quit()
 

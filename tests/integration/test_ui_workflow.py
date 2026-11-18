@@ -16,7 +16,7 @@ from smart_racing.tracks.generator import generate_circuit
 from smart_racing.algorithms.routing.shortest import Route, shortest_path
 from smart_racing.championship.standings import leaders, standings
 from smart_racing.core.graph import Edge, Graph, Vertex
-from smart_racing.ui.app import ACCENT, EMPHASIS, GAUGE_TRACK, INTRO_DURATION, MUTED, PANEL, PLANNER_MAP, PRIMARY, TEXT, App, LAB_ALGORITHMS, PROFILES
+from smart_racing.ui.app import ACCENT, BACKGROUND, EMPHASIS, GAUGE_TRACK, INTRO_DURATION, MUTED, PANEL, PLANNER_MAP, PRIMARY, TEXT, App, LAB_ALGORITHMS, PROFILES
 
 
 def test_startup_intro_finishes_and_skip_does_not_activate_menu():
@@ -81,6 +81,15 @@ def test_original_hero_car_background_is_consistent_across_circuits():
             app.draw_pit_background()
             frames.append(hashlib.sha256(pygame.image.tostring(app.surface, "RGB")).digest())
         assert len(frames) == 3 and len(set(frames)) == 1
+
+        app.screen = "planner"
+        venue_frames = []
+        for path in app.authored_paths:
+            app.circuit = load_circuit(path)
+            app.surface.fill(BACKGROUND)
+            app.draw_pit_background()
+            venue_frames.append(hashlib.sha256(pygame.image.tostring(app.surface, "RGB")).digest())
+        assert len(set(venue_frames)) == 3
     finally:
         pygame.quit()
 
