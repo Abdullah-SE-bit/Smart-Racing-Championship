@@ -275,6 +275,19 @@ def test_reduced_motion_keeps_planner_route_and_panel_static():
         pygame.quit()
 
 
+def test_planner_cost_profile_chips_select_a_specific_profile():
+    app = App()
+    try:
+        app.go("planner")
+        app.buttons = []
+        app.draw_planner()
+        profile_chip_center = (903 + 80, 553 + 15)  # Economy chip during panel entrance.
+        app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=profile_chip_center))
+        assert app.profile_index == 2
+    finally:
+        pygame.quit()
+
+
 def test_race_presentation_does_not_advance_simulation():
     app = App()
     try:
