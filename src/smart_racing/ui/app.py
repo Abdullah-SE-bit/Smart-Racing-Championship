@@ -26,6 +26,7 @@ from smart_racing.resources.planner import pickup_suggestions, route_refuelling
 from smart_racing.tracks.circuits import load_circuit, save_circuit, validate_circuit
 from smart_racing.tracks.generator import _assign_checkpoints, _ring_compatible, generate_circuit
 from smart_racing.ui.screens.classification import draw_classification
+from smart_racing.ui.audio import Soundscape
 from smart_racing.ui.components.menu_icons import draw_mode_icon
 from smart_racing.ui.visualization.telemetry import drafting_surface, draw_trace_board, endpoint_flag, route_thumbnail
 from smart_racing.ui.visualization.race_scene import RaceScene
@@ -70,6 +71,14 @@ def load_pit_backdrop():
                                                 round(image.get_height() * scale)))
 
 
+@lru_cache(maxsize=3)
+def load_circuit_backdrop(filename):
+    image = pygame.image.load(str(ROOT / "assets" / "images" / filename)).convert()
+    scale = max(WIDTH / image.get_width(), HEIGHT / image.get_height())
+    return pygame.transform.smoothscale(image, (round(image.get_width() * scale),
+                                                round(image.get_height() * scale)))
+
+
 class App:
     def __init__(self, *, settings_file=None):
         pygame.init()
@@ -98,7 +107,9 @@ class App:
         self.setup_entered = 0.0
         self.setup_indicators = {}
         self.settings_file = settings_file
-        self.reduced_motion = self.load_motion_preference()
+        self.reduced_motion, sound_level = self.load_preferences()
+        self.soundscape = Soundscape(ROOT / "assets" / "audio", sound_level)
+        self._intro_light_count = 0
         self.intro_active = False
         self.intro_elapsed = 0.0
         self.transition_remaining = 0.0
@@ -176,6 +187,7 @@ class App:
             self.transition_remaining = 0
             self.previous_frame = None
         if screen != self.screen:
+            self.soundscape.cue("transition")
             self.buttons = []
             self.focused_button = 0
             if screen == "settings":
@@ -184,6 +196,7 @@ class App:
             if screen == "menu":
                 self.menu_entered = None
         self.screen = screen
+        self.soundscape.scene("race" if screen == "race" else "menu")
         self.lab_step = 0
 
     def viewport(self):
@@ -338,11 +351,14 @@ class App:
         self.surface.blit(smooth, rect[:2])
 
     def draw_pit_background(self):
-        x = (WIDTH - self.pit_backdrop.get_width()) // 2
-        y = (HEIGHT - self.pit_backdrop.get_height()) // 2
+        venue = {"neon harbor": "neon-harbor.png", "copper canyon": "copper-canyon.png",
+                 "aurora circuit": "aurora-night.png"}.get(self.circuit.name.casefold())
+        backdrop = load_circuit_backdrop(venue) if venue else self.pit_backdrop
+        x = (WIDTH - backdrop.get_width()) // 2
+        y = (HEIGHT - backdrop.get_height()) // 2
         if not self.reduced_motion and self.screen != "menu":
             x += round(10 * math.sin(self.time * .18))
-        self.surface.blit(self.pit_backdrop, (x, y))
+        self.surface.blit(backdrop, (x, y))
         self.surface.blit(self.broadcast.scrim if self.screen == "menu" else self.screen_veil, (0, 0))
         pygame.draw.rect(self.surface, (14, 17, 23), (0, 0, WIDTH, 70))
         pygame.draw.line(self.surface, BORDER, (0, 69), (WIDTH, 69))
@@ -355,12 +371,19 @@ class App:
     def start_intro(self):
         """Start a presentation-only sequence; reduced motion opens the menu."""
         self.intro_elapsed = 0.0
+        self._intro_light_count = 0
         self.intro_active = not self.reduced_motion
         self.buttons = []
+        if self.intro_active:
+            self.soundscape.scene("menu")
 
     def advance_intro(self, delta):
         if self.intro_active:
             self.intro_elapsed = min(INTRO_DURATION, self.intro_elapsed + max(0.0, delta))
+            lights = sum(self.intro_elapsed >= .55 + .43 * index for index in range(5))
+            while self._intro_light_count < lights:
+                self.soundscape.cue("countdown")
+                self._intro_light_count += 1
             if self.intro_elapsed >= INTRO_DURATION:
                 self.intro_active = False
 
@@ -368,9 +391,12 @@ class App:
         """A four-second lights-out title sequence, driven only by presentation time."""
         elapsed = self.intro_elapsed
         progress = max(0.0, min(1.0, elapsed / INTRO_DURATION))
-        x = (WIDTH - self.pit_backdrop.get_width()) // 2 + round(50 * (progress - .5))
-        y = (HEIGHT - self.pit_backdrop.get_height()) // 2
-        self.surface.blit(self.pit_backdrop, (x, y))
+        venue = {"neon harbor": "neon-harbor.png", "copper canyon": "copper-canyon.png",
+                 "aurora circuit": "aurora-night.png"}.get(self.circuit.name.casefold())
+        backdrop = load_circuit_backdrop(venue) if venue else self.pit_backdrop
+        x = (WIDTH - backdrop.get_width()) // 2 + round(50 * (progress - .5))
+        y = (HEIGHT - backdrop.get_height()) // 2
+        self.surface.blit(backdrop, (x, y))
         self.surface.blit(self.broadcast.scrim, (0, 0))
         # Opening and closing the crop reveals the actual car in the original art.
         crop = round(38 + 74 * (1 - ease_out(elapsed / .85)))
@@ -786,14 +812,14 @@ class App:
             ("LAPS PER RACE", ("2 laps", "3 laps"), self.laps_setting - 2, self.toggle_laps),
             ("RACE TIME LIMIT", ("180 s", "240 s", "360 s"), (180, 240, 360).index(self.limit_setting), self.toggle_limit),
             ("INTERFACE MOTION", ("Full", "Reduced"), int(self.reduced_motion), self.toggle_motion),
+            ("SOUND LEVEL", ("Mute", "Quiet", "Balanced", "Loud"), self.soundscape.level, self.toggle_sound),
         )
         for index, (title, choices, selected, action) in enumerate(options):
             y = 307 + 99 * index
             self.label(title, 772, y, 16, MUTED)
             self.draw_setup_selector(title, choices, selected, action, y + 29)
-        pygame.draw.line(self.surface, BORDER, (772, 620), (1208, 620))
-        self.label("Select a setting to cycle its value.", 772, 637, 16, TEXT)
-        self.label("Reduced motion also skips the startup sequence.", 772, 670, 16, MUTED)
+        pygame.draw.line(self.surface, BORDER, (772, 698), (1208, 698))
+        self.label("Audio and motion preferences save automatically.", 772, 707, 14, TEXT)
 
         for x, key, description in ((48, "TAB", "Focus"), (197, "ENTER", "Activate"), (377, "ESC", "Main menu")):
             self.draw_keycap(key, x, 751, 64)
@@ -841,20 +867,25 @@ class App:
         options = [180, 240, 360]
         self.limit_setting = options[(options.index(self.limit_setting) + 1) % len(options)]
 
-    def load_motion_preference(self):
+    def load_preferences(self):
         if self.settings_file is None:
-            return False
+            return False, 2
         try:
             saved = json.loads(self.settings_file.read_text(encoding="utf-8"))
         except (OSError, ValueError):
-            return False
-        return isinstance(saved, dict) and saved.get("reduced_motion") is True
+            return False, 2
+        if not isinstance(saved, dict):
+            return False, 2
+        level = saved.get("sound_level", 2)
+        if isinstance(level, bool) or not isinstance(level, int) or not 0 <= level <= 3:
+            level = 2
+        return saved.get("reduced_motion") is True, level
 
-    def toggle_motion(self):
-        self.reduced_motion = not self.reduced_motion
-        if self.reduced_motion:
-            self.transition_remaining = 0
-            self.previous_frame = None
+    def load_motion_preference(self):
+        """Retain a compatibility accessor for existing settings integrations."""
+        return self.load_preferences()[0]
+
+    def save_preferences(self):
         if self.settings_file is None:
             return
         temporary = None
@@ -862,10 +893,10 @@ class App:
             self.settings_file.parent.mkdir(parents=True, exist_ok=True)
             with NamedTemporaryFile(dir=self.settings_file.parent, delete=False, mode="w", encoding="utf-8") as temp:
                 temporary = Path(temp.name)
-                json.dump({"reduced_motion": self.reduced_motion}, temp)
+                json.dump({"reduced_motion": self.reduced_motion, "sound_level": self.soundscape.level}, temp)
             os.replace(temporary, self.settings_file)
         except OSError:
-            # Keep the selected setting for this session when the directory is read-only.
+            # Keep the selected preferences for this session if the directory is read-only.
             pass
         finally:
             if temporary is not None:
@@ -873,6 +904,18 @@ class App:
                     temporary.unlink(missing_ok=True)
                 except OSError:
                     pass
+
+    def toggle_motion(self):
+        self.reduced_motion = not self.reduced_motion
+        if self.reduced_motion:
+            self.transition_remaining = 0
+            self.previous_frame = None
+        self.save_preferences()
+
+    def toggle_sound(self):
+        self.soundscape.set_level((self.soundscape.level + 1) % len(self.soundscape.LEVELS))
+        self.save_preferences()
+        self.soundscape.cue("confirm")
 
     def generate(self):
         if self.pending_championship:
@@ -1316,6 +1359,7 @@ class App:
                     or (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1)):
                 self.intro_active = False
                 self.buttons = []
+                self.soundscape.cue("launch")
             return
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.keyboard_focus = False
@@ -1323,6 +1367,7 @@ class App:
             for rect, action in reversed(self.buttons):
                 if rect.collidepoint(position):
                     action()
+                    self.soundscape.cue("confirm")
                     return
             if self.screen == "planner":
                 for vertex, point in self.map_positions(PLANNER_MAP, self.circuit).items():
@@ -1339,8 +1384,10 @@ class App:
                 else:
                     self.focused_button = 0 if direction > 0 else len(self.buttons) - 1
                 self.keyboard_focus = True
+                self.soundscape.cue("focus")
             elif event.key == pygame.K_RETURN and self.keyboard_focus and self.buttons:
                 self.buttons[self.focused_button % len(self.buttons)][1]()
+                self.soundscape.cue("confirm")
             elif self.screen == "planner" and event.key in {pygame.K_LEFT, pygame.K_RIGHT}:
                 self.keyboard_focus = False
                 vertices = sorted(self.circuit.graph.vertices)
@@ -1359,9 +1406,11 @@ class App:
                     self.keyboard_focus = False
                     self.change_road(1)
                 elif event.key == pygame.K_n:
-                    self.race.activate_nitro(0)
+                    if self.race.activate_nitro(0):
+                        self.soundscape.cue("nitro")
                 elif event.key == pygame.K_f:
-                    self.race.refuel(0)
+                    if self.race.refuel(0):
+                        self.soundscape.cue("confirm")
                 elif event.key == pygame.K_SPACE:
                     self.toggle_pause()
                 elif event.key == pygame.K_RETURN:
@@ -1376,6 +1425,19 @@ class App:
                 self.event(event)
             if not self.running:
                 break
+            if self.screen == "race" and self.race is not None:
+                player = next((racer for racer in self.race.racers if racer.id == 0), None)
+                if player is not None and not self.paused and not player.finished and not player.dnf:
+                    if player.nitro_remaining > 0:
+                        layer = "race-boost"
+                    elif player.edge_id is not None:
+                        layer = "race-rev"
+                    else:
+                        layer = "race"
+                    self.soundscape.scene(layer)
+                else:
+                    self.soundscape.scene("race")
+            self.soundscape.update(delta)
             if self.intro_active:
                 self.advance_intro(delta)
                 if self.intro_active:
@@ -1383,7 +1445,18 @@ class App:
                     self.present()
                     continue
             if self.screen == "race" and not self.paused:
+                old_events = len(self.race.event_log)
+                player = next((racer for racer in self.race.racers if racer.id == 0), None)
+                old_progress = None if player is None else (player.laps, player.next_checkpoint)
                 self.simulation_clock.advance(delta, self.race.tick)
+                player = next((racer for racer in self.race.racers if racer.id == 0), None)
+                if (player is not None and old_progress is not None
+                        and old_progress != (player.laps, player.next_checkpoint)
+                        and not player.finished and not player.dnf):
+                    self.soundscape.cue("checkpoint")
+                self.play_race_events(self.race.event_log[old_events:])
+            if self.screen == "race" and self.race is not None and self.race.over:
+                self.soundscape.scene("menu")
             if self.screen == "lab" and self.lab_playing:
                 length = len(self.lab_result()[0])
                 old_step = int(self.lab_step)
@@ -1404,7 +1477,21 @@ class App:
                 if self.transition_remaining == 0:
                     self.previous_frame = None
             self.present()
+        self.soundscape.close()
         pygame.quit()
+
+    def play_race_events(self, events):
+        """Translate newly emitted domain events into optional presentation cues."""
+        for message in events:
+            lowered = message.lower()
+            if "finished" in lowered:
+                self.soundscape.cue("finish")
+            elif "nitro" in lowered:
+                self.soundscape.cue("nitro")
+            elif "checkpoint" in lowered or "collected" in lowered:
+                self.soundscape.cue("checkpoint")
+            elif any(word in lowered for word in ("block", "restriction", "oil", "unavailable", "out of fuel")):
+                self.soundscape.cue("warning")
 
 
 def main():
