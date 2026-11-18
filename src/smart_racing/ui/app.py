@@ -152,6 +152,9 @@ class App:
         self._pickup_cache = {}
         self._planner_key = None
         self._planner_routes = {}
+        self._planner_reveal_key = None
+        self._planner_reveal_started = 0.0
+        self.planner_entered = 0.0
         self.refuel_page = 0
         self.alternative_paths = []
         self.alternative_index = 0
@@ -198,6 +201,9 @@ class App:
             if screen == "settings":
                 self.setup_entered = self.time
                 self.setup_indicators.clear()
+            if screen == "planner":
+                self.planner_entered = self.time
+                self._planner_reveal_key = None
             if screen == "menu":
                 self.menu_entered = None
         self.screen = screen
@@ -597,39 +603,61 @@ class App:
         breadth = bfs(graph, self.source)
         depth = dfs(graph, self.source)
         unreachable = set(self.circuit.checkpoints) - set(breadth.parents)
-        positions = self.draw_map(PLANNER_MAP, self.circuit, route.edges, route.vertices, unreachable=unreachable)
         destination = self.circuit.start if self.ordered_plan else self.target
+        reveal_key = (self.resource_graph_signature(graph), tuple(route.vertices), tuple(route.edges),
+                      self.source, destination, profile_name, self.route_algorithm)
+        if reveal_key != self._planner_reveal_key:
+            self._planner_reveal_key = reveal_key
+            self._planner_reveal_started = self.time
+        route_phase = (1.0 if self.reduced_motion else
+                       ease_out((self.time - self._planner_reveal_started) / .92))
+        visible_edge_count = min(len(route.edges), math.ceil(route_phase * len(route.edges)))
+        visible_edges = route.edges[:visible_edge_count]
+        visible_vertices = route.vertices[:visible_edge_count + 1] if route.vertices else ()
+        positions = self.draw_map(PLANNER_MAP, self.circuit, visible_edges, visible_vertices,
+                                  unreachable=unreachable)
+        if visible_edge_count:
+            self.draw_planner_route_marker(route, positions, visible_edge_count,
+                                           self.time - self._planner_reveal_started)
         if self.source == destination:
             endpoint_flag(self, positions[self.source], f"START / FINISH  {self.source}", ACCENT)
         else:
             endpoint_flag(self, positions[self.source], f"FROM  {self.source}", ACCENT)
             endpoint_flag(self, positions[destination], f"TO  {destination}", GOLD, above=False)
+        if not self.reduced_motion:
+            pulse = .5 + .5 * math.sin(self.time * 4.2)
+            for vertex, color in ((self.source, ACCENT), (destination, GOLD)):
+                pygame.draw.circle(self.surface, color, positions[vertex], 10 + round(3 * pulse), 1)
         self.menu_button((75, 662, 205, 42), "REFUEL PLAN", None, self.open_refuel_plan)
         self.menu_button((292, 662, 205, 42), "ALTERNATIVES", None, self.open_alternatives)
         self.label(f"CHECKPOINTS {len(self.circuit.checkpoints) - len(unreachable)}/{len(self.circuit.checkpoints)} REACHABLE   "
                    f"DFS {len(depth.order)}   "
                    f"Components: {len(weak_components(graph))}   Cycles: {'yes' if has_cycle(graph) else 'no'}   "
                    f"Dead ends: {len(dead_ends(graph, self.circuit.start))}", 75, 715, 14, MUTED)
-        self.card((860, 220, 380, 530), PANEL, 12, BORDER)
-        self.label("ROUTE INTELLIGENCE", 885, 246, 14, EMPHASIS)
+        panel_phase = (1.0 if self.reduced_motion else
+                       ease_out((self.time - self.planner_entered - .06) / .42))
+        panel_dx = round(18 * (1 - panel_phase))
+        panel_x, text_x = 860 + panel_dx, 885 + panel_dx
+        self.card((panel_x, 220, 380, 530), PANEL, 12, BORDER)
+        self.label("ROUTE INTELLIGENCE", text_x, 246, 14, EMPHASIS)
         circuit_name = self.circuit.name
         while self.fonts[24].size(circuit_name)[0] > 330 and len(circuit_name) > 1:
             circuit_name = circuit_name[:-1]
-        self.label(circuit_name, 885, 275, 24, TEXT)
-        self.label(f"From {self.source}   →   {'ordered lap' if self.ordered_plan else f'To {self.target}'}", 885, 322, 18, (220, 225, 233))
-        self.label(f"Optimized cost   {route.cost:.3f}" if route.vertices else "Destination unreachable", 885, 358, 18, EMPHASIS)
-        self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", 885, 391, 14, MUTED)
+        self.label(circuit_name, text_x, 275, 24, TEXT)
+        self.label(f"From {self.source}   →   {'ordered lap' if self.ordered_plan else f'To {self.target}'}", text_x, 322, 18, (220, 225, 233))
+        self.label(f"Optimized cost   {route.cost:.3f}" if route.vertices else "Destination unreachable", text_x, 358, 18, EMPHASIS)
+        self.label(f"Expanded {route.expanded}  /  Relaxed {route.relaxed}", text_x, 391, 14, MUTED)
         if route.vertices:
             roads = [graph.edges[i] for i in route.edges]
             distance = sum(road.distance for road in roads)
             travel_time = sum(road.base_time * (1.5 if road.status == "restricted" else 1) for road in roads)
-            self.label(f"Distance {distance:.1f}   /   Est. {travel_time:.2f}s", 885, 409, 14, MUTED)
-        self.menu_button((885, 430, 330, 48), f"PRESET: {profile_name.upper()}", None, self.cycle_profile)
-        self.menu_button((885, 488, 330, 48), f"ALGORITHM: {self.route_algorithm.upper()}", None, self.toggle_route_algorithm)
-        self.menu_button((885, 546, 330, 48), "FIXED SEASON ORDER" if self.pending_championship else "GENERATE CIRCUIT", None, self.generate)
+            self.label(f"Distance {distance:.1f}   /   Est. {travel_time:.2f}s", text_x, 409, 14, MUTED)
+        self.menu_button((text_x, 430, 330, 48), f"PRESET: {profile_name.upper()}", None, self.cycle_profile)
+        self.menu_button((text_x, 488, 330, 48), f"ALGORITHM: {self.route_algorithm.upper()}", None, self.toggle_route_algorithm)
+        self.menu_button((text_x, 546, 330, 48), "FIXED SEASON ORDER" if self.pending_championship else "GENERATE CIRCUIT", None, self.generate)
         race_label = (f"START RACE {self.track_index + 1} / {len(self.authored_paths)}"
                       if self.pending_championship else "START QUICK RACE")
-        self.menu_button((885, 604, 330, 48), race_label, None, self.start_planned_race, True)
+        self.menu_button((text_x, 604, 330, 48), race_label, None, self.start_planned_race, True)
         destinations = self.ordered_destinations() if self.ordered_plan else [self.target]
         pickup_key = (self.source, tuple(destinations), self.resource_graph_signature())
         if pickup_key not in self._pickup_cache:
@@ -639,17 +667,32 @@ class App:
         selected = [item for item in suggestions if item.dp_selected]
         recommendation = (f"PICKUP {selected[0].vertex} / DP {selected[0].benefit} / GREEDY {int(selected[0].greedy_selected)}"
                           if selected else "NITRO: no feasible pickup within budget")
-        self.label((self.validation_message or recommendation)[:42], 885, 675, 14, GOLD)
+        self.label((self.validation_message or recommendation)[:42], text_x, 675, 14, GOLD)
         route_key = (tuple(route.vertices), tuple(route.edges), self.resource_graph_signature())
         if route.vertices and route_key not in self._refuel_cache:
             self._refuel_cache[route_key] = route_refuelling(self.circuit.graph, route.vertices, route.edges)
         refuelling = self._refuel_cache.get(route_key)
         fuel_message = f"REFUEL PLAN: {refuelling[0] // 3} stop(s), 0.1-unit model" if refuelling is not None else "REFUEL PLAN: no feasible route"
-        self.label(fuel_message, 885, 691, 14, MUTED)
+        self.label(fuel_message, text_x, 691, 14, MUTED)
         for index, (name, profile) in enumerate(PROFILES.items()):
             candidate = self.planned_route(profile)
-            self.label(f"{name}: {candidate.cost:.2f}", 885 + (index % 2) * 160,
+            self.label(f"{name}: {candidate.cost:.2f}", text_x + (index % 2) * 160,
                        711 + (index // 2) * 18, 14, MUTED)
+
+    def draw_planner_route_marker(self, route, positions, visible_edge_count, elapsed):
+        """Animate a beacon along the visible route without advancing graph state."""
+        if self.reduced_motion or visible_edge_count <= 0 or len(route.vertices) < 2:
+            return
+        travel = max(0.0, elapsed * 1.15)
+        edge_index = int(travel) % visible_edge_count
+        progress = travel % 1.0
+        start = positions[route.vertices[edge_index]]
+        end = positions[route.vertices[edge_index + 1]]
+        point = (round(start[0] + (end[0] - start[0]) * progress),
+                 round(start[1] + (end[1] - start[1]) * progress))
+        pygame.draw.circle(self.surface, (14, 21, 28), point, 9)
+        pygame.draw.circle(self.surface, ACCENT, point, 7, 2)
+        pygame.draw.circle(self.surface, TEXT, point, 3)
 
     def planned_route(self, profile):
         destinations = self.ordered_destinations() if self.ordered_plan else [self.target]
