@@ -123,6 +123,7 @@ class App:
         self.lab_step = 0.0
         self.lab_playing = True
         self.lab_speed = 3.0
+        self.lab_step_started = 0.0
         self._lab_key = None
         self._lab_recording = None
         self.paused = False
@@ -1089,6 +1090,7 @@ class App:
     def change_lab(self, direction):
         self.lab_algorithm = LAB_ALGORITHMS[(LAB_ALGORITHMS.index(self.lab_algorithm) + direction) % len(LAB_ALGORITHMS)]
         self.lab_step = 0
+        self.lab_step_started = self.time
 
     def toggle_lab(self):
         if not self.lab_playing and self.lab_step >= len(self.lab_result()[0]):
@@ -1099,13 +1101,23 @@ class App:
         speeds = [1.5, 3.0, 6.0, 12.0]
         self.lab_speed = speeds[(speeds.index(self.lab_speed) + 1) % len(speeds)]
 
+    def lab_animation_phase(self):
+        """Presentation-only easing between recorded trace states."""
+        if self.reduced_motion:
+            return 1.0
+        if self.lab_playing:
+            return ease_out(self.lab_step % 1)
+        return ease_out(min(1.0, max(0.0, (self.time - self.lab_step_started) / .22)))
+
     def step_lab(self, amount):
         self.lab_playing = False
         self.lab_step = max(0, min(len(self.lab_result()[0]), self.lab_step + amount))
+        self.lab_step_started = self.time
 
     def reset_lab(self):
         self.lab_playing = False
         self.lab_step = 0
+        self.lab_step_started = self.time
 
     def draw_race(self):
         race = self.race
@@ -1374,7 +1386,10 @@ class App:
                 self.simulation_clock.advance(delta, self.race.tick)
             if self.screen == "lab" and self.lab_playing:
                 length = len(self.lab_result()[0])
+                old_step = int(self.lab_step)
                 self.lab_step = min(length, self.lab_step + delta * self.lab_speed)
+                if int(self.lab_step) != old_step:
+                    self.lab_step_started = self.time
                 self.lab_playing = self.lab_step < length
             self.buttons = []
             self.background()

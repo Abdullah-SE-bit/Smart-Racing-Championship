@@ -139,3 +139,33 @@ def test_playback_caps_at_end_then_replays_and_pause_freezes_trace():
     finally:
         pygame.quit()
 
+
+@pytest.mark.parametrize("algorithm", ["BFS", "Event heap", "Merge sort", "Knapsack"])
+def test_algorithm_motion_animates_between_manual_steps_and_respects_reduced_motion(algorithm):
+    app = App()
+    try:
+        app.go("lab")
+        app.lab_algorithm = algorithm
+        app.lab_playing = False
+        app.reduced_motion = False
+        trace, _ = app.lab_result()
+        assert trace
+
+        def board_at(elapsed):
+            app.time = elapsed
+            app.buttons.clear()
+            app.draw_lab()
+            return pygame.image.tostring(app.surface.subsurface((60, 242, 760, 375)), "RGB")
+
+        app.step_lab(1)
+        first = board_at(app.lab_step_started + .02)
+        settled = board_at(app.lab_step_started + .3)
+        assert first != settled
+
+        app.reduced_motion = True
+        still = board_at(app.lab_step_started + .02)
+        later = board_at(app.lab_step_started + 5)
+        assert still == later
+    finally:
+        pygame.quit()
+
