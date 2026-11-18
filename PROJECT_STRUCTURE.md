@@ -30,7 +30,7 @@ checked against the supplied PDF. The user has authorized implementation.
 | `championship/` | Race results, points, rankings, tie-breaking, and progression. |
 | `ui/` | Pygame presentation and input translation. |
 | `ui/app.py` | Main Menu, planner, race, Algorithm Lab, dashboard and shared presentation helpers. |
-| `ui/screens/`, `ui/components/`, `ui/visualization/` | Reserved packages; their current presentation code lives in `ui/app.py`. |
+| `ui/screens/`, `ui/components/`, `ui/visualization/` | Finish classification, broadcast components, circuit scenery, race cameras and algorithm trace graphics. |
 | `utils/` | Reserved package for utilities that do not belong to a specific domain. |
 
 ## Supporting directories
@@ -39,7 +39,7 @@ checked against the supplied PDF. The user has authorized implementation.
 | --- | --- |
 | `assets/` | Versioned presentation assets included in the Windows build. |
 | `assets/images/` | Original generated pit-lane artwork and its provenance. |
-| `assets/sprites/`, `assets/fonts/`, `assets/sounds/` | Reserved for future media and associated license information. |
+| `assets/sprites/`, `assets/fonts/`, `assets/sounds/` | Bundled Barlow typefaces and OFL license in fonts. Sprite and sound directories are reserved. |
 | `data/` | Versioned JSON inputs and configuration. |
 | `data/circuits/` | Definitions for the three circuits and their checkpoints and shortcuts. |
 | `data/configurations/`, `data/experiments/` | Reserved input directories; current settings and study inputs are defined in code. |

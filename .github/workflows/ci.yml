@@ -103,7 +103,8 @@ jobs:
             "SmartRacingChampionship.exe", "technical-report.pdf", "source/README.md",
             "source/pyproject.toml", "source/src/smart_racing/__main__.py",
             "source/data/circuits/circuit_1.json", "source/data/circuits/circuit_2.json",
-            "source/data/circuits/circuit_3.json", "source/assets/fonts/.gitkeep",
+            "source/data/circuits/circuit_3.json", "source/assets/fonts/OFL.txt", "source/assets/fonts/Barlow-Regular.ttf",
+            "source/assets/fonts/BarlowCondensed-BoldItalic.ttf", "source/assets/fonts/BarlowCondensed-SemiBold.ttf",
             "source/assets/images/pit-lane-night.png",
             "source/docs/assignment-specification.md", "source/experiments/results/analysis.md",
             "source/experiments/results/studies.json"

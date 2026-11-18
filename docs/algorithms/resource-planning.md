@@ -33,13 +33,20 @@ nitro is spent and no road or service changes occur while following the route.
 
 ## Discrete refuelling
 
-For each consecutive route segment, the state stores arrival fuel and the best
-accumulated stop time. At an active station it considers buying zero through the
-lesser of remaining tank capacity and 40 units. A positive purchase adds the
-same three-second stop time as the game; the transition subtracts the next
-segment's required fuel. Unreachable states are discarded, and a plan is
-infeasible if no state reaches the destination. The straightforward search is
-O(mC²), with `m` segments and `C` discrete tank units in the worst case.
+For segment j and arrival fuel f, the state stores the minimum remaining stop
+time. Every fuel level at the destination costs zero. Work backwards, either
+skipping the stop or purchasing up to the lesser of remaining capacity and
+40 units at an active station. A positive purchase always adds three seconds.
+The segment's fuel requirement is deducted in both cases. Insufficient fuel is
+infeasible and has infinite cost.
+
+More arrival fuel can only improve or preserve the best remaining time. The
+largest allowed purchase therefore achieves the lowest future time available
+to a positive stop. Each row records the first fuel level giving each run of
+equal future times. This lets the planner choose the smallest purchase
+achieving the optimal time and skip the stop when skipping ties. Each state takes
+constant work after one linear scan of the row. With m segments and C discrete
+tank units this costs O(m(C+1)) time and space including purchase reconstruction.
 
 The route planner uses tenths of a fuel unit: edge requirements round up and
 starting fuel rounds down, so discretization is conservative. Purchases are

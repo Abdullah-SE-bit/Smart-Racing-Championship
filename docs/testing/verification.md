@@ -110,3 +110,9 @@ the game can run.
 the dummy SDL driver. CI uploads those images as an artifact for visual review;
 the previews are generated from the app and a simulated race, not a recording of
 a human playthrough.
+
+## REDLINE presentation and assignment verification
+
+The local Python 3.12.16 suite passed 146 tests and pip check reported no broken requirements. Screen previews covered both race cameras, the race results, standings and the Lab's graph, heap, sorting and budget views.
+
+A separate scripted playthrough sent mouse and keyboard events through the application and advanced its fixed-step clock. It selected Championship from the menu, drove the three authored two-lap races, switched camera, and opened results and standings after each round. All four racers finished each round. The championship awarded 70, 140 and 210 cumulative points and returned to the menu after the finale. The player's finishing times were 24.10, 24.07 and 24.07 simulation seconds. A human rehearsal and the group's submission details remain outstanding.

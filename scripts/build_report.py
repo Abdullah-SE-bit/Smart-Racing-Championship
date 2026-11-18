@@ -9,7 +9,7 @@ from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import LongTable, Paragraph, SimpleDocTemplate, Spacer, TableStyle
+from reportlab.platypus import Image, LongTable, PageBreak, Paragraph, SimpleDocTemplate, Spacer, TableStyle
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +41,19 @@ def markdown_flowables(path):
     while index < len(lines):
         line = lines[index].strip()
         if not line:
+            index += 1
+            continue
+        if line == "---":
+            flow.append(PageBreak())
+            index += 1
+            continue
+        artwork = re.fullmatch(r"!\[[^\]]*\]\(([^)]+)\)", line)
+        if artwork:
+            image = Image(str(path.parent / artwork.group(1)))
+            width = 170 * mm
+            image.drawHeight *= width / image.drawWidth
+            image.drawWidth = width
+            flow.extend([image, Spacer(1, 7 * mm)])
             index += 1
             continue
         if line.startswith("|"):
@@ -89,6 +102,7 @@ def main():
     document = SimpleDocTemplate(str(OUTPUT), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
                                  topMargin=18 * mm, bottomMargin=20 * mm, title="Smart Racing Championship - Draft Report")
     flow = markdown_flowables(ROOT / "docs" / "report" / "technical-report.md")
+    flow.append(PageBreak())
     flow += markdown_flowables(ROOT / "experiments" / "results" / "analysis.md")
     document.build(flow, onFirstPage=footer, onLaterPages=footer)
     print(f"Wrote {OUTPUT}")
