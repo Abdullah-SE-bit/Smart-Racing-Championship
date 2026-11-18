@@ -716,6 +716,11 @@ def test_every_algorithm_lab_mode_renders_and_steps_on_real_tracks(generated, mo
             app.lab_step = 50000
             app.reset_lab()
             assert app.lab_step == 0 and not app.lab_playing
+        app.step_lab(-1)
+        assert app.lab_step == 0
+        app.lab_step = len(trace)
+        app.step_lab(1)
+        assert app.lab_step == len(trace)
         previous_speed = app.lab_speed
         app.change_lab_speed()
         assert app.lab_speed != previous_speed
