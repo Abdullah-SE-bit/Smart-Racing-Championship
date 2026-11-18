@@ -1,5 +1,17 @@
 # Verification in progress
 
+## Algorithm Lab quality coverage
+
+`tests/integration/test_algorithm_lab_quality.py` applies boundary-value
+analysis to backward, zero, forward, exact-end, over-end and corrupted
+playback indices. It renders every selectable algorithm at the beginning,
+near the midpoint and at the end of its trace on both an authored and a
+seeded generated circuit. It also checks that repeated rendering leaves the
+trace deterministic and does not advance a live race, that circuit and
+championship changes invalidate cached trace data, and that playback stops at
+the final record and can replay. Each case runs with the dummy SDL video and
+audio drivers for reproducibility.
+
 Run the automated suite from the repository root with Python 3.12:
 
 ```powershell
