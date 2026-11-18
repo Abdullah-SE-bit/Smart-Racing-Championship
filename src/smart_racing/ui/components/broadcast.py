@@ -36,8 +36,11 @@ class BroadcastGraphics:
         upright = str(font_directory / "BarlowCondensed-SemiBold.ttf")
         self.title = {px: pygame.font.Font(italic, px) for px in (42, 104, 170)}
         self.compact = {px: pygame.font.Font(upright, px) for px in (16, 20, 24, 30)}
-        self.menu_wordmark = self.title[104].render("REDLINE", True, INK)
         self.intro_wordmark = self.title[170].render("REDLINE", True, INK)
+        ink_bounds = self.intro_wordmark.get_bounding_rect()
+        letters = self.intro_wordmark.subsurface(ink_bounds)
+        self.menu_wordmark = pygame.transform.smoothscale(
+            letters, (420, round(420 * letters.get_height() / letters.get_width())))
         # One cached scrim preserves the photo's highlights and darkens text areas.
         width, height = size
         scrim = pygame.Surface(size, pygame.SRCALPHA)
@@ -45,6 +48,22 @@ class BroadcastGraphics:
             floor = max(0, (y - height * .76) / (height * .24))
             pygame.draw.line(scrim, (7, 10, 15, round(15 + floor * 202)), (0, y), (width, y))
         self.scrim = scrim
+        # Grade the command rail independently so the car can keep its highlights.
+        self.menu_shade = pygame.Surface((580, size[1] - 70), pygame.SRCALPHA)
+        for x in range(580):
+            alpha = round(145 * (1 - ease_out((x - 380) / 200)))
+            pygame.draw.line(self.menu_shade, (8, 13, 20, alpha), (x, 0), (x, size[1]))
+
+    def draw_menu_title(self, surface, progress):
+        mark = self.menu_wordmark
+        width, height = mark.get_size()
+        # Three ribbons settle onto one baseline above the fixed control column.
+        for row in range(3):
+            y = round(row * height / 3)
+            h = round((row + 1) * height / 3) - y
+            phase = ease_out((progress - row * .1) / .8)
+            visible = round(width * (.33 + .67 * phase))
+            surface.blit(mark, (48, 144 + y), (width - visible, y, visible, h))
 
     def draw_striped_title(self, surface, x, y, elapsed, duration):
         """Reveal the three slices of the lockup, then let the lights release it."""

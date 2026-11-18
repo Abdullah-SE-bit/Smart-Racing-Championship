@@ -26,6 +26,7 @@ from smart_racing.resources.planner import pickup_suggestions, route_refuelling
 from smart_racing.tracks.circuits import load_circuit, save_circuit, validate_circuit
 from smart_racing.tracks.generator import _assign_checkpoints, _ring_compatible, generate_circuit
 from smart_racing.ui.screens.classification import draw_classification
+from smart_racing.ui.components.menu_icons import draw_mode_icon
 from smart_racing.ui.visualization.telemetry import drafting_surface, draw_trace_board, endpoint_flag, route_thumbnail
 from smart_racing.ui.visualization.race_scene import RaceScene
 from smart_racing.ui.components.broadcast import (
@@ -93,6 +94,7 @@ class App:
         self.screen = "menu"
         self.running = True
         self.time = 0.0
+        self.menu_entered = None
         self.settings_file = settings_file
         self.reduced_motion = self.load_motion_preference()
         self.intro_active = False
@@ -173,6 +175,8 @@ class App:
         if screen != self.screen:
             self.buttons = []
             self.focused_button = 0
+            if screen == "menu":
+                self.menu_entered = None
         self.screen = screen
         self.lab_step = 0
 
@@ -294,18 +298,22 @@ class App:
                                  (sweep - 5, rect.height), (sweep - 30, rect.height)])
             self.surface.blit(highlight, rect.topleft)
         ink = TEXT
+        inset = 18
         if rect.width <= 60:
             glyph = self.fonts[24].render(title, True, ink)
             self.surface.blit(glyph, glyph.get_rect(center=rect.center))
         else:
+            if self.screen == "menu":
+                draw_mode_icon(self.surface, title, (rect.x + 24, rect.centery), TEXT if primary else ACCENT)
+                inset = 48
             font = self.broadcast.compact[20 if rect.width < 250 else 24]
-            if font.size(title)[0] > rect.width - 44:
+            if font.size(title)[0] > rect.width - inset - 26:
                 font = self.broadcast.compact[16]
             text = font.render(title, True, ink)
             y = rect.y + 5 if detail else rect.centery - text.get_height() // 2
-            self.surface.blit(text, (rect.x + 18, y))
+            self.surface.blit(text, (rect.x + inset, y))
         if detail:
-            self.label(detail, rect.x + 18, rect.y + 35, 14,
+            self.label(detail, rect.x + inset, rect.y + 35, 14,
                        (255, 224, 224) if primary else MUTED)
         if rect.width >= 250:
             x, y = rect.right - 23, rect.centery
@@ -381,9 +389,14 @@ class App:
 
     def draw_menu(self):
         self.draw_pit_background()
-        self.surface.blit(self.broadcast.menu_wordmark, (43, 124))
-        pygame.draw.rect(self.surface, EMPHASIS, (49, 252, 32, 4))
-        self.label("SELECT MODE", 94, 240, 20, TEXT)
+        if self.menu_entered is None:
+            self.menu_entered = self.time
+        progress = 1 if self.reduced_motion else min(1, (self.time - self.menu_entered) / .64)
+        self.surface.blit(self.broadcast.menu_shade, (0, 70))
+        self.broadcast.draw_menu_title(self.surface, progress)
+        self.label("SELECT MODE", 48, 278, 20, TEXT)
+        pygame.draw.line(self.surface, BORDER, (148, 293), (468, 293))
+        pygame.draw.line(self.surface, EMPHASIS, (148, 293), (148 + round(100 * ease_out(progress)), 293), 2)
         self.menu_button((48, 319, 420, 65), "CHAMPIONSHIP",
                          f"{len(self.authored_paths)} circuits  /  season standings", self.prepare_championship, True)
         self.menu_button((48, 396, 420, 65), "QUICK RACE", "Race the selected circuit", lambda: self.start_race(False))
@@ -393,6 +406,7 @@ class App:
 
         # A single lower third leaves the hero car visible above the circuit selector.
         pygame.draw.rect(self.surface, (18, 22, 29), (0, 615, WIDTH, 130))
+        pygame.draw.polygon(self.surface, (29, 36, 45), ((0, 615), (510, 615), (485, 745), (0, 745)))
         pygame.draw.line(self.surface, BORDER, (0, 615), (WIDTH, 615))
         pygame.draw.rect(self.surface, EMPHASIS, (48, 615, 57, 3))
         self.label("SELECT CIRCUIT", 48, 626, 14, MUTED)
@@ -403,17 +417,21 @@ class App:
             name = name[:-1]
         self.label(name, 119, 648, 24, TEXT)
         self.label(f"{self.track_index + 1:02}  /  {len(self.circuit_paths):02}", 120, 683, 14, MUTED)
-        pygame.draw.line(self.surface, BORDER, (506, 636), (506, 723))
         self.draw_menu_circuit((525, 616, 236, 128))
         facts = ((len(self.circuit.checkpoints), "CHECKPOINTS"),
                  (sum(edge.shortcut for edge in self.circuit.graph.edges.values()), "SHORTCUTS"),
                  (self.laps_setting, "LAPS"))
         for index, (value, label) in enumerate(facts):
             x = 810 + 151 * index
+            pygame.draw.line(self.surface, BORDER, (x - 18, 649), (x - 18, 710))
             self.label(f"{value:02}", x, 636, 42, TEXT)
             self.label(label, x + 1, 693, 14, MUTED)
-        self.label("TAB   Select", 48, 758, 14, MUTED)
-        self.label("ENTER   Confirm", 154, 758, 14, MUTED)
+        for x, width, key, action in ((48, 42, "TAB", "Select"), (162, 58, "ENTER", "Confirm")):
+            pygame.draw.rect(self.surface, PANEL, (x, 759, width, 24), border_radius=3)
+            pygame.draw.rect(self.surface, BORDER, (x, 759, width, 24), 1, border_radius=3)
+            glyph = self.fonts[14].render(key, True, TEXT)
+            self.surface.blit(glyph, glyph.get_rect(center=(x + width // 2, 771)))
+            self.label(action, x + width + 8, 761, 14, MUTED)
 
     def map_positions(self, rect, circuit):
         left, top, width, height = rect
