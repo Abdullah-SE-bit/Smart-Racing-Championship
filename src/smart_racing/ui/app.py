@@ -80,8 +80,8 @@ def load_circuit_backdrop(filename):
 
 
 def circuit_artwork_name(circuit):
-    return {"neon harbor": "neon-harbor.png", "copper canyon": "copper-canyon.png",
-            "aurora circuit": "aurora-night.png"}.get(circuit.name.casefold())
+    return {"neon harbor": "neon-harbor-night.png", "copper canyon": "copper-canyon-dusk.png",
+            "aurora circuit": "aurora-circuit-dusk.png"}.get(circuit.name.casefold())
 
 
 class App:
@@ -93,7 +93,7 @@ class App:
         self.pit_backdrop = load_pit_backdrop()
         self.broadcast = BroadcastGraphics(ROOT / "assets" / "fonts", (WIDTH, HEIGHT))
         self.screen_veil = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        self.screen_veil.fill((6, 9, 14, 195))
+        self.screen_veil.fill((6, 9, 14, 148))
         self.clock = pygame.time.Clock()
         reading_face = str(ROOT / "assets" / "fonts" / "Barlow-Regular.ttf")
         self.fonts = {size: pygame.font.Font(reading_face, size) for size in (14, 16, 18)}
@@ -353,7 +353,7 @@ class App:
             backdrop = pygame.transform.smoothscale(load_circuit_backdrop(artwork), preview.get_size())
             preview.blit(backdrop, (0, 0))
             shade = pygame.Surface(preview.get_size(), pygame.SRCALPHA)
-            shade.fill((8, 12, 18, 155))
+            shade.fill((8, 12, 18, 112))
             preview.blit(shade, (0, 0))
         else:
             preview.fill((18, 22, 29))
@@ -364,8 +364,9 @@ class App:
         self.surface.blit(smooth, rect[:2])
 
     def draw_pit_background(self):
-        # Keep the original hero-car scene as the consistent application backdrop.
-        backdrop = self.pit_backdrop
+        # Keep the car scene on the home screen; venue art fills the other pages.
+        artwork = None if self.screen == "menu" else circuit_artwork_name(self.circuit)
+        backdrop = load_circuit_backdrop(artwork) if artwork else self.pit_backdrop
         x = (WIDTH - backdrop.get_width()) // 2
         y = (HEIGHT - backdrop.get_height()) // 2
         if not self.reduced_motion and self.screen != "menu":

@@ -58,7 +58,7 @@ checked against the supplied PDF. The user has authorized implementation.
 | `docs/testing/` | Test strategy and verification documentation. |
 | `docs/report/` | Assignment report sources and submission material. |
 | `scripts/` | Build, preview, report and local submission-packaging scripts. |
-| `scripts/generate_audio_assets.py`, `scripts/generate_circuit_art.py` | Reproducible generators for original sound and venue artwork. |
+| `scripts/generate_audio_assets.py` | Reproducible generator for the original synthesized sound pack. |
 
 Empty non-package directories contain `.gitkeep` so Git preserves them. Circuit
 JSON lives outside the Python package in source checkouts. The PyInstaller build
