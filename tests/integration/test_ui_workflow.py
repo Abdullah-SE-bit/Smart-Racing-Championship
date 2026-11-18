@@ -143,9 +143,15 @@ def test_backdrop_and_button_motion_respect_reduced_motion(monkeypatch):
             return pygame.image.tostring(app.surface.subsurface((48, 319, 420, 65)), "RGB")
 
         app.reduced_motion = False
+        app.screen = "menu"
+        assert backdrop_at(0) == backdrop_at(5)
+        app.screen = "settings"
         assert backdrop_at(0) != backdrop_at(5)
         assert button_at(0) != button_at(1)
         app.reduced_motion = True
+        app.screen = "menu"
+        assert backdrop_at(0) == backdrop_at(5)
+        app.screen = "settings"
         assert backdrop_at(0) == backdrop_at(5)
         assert button_at(0) == button_at(1)
     finally:
