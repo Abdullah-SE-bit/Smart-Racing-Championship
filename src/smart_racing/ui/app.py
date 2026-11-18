@@ -326,12 +326,20 @@ class App:
         self.buttons.append((rect, action))
 
     def draw_menu_circuit(self, rect):
-        draw_circuit_model(self.surface, rect, self.circuit, 0 if self.reduced_motion else self.time)
+        width, height = rect[2:]
+        render_scale = 3
+        preview = pygame.Surface((width * render_scale, height * render_scale))
+        preview.fill((18, 22, 29))
+        high_resolution_rect = (0, 0, width * render_scale, height * render_scale)
+        draw_circuit_model(preview, high_resolution_rect, self.circuit,
+                           0 if self.reduced_motion else self.time)
+        smooth = pygame.transform.smoothscale(preview, (width, height))
+        self.surface.blit(smooth, rect[:2])
 
     def draw_pit_background(self):
         x = (WIDTH - self.pit_backdrop.get_width()) // 2
         y = (HEIGHT - self.pit_backdrop.get_height()) // 2
-        if not self.reduced_motion:
+        if not self.reduced_motion and self.screen != "menu":
             x += round(10 * math.sin(self.time * .18))
         self.surface.blit(self.pit_backdrop, (x, y))
         self.surface.blit(self.broadcast.scrim if self.screen == "menu" else self.screen_veil, (0, 0))
