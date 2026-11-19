@@ -17,6 +17,8 @@ ENV/
 .ruff_cache/
 .tox/
 .nox/
+.hypothesis/
+.pyright/
 .coverage
 .coverage.*
 htmlcov/
@@ -28,6 +30,9 @@ junit.xml
 /dist/
 /output/previews/
 /output/report-review/
+/output/lab-audit/
+/output/lab-motion-check/
+/output/algorithm-canvas-*.png
 
 # Local editor and operating system files
 .idea/
@@ -45,3 +50,4 @@ Desktop.ini
 !.env.example
 *.tmp
 *.temp
+*.log

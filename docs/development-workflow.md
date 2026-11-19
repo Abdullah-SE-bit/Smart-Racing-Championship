@@ -22,8 +22,8 @@ not a set of approval gates.
    decisions and tuned rules in `docs/architecture/`.
 4. Work on a short-lived branch from `main`, connect related changes to their
    issue, and open a pull request. The protected `main` branch requires the
-   `checks` and `package-smoke` CI jobs to pass before merging, including for administrators; no
-   approval is required. Agent commits and pushes require explicit permission.
+   `checks` and `package-smoke` CI jobs to pass before merging; no approval is
+   required. Agent commits and pushes require explicit permission.
 5. Include meaningful tests with implemented behavior, update documentation, and
    share screenshots or a recording for visual changes. Explain what was actually
    checked. Review and merge, then clean up temporary branches where appropriate.
@@ -110,6 +110,9 @@ change engine outcomes; check usability and the complete navigation flow.
   routing optimality, legal movement, resource feasibility, deterministic events
   and opponents, scoring ties, sorting agreement and end-to-end races. Verify
   the Lab and experiments use the gameplay implementations.
+- Run Ruff (`python -m ruff check src tests experiments scripts`), pytest,
+  and `pip check`. CI runs these checks on every pull request and push to `main`;
+  a missing test suite is a failure, not a skipped check.
 - Run all five studies: BFS vs DFS, Dijkstra vs A*, DP vs greedy, event priority
   queue, and sorting vs top-k. Use repeatable inputs and seeds, multiple sizes,
   warm-up and repeated measurements; exclude rendering and I/O from timed regions.

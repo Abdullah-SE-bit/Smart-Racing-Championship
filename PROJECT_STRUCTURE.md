@@ -24,7 +24,6 @@ checked against the supplied PDF. REDLINE's presentation rules are in
 | `algorithms/sorting/` | Sorting algorithms supporting rankings and required demonstrations. |
 | `algorithms/structures/` | Supporting data structures used by the custom algorithms. |
 | `game/` | Race lifecycle, game state, rules, timing, and domain coordination. |
-| `racers/` | Reserved package; racer state and opponent strategies currently live in `game/race.py`. |
 | `tracks/` | Circuit loading, graph validation, checkpoints, roads, and track state. |
 | `events/` | Deterministic scheduling, road closures, temporary effects, and expiration. |
 | `resources/` | Pickup and refuelling recommendations; the race engine applies resource rules. |
@@ -32,26 +31,27 @@ checked against the supplied PDF. REDLINE's presentation rules are in
 | `ui/` | Pygame presentation and input translation. |
 | `ui/app.py` | Main Menu, planner, race, Algorithm Lab, dashboard and shared presentation helpers. |
 | `ui/screens/`, `ui/components/`, `ui/visualization/` | Finish classification, broadcast components, circuit scenery, race cameras and algorithm trace graphics. |
-| `utils/` | Reserved package for utilities that do not belong to a specific domain. |
 
 ## Supporting directories
 
 | Directory | Intended responsibility |
 | --- | --- |
+| `.github/` | CI workflow, issue and pull request templates, contribution and security guidance, dependency updates. |
+| `.editorconfig` | Shared text encoding, indentation, and line-ending defaults. |
+| `CHANGELOG.md` | Notable changes by project version. |
+| `docs/README.md` | Navigation index for project documentation. |
 | `assets/` | Versioned presentation assets included in the Windows build. |
 | `assets/images/` | Original pit-lane artwork and three generated circuit-specific scene backdrops with provenance. |
 | `assets/audio/` | Original synthesized ambience and UI/race cues with reproducible source script and provenance. |
-| `assets/sprites/`, `assets/fonts/` | Reserved sprite directory; bundled Barlow typefaces and OFL license in fonts. |
+| `assets/fonts/` | Bundled Barlow typefaces and their OFL license. |
 | `data/` | Versioned JSON inputs and configuration. |
 | `data/circuits/` | Definitions for the three circuits and their checkpoints and shortcuts. |
-| `data/configurations/`, `data/experiments/` | Reserved input directories; current settings and study inputs are defined in code. |
+| `data/circuits/README.md` | Circuit JSON shape, editing rules, and validation guidance. |
 | `tests/` | Automated unit and integration tests. |
 | `tests/unit/` | Isolated algorithm and domain tests. |
 | `tests/integration/` | Tests across domain, loading, and presentation boundaries. |
-| `tests/fixtures/` | Reserved for reusable fixture files; current fixtures are created in tests. |
 | `experiments/` | Reproducible experimental study tooling and artifacts. |
 | `experiments/benchmarks/` | Driver for the five required studies. |
-| `experiments/datasets/` | Reserved dataset directory; the study driver generates seeded inputs. |
 | `experiments/results/` | Raw measurements, derived summaries, and charts intended for submission. |
 | `docs/` | Project documentation. |
 | `docs/architecture/` | Architectural decisions and domain contracts. |
@@ -61,11 +61,11 @@ checked against the supplied PDF. REDLINE's presentation rules are in
 | `scripts/` | Build, preview, report and local submission-packaging scripts. |
 | `scripts/generate_audio_assets.py` | Reproducible generator for the original synthesized sound pack. |
 
-Empty non-package directories contain `.gitkeep` so Git preserves them. Circuit
-JSON lives outside the Python package in source checkouts. The PyInstaller build
-includes `data/circuits` and the app resolves that bundled data at runtime;
-Windows CI builds and smoke-tests the executable. The final submission package
-still requires separate verification.
+Circuit JSON lives outside the Python package in source checkouts. The
+PyInstaller build includes `data/circuits` and the app resolves that bundled
+data at runtime; Windows CI builds and smoke-tests the executable. The final
+submission package still requires separate verification. Directories are kept
+in Git by their real contents rather than placeholder files.
 
 ## Relationships
 
@@ -81,8 +81,8 @@ It must not contain demonstration copies of algorithms. Shared algorithms expose
 plain Python traces for stepwise observation without rendering inside algorithms.
 Experiment drivers also call these shared algorithms.
 
-Deterministic behavior requires explicit random seeds where randomness
-is allowed, stable tie-breaking, and an engine-controlled simulation clock for
-opponents and events. Studies must record inputs, seeds, dependency versions,
-measurement methods, and raw results. Continue checking these requirements as
-the game and studies are implemented.
+Deterministic behavior uses explicit random seeds where randomness is allowed,
+stable tie-breaking, and an engine-controlled simulation clock for opponents
+and events. Studies record inputs, seeds, dependency versions, measurement
+methods, and raw results. See the assignment QA audit for the latest verification
+and the remaining release checks.

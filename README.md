@@ -1,5 +1,7 @@
 <div align="center">
 
+[![Python checks](https://github.com/TahaSohail-Goat/Smart-Racing-Championship/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TahaSohail-Goat/Smart-Racing-Championship/actions/workflows/ci.yml)
+
 # REDLINE
 
 ### SMART RACING CHAMPIONSHIP
@@ -114,6 +116,7 @@ Run the full suite and a headless launch check from PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\python.exe -m ruff check src tests experiments scripts
 .\.venv\Scripts\python.exe -m pip check
 $env:SDL_VIDEODRIVER = "dummy"
 $env:SDL_AUDIODRIVER = "dummy"
@@ -157,7 +160,7 @@ use can change the actual outcome.
 - **Language:** Python 3.12+
 - **Game and presentation:** Pygame
 - **Circuit format:** JSON adjacency-list graphs
-- **Verification:** pytest, deterministic fixtures, integration and UI tests
+- **Verification:** Ruff, pytest, deterministic fixtures, integration and UI tests
 - **Studies:** seeded benchmark driver with raw JSON results and analysis
 - **Optional tools:** PyInstaller for Windows builds; ReportLab for PDF reports
 
@@ -178,8 +181,10 @@ profiles, and heap-based live top-k standings.
 | `tests/` | Unit and integration test suites. |
 | `experiments/` | Five study drivers, raw measurements, and analysis. |
 | `docs/` | Assignment, architecture, algorithms, workflow, verification, and report. |
+| `CHANGELOG.md` | Notable repository and game changes. |
 | `scripts/` | Run support, previews, sound generation, report, build, and packaging tools. |
-| `.github/` | Contribution guidance, issue/PR templates, and Windows CI. |
+| `.github/` | Contribution/security guidance, issue/PR templates, Dependabot, and Windows CI. |
+| `.editorconfig` | Shared indentation, encoding, and line-ending defaults. |
 
 ## Crew notes
 
@@ -197,9 +202,18 @@ profiles, and heap-based live top-k standings.
   prompts for the group.
 - [Technical report source](docs/report/technical-report.md) — current draft;
   group details and final review are still required.
+- [Documentation index](docs/README.md) — project documents by purpose.
+- [Changelog](CHANGELOG.md) — notable project changes.
+- [Security policy](.github/SECURITY.md) — private vulnerability reporting.
 
 REDLINE is the interface brand; **Smart Racing Championship** is the course
 project title. Original imagery and synthesized sound are documented in
 [`assets/images/README.md`](assets/images/README.md) and
 [`assets/audio/README.md`](assets/audio/README.md). The bundled Barlow fonts
 retain their [SIL Open Font License](assets/fonts/OFL.txt).
+
+**Source license:** no license has been declared for the project source yet.
+The font and image/audio asset notes describe their own provenance and terms;
+those do not grant a license to redistribute the game code. Choose and add the
+project license before accepting outside contributions or presenting the
+repository as open source.

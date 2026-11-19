@@ -756,7 +756,6 @@ class App:
         if route.vertices and route_key not in self._refuel_cache:
             self._refuel_cache[route_key] = route_refuelling(self.circuit.graph, route.vertices, route.edges)
         refuelling = self._refuel_cache.get(route_key)
-        fuel_message = f"REFUEL PLAN: {refuelling[0] // 3} stop(s), 0.1-unit model" if refuelling is not None else "REFUEL PLAN: no feasible route"
         stop_count = refuelling[0] // 3 if refuelling is not None else "—"
         self.label(f"FUEL PLAN  /  {stop_count} STOPS  /  0.1-UNIT MODEL", text_x, 752, 14, MUTED)
 

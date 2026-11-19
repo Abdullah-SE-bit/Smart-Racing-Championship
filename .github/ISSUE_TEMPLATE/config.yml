@@ -1,2 +1,6 @@
 blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability privately
+    url: https://github.com/TahaSohail-Goat/Smart-Racing-Championship/security/advisories/new
+    about: Please do not disclose exploitable security issues in a public issue.
 
