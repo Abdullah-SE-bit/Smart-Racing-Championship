@@ -39,7 +39,7 @@ jobs:
       - name: Render interface previews
         run: python scripts/capture_previews.py
       - name: Upload interface previews
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: interface-previews
           path: output/previews/*.png
@@ -49,7 +49,7 @@ jobs:
           python scripts/build_report.py
           python scripts/render_report_preview.py
       - name: Upload report for inspection
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: report-verification
           path: |
