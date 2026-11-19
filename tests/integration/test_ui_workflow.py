@@ -889,6 +889,7 @@ def test_keyboard_navigation_and_planner_vertex_selection():
         assert app.keyboard_focus and app.focused_button == 0
         app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN, mod=0))
         assert app.screen == "planner" and app.pending_championship
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE, mod=0))
         before = app.target
         app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RIGHT, mod=0))
         assert app.target != before

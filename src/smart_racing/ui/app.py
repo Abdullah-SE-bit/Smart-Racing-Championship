@@ -29,6 +29,8 @@ from smart_racing.ui.screens.classification import draw_classification
 from smart_racing.ui.audio import Soundscape
 from smart_racing.ui.components.menu_icons import draw_mode_icon
 from smart_racing.ui.components.quick_grid import GRID_DURATION, draw_grid
+from smart_racing.ui.components.title_opener import TITLE_DURATION, draw_title_opener
+from smart_racing.ui.components.title_reveal import REVEAL_DURATION, SETTLED_AT, draw_title_reveal
 from smart_racing.ui.components.quick_telemetry import draw_quick_telemetry
 from smart_racing.ui.visualization.telemetry import drafting_surface, draw_trace_board, endpoint_flag, route_thumbnail
 from smart_racing.ui.visualization.race_scene import RaceScene
@@ -127,6 +129,11 @@ class App:
         self.keyboard_focus = False
         self.race = None
         self.quick_grid_started = None
+        self.title_opener_started = None
+        self.title_reveal_started = None
+        self.title_before = []
+        self.title_after = []
+        self.title_lead_cue = False
         self.overhead_camera = True
         self.selected_road = 0
         self.championship = False
@@ -191,6 +198,9 @@ class App:
         self.menu_button((1040, 103, 190, 44), "‹  MAIN MENU", None, lambda: self.go("menu"))
 
     def go(self, screen):
+        if screen != self.screen:
+            self.title_opener_started = None
+            self.title_reveal_started = None
         if screen != self.screen and not self.reduced_motion:
             self.previous_frame = self.surface.copy()
             self.transition_remaining = TRANSITION_SECONDS
@@ -282,6 +292,7 @@ class App:
             self.set_track(1)
             self.pending_championship = True
             self.go("planner")
+            self.title_opener_started = None if self.reduced_motion else self.time
         else:
             self.pending_championship = False
             self.go("menu")
@@ -297,6 +308,7 @@ class App:
         self.entries = [ChampionshipEntry(i, name) for i, name in enumerate(("YOU", "NOVA", "BLAZE", "VECTOR"))]
         self.pending_championship = True
         self.go("planner")
+        self.title_opener_started = None if self.reduced_motion else self.time
 
     def open_quick_planner(self):
         self.pending_championship = False
@@ -606,6 +618,9 @@ class App:
         return positions
 
     def draw_planner(self):
+        if self.title_opener_started is not None:
+            draw_title_opener(self, self.time - self.title_opener_started)
+            return
         self.draw_pit_background()
         self.label("RACE CONTROL  /  ROUTE PLANNER", 48, 98, 14, EMPHASIS)
         self.label("TRACK EXPLORER", 45, 118, 42, TEXT)
@@ -1436,11 +1451,23 @@ class App:
         if not self.race.over:
             return
         if self.championship and not self.recorded:
+            self.title_before = deepcopy(standings(self.entries))
             award_results(self.entries, self.race.result_records(self.track_index + 1))
+            self.title_after = deepcopy(standings(self.entries))
             self.recorded = True
+            self.go("dashboard")
+            self.title_reveal_started = None if self.reduced_motion else self.time
+            self.title_lead_cue = (self.track_index > 0 and
+                                   self.title_before[0].racer_id != self.title_after[0].racer_id)
+            if self.reduced_motion and self.title_lead_cue:
+                self.soundscape.cue("checkpoint")
+            return
         self.go("dashboard")
 
     def draw_dashboard(self):
+        if self.title_reveal_started is not None:
+            draw_title_reveal(self, self.time - self.title_reveal_started, self.title_before, self.title_after)
+            return
         draw_classification(self, CAR_COLORS)
 
     def draw_standings(self):
@@ -1506,6 +1533,13 @@ class App:
                 self.intro_active = False
                 self.buttons = []
                 self.soundscape.cue("launch")
+            return
+        if self.title_opener_started is not None or self.title_reveal_started is not None:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.go("menu")
+            elif ((event.type == pygame.KEYDOWN and event.key in {pygame.K_RETURN, pygame.K_SPACE})
+                  or (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1)):
+                self.title_opener_started = self.title_reveal_started = None
             return
         if self.screen == "race" and self.quick_grid_started is not None:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -1576,6 +1610,15 @@ class App:
         while self.running:
             delta = min(self.clock.tick(60) / 1000, .1)
             self.time += delta
+            if self.title_opener_started is not None and self.time - self.title_opener_started >= TITLE_DURATION:
+                self.title_opener_started = None
+            if self.title_reveal_started is not None:
+                elapsed = self.time - self.title_reveal_started
+                if self.title_lead_cue and elapsed >= SETTLED_AT:
+                    self.soundscape.cue("checkpoint")
+                    self.title_lead_cue = False
+                if elapsed >= REVEAL_DURATION:
+                    self.title_reveal_started = None
             for event in pygame.event.get():
                 self.event(event)
             if not self.running:
