@@ -279,9 +279,10 @@ def test_planner_cost_profile_chips_select_a_specific_profile():
     app = App()
     try:
         app.go("planner")
+        app.time = app.planner_entered + 1.0
         app.buttons = []
         app.draw_planner()
-        profile_chip_center = (903 + 80, 553 + 15)  # Economy chip during panel entrance.
+        profile_chip_center = (885 + 80, 570 + 17)
         app.event(pygame.event.Event(pygame.MOUSEBUTTONDOWN, button=1, pos=profile_chip_center))
         assert app.profile_index == 2
     finally:
@@ -569,6 +570,7 @@ def test_mouse_and_keyboard_start_and_drive_a_quick_race():
         assert app.screen == "race"
         human = app.race.racers[0]
         initial_vertex = human.vertex
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN))
         app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_n))
         assert human.nitro == 0
         app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN))

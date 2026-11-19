@@ -111,6 +111,54 @@ The greedy trace keeps running benefit and cost totals for 3,000 pickups, and
 its final selection is checked against the untraced implementation. The local
 suite passed 129 tests after this change; all measured studies were rerun.
 
+## Route planner focused QA (19 November 2026)
+
+The route planner received boundary-value, equivalence-class, state-transition,
+integration and visual checks. `tests/integration/test_route_planner_qa.py`
+compares Dijkstra and A* for every source/target pair on all three authored
+circuits, under all four cost profiles. For every reachable result it validates
+the endpoints, edge count, legal directed traversal and recomputed path cost;
+unreachable results must return no path and infinite cost. Additional cases
+exercise minimum/maximum vertex navigation, wraparound, a zero-length route,
+ordered checkpoint laps, switching the routing algorithm through its UI
+control, a fully disconnected graph, and planner action hitboxes within the
+expanded panel. `tests/integration/test_route_planner_button_outputs.py`
+clicks every planner button and verifies its resulting state or output: all
+four profiles, ordered/direct mode, comparison rows and return, algorithm
+switching, refuelling and alternatives navigation, generated-circuit validation,
+season-order protection, quick/championship race startup, save and invalid-track
+feedback. Refuelling pagination is exercised with a real route requiring more
+than six stops. The profile-chip UI test uses the updated chip location.
+
+On Python 3.12.16 / Windows, the focused planner checks passed **20 tests** and
+the complete suite passed **230 tests**. `pip check` reported no broken
+requirements; `python -m smart_racing --smoke-test` exited successfully.
+`scripts/capture_previews.py` rendered all screens, and the
+1280×800 planner preview was visually inspected for clipping, overlap and
+control alignment. The preview is a headless render, not a substitute for a
+manual mouse-and-keyboard playthrough.
+
+## Quick Race focused QA (19 November 2026)
+
+`tests/integration/test_quick_race_qa.py` drives the actual mouse controls for
+camera mode, previous/next road, drive, boost, refuel, pause/resume, main-menu
+return and results. Boundary-value cases cover fuel at 0, 60, 99 and 100 units,
+nitro at 0, 1 and 3 charges, repeated refuelling at one station, refuelling away
+from a station, and road-choice wraparound at a junction. It checks Quick Race
+entry on each authored circuit, four starting racers and a full player tank.
+Existing race tests cover checkpoint order, lap completion, blocked and
+restricted roads, event ordering, deterministic opponents, DNF and results.
+`tests/integration/test_quick_grid.py` checks menu/planner entry, countdown
+simulation freeze and release, skip input isolation, reduced motion and the
+championship path.
+
+The Quick Race focused set passed **63 tests** and the full suite passed **249
+tests** on Python 3.12.16 / Windows. `pip check`, the headless application smoke
+test and `git diff --check` passed. The updated 1280×800 start grid and live race
+with nitro were rendered and visually inspected. The earlier full run caught
+one outdated interaction test that attempted boost before skipping the new grid
+countdown. The test now explicitly starts the race before asserting boost.
+
 The headless screen smoke tests do not replace a human playthrough. Before final
 submission, perform a complete manual quick race and championship on a Windows
 machine, try the Lab and planner controls, verify the generated circuit and
