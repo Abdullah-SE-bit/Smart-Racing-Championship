@@ -1,21 +1,25 @@
-## What changed?
+## Summary
 
-<!-- Briefly describe the change. -->
+<!-- Describe the player-visible or engineering outcome. -->
 
-## Related issue
+## Context
 
-<!-- Link an issue if there is one. -->
+<!-- Link a related issue or assignment requirement, if applicable. -->
 
-## Checks
+## Verification
 
-- [ ] I ran relevant checks and noted the results below.
-- [ ] I updated documentation where useful.
+- [ ] Relevant tests and checks were run.
+- [ ] Documentation or asset attribution was updated where needed.
 
 **Checks and results:**
 
-## UI or gameplay preview
+## Screenshots or recording
 
-<!-- Add screenshots or a short recording for visible changes. -->
+<!-- Include before/after evidence for visible UI or gameplay changes. -->
+
+## Accessibility and motion
+
+<!-- For UI changes, note keyboard focus and Reduced Motion behavior. -->
 
 ## Algorithm notes
 

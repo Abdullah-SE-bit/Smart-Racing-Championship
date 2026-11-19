@@ -32,8 +32,9 @@ affected behavior. Complete mandatory requirements and all three bonuses.
 - `src/smart_racing/core/` holds shared, presentation-independent models.
 - `algorithms/` contains the team's manual implementations; do not use external
   algorithm libraries for mandatory algorithms. Keep Pygame out of this layer.
-- `game/`, `tracks/`, `racers/`, `resources/`, `events/`, and `championship/`
-  contain game rules and domain behavior, separate from presentation.
+- `game/` contains race rules, racer state/opponent behavior, and simulation
+  coordination. `tracks/`, `resources/`, `events/`, and `championship/` contain
+  their domain behavior, separate from presentation.
 - `ui/` translates input and displays state. The Algorithm Lab and experiments
   call the exact algorithm implementations used by gameplay, with plain-data
   traces and counters if visualization needs them.
@@ -55,7 +56,7 @@ affected behavior. Complete mandatory requirements and all three bonuses.
 - Follow [`docs/architecture/visual-direction.md`](docs/architecture/visual-direction.md)
   for REDLINE's palette, static menu hero, state-driven motion, camera, sound,
   and reduced-motion behavior. Avoid idle motion and decorative, misleading data.
-- Add meaningful tests with real functionality in later phases. Check edge cases,
+- Add meaningful tests with implemented behavior. Check edge cases,
   integration and reproducibility. Never add placeholder tests or fake results,
   and never claim a test passed unless it actually ran; an empty collection is
   not a passing suite.

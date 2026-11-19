@@ -4,14 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smart-racing-championship"
-version = "0.0.0"
+version = "0.1.0"
 description = "A strategy racing game powered by graph algorithms and deterministic race simulation."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["pygame>=2.6,<3"]
 
+[project.urls]
+Homepage = "https://github.com/TahaSohail-Goat/Smart-Racing-Championship"
+Repository = "https://github.com/TahaSohail-Goat/Smart-Racing-Championship"
+Issues = "https://github.com/TahaSohail-Goat/Smart-Racing-Championship/issues"
+
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "matplotlib>=3.9,<4"]
+dev = ["pytest>=8,<10", "matplotlib>=3.9,<4", "ruff>=0.14,<1"]
 packaging = ["pyinstaller>=6,<7"]
 report = ["reportlab>=4,<6"]
 
@@ -22,3 +27,10 @@ include = ["smart_racing*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

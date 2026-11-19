@@ -9,29 +9,33 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   checks:
     runs-on: windows-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
       - name: Install project and development dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev,report]" "pymupdf>=1.24,<2"
       - name: Check installed dependencies
         run: python -m pip check
-      - name: Run tests when test files exist
-        shell: pwsh
-        run: |
-          $testFiles = Get-ChildItem tests -Recurse -Filter "test_*.py" -File -ErrorAction SilentlyContinue
-          if ($testFiles) {
-            python -m pytest
-          } else {
-            Write-Host "No test files yet; skipping pytest until project functionality is implemented."
-          }
+      - name: Lint Python
+        run: python -m ruff check src tests experiments scripts
+      - name: Run tests
+        run: python -m pytest
       - name: Render interface previews
         run: python scripts/capture_previews.py
       - name: Upload interface previews
