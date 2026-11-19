@@ -28,6 +28,8 @@ from smart_racing.tracks.generator import _assign_checkpoints, _ring_compatible,
 from smart_racing.ui.screens.classification import draw_classification
 from smart_racing.ui.audio import Soundscape
 from smart_racing.ui.components.menu_icons import draw_mode_icon
+from smart_racing.ui.components.quick_grid import GRID_DURATION, draw_grid
+from smart_racing.ui.components.quick_telemetry import draw_quick_telemetry
 from smart_racing.ui.visualization.telemetry import drafting_surface, draw_trace_board, endpoint_flag, route_thumbnail
 from smart_racing.ui.visualization.race_scene import RaceScene
 from smart_racing.ui.components.broadcast import (
@@ -124,6 +126,7 @@ class App:
         self.focused_button = 0
         self.keyboard_focus = False
         self.race = None
+        self.quick_grid_started = None
         self.overhead_camera = True
         self.selected_road = 0
         self.championship = False
@@ -240,6 +243,7 @@ class App:
         self.target = self.circuit.checkpoints[min(3, len(self.circuit.checkpoints) - 1)]
 
     def start_race(self, championship=False, next_race=False):
+        self.quick_grid_started = None
         if championship and not next_race:
             self.track_index = 0
             self.circuit = load_circuit(self.circuit_paths[0])
@@ -302,7 +306,20 @@ class App:
         if self.pending_championship:
             self.start_race(championship=True, next_race=True)
         else:
-            self.start_race(championship=False)
+            self.start_quick_race()
+
+    def start_quick_race(self):
+        self.start_race()
+        if not self.reduced_motion:
+            self.quick_grid_started = self.time
+
+    def advance_quick_grid(self, delta):
+        elapsed = self.time - self.quick_grid_started
+        if elapsed >= GRID_DURATION:
+            self.quick_grid_started = None
+            self.soundscape.cue("launch")
+        elif any(elapsed - delta < .25 + lamp * .33 <= elapsed for lamp in range(5)):
+            self.soundscape.cue("countdown")
 
     def menu_button(self, rect, title, detail, action, primary=False):
         """Draw a large menu action using the same input and focus system."""
@@ -457,7 +474,7 @@ class App:
         pygame.draw.line(self.surface, EMPHASIS, (148, 293), (148 + round(100 * ease_out(progress)), 293), 2)
         self.menu_button((48, 319, 420, 65), "CHAMPIONSHIP",
                          f"{len(self.authored_paths)} circuits  /  season standings", self.prepare_championship, True)
-        self.menu_button((48, 396, 420, 65), "QUICK RACE", "Race the selected circuit", lambda: self.start_race(False))
+        self.menu_button((48, 396, 420, 65), "QUICK RACE", "Race the selected circuit", self.start_quick_race)
         self.menu_button((48, 473, 204, 50), "ROUTE PLANNER", None, self.open_quick_planner)
         self.menu_button((264, 473, 204, 50), "ALGORITHM LAB", None, lambda: self.go("lab"))
         self.menu_button((48, 535, 420, 50), "CONTROLS & SETTINGS", None, lambda: self.go("settings"))
@@ -638,10 +655,10 @@ class App:
                        ease_out((self.time - self.planner_entered - .06) / .42))
         panel_dx = round(18 * (1 - panel_phase))
         panel_x, text_x = 860 + panel_dx, 885 + panel_dx
-        self.card((panel_x, 220, 380, 530), PANEL, 12, BORDER)
-        self.label("ROUTE INTELLIGENCE", text_x, 246, 14, EMPHASIS)
+        self.card((panel_x, 202, 380, 578), PANEL, 12, BORDER)
+        self.label("ROUTE INTELLIGENCE", text_x, 229, 14, EMPHASIS)
         mode_text = "ORDERED LAP" if self.ordered_plan else "DIRECT ROUTE"
-        mode_rect = pygame.Rect(text_x + 203, 240, 127, 24)
+        mode_rect = pygame.Rect(text_x + 203, 223, 127, 24)
         pygame.draw.rect(self.surface, (33, 43, 53), mode_rect, border_radius=4)
         pygame.draw.rect(self.surface, ACCENT, mode_rect, 1, border_radius=4)
         mode_width = self.fonts[14].size(mode_text)[0]
@@ -649,9 +666,9 @@ class App:
         circuit_name = self.circuit.name
         while self.fonts[24].size(circuit_name)[0] > 330 and len(circuit_name) > 1:
             circuit_name = circuit_name[:-1]
-        self.label(circuit_name, text_x, 273, 24, TEXT)
+        self.label(circuit_name, text_x, 262, 24, TEXT)
         destination_label = "ORDERED LAP" if self.ordered_plan else f"TO {self.target}"
-        self.label(f"FROM {self.source}   →   {destination_label}", text_x, 305, 14, MUTED)
+        self.label(f"FROM {self.source}   →   {destination_label}", text_x, 292, 14, MUTED)
 
         if route.vertices:
             roads = [graph.edges[i] for i in route.edges]
@@ -662,27 +679,27 @@ class App:
         else:
             distance_text = time_text = cost_text = "—"
 
-        cost_card = pygame.Rect(text_x - 3, 326, 336, 78)
+        cost_card = pygame.Rect(text_x - 3, 315, 336, 80)
         pygame.draw.rect(self.surface, (28, 34, 43), cost_card, border_radius=7)
         pygame.draw.rect(self.surface, BORDER, cost_card, 1, border_radius=7)
         pygame.draw.rect(self.surface, EMPHASIS, (cost_card.x, cost_card.y + 8, 3, 30), border_radius=1)
-        self.label("OPTIMIZED COST", text_x + 12, 333, 14, MUTED)
-        self.label(cost_text, text_x + 10, 350, 42, ACCENT)
-        self.label(profile_name.upper(), text_x + 228, 338, 14, EMPHASIS)
-        self.label("LOWER IS BETTER", text_x + 228, 359, 14, MUTED)
+        self.label("OPTIMIZED COST", text_x + 12, 322, 14, MUTED)
+        self.label(cost_text, text_x + 10, 341, 42, ACCENT)
+        self.label(profile_name.upper(), text_x + 228, 327, 14, EMPHASIS)
+        self.label("LOWER IS BETTER", text_x + 228, 349, 14, MUTED)
 
         stats = (("DISTANCE", distance_text), ("EST. TIME", time_text),
                  ("EXPANDED", str(route.expanded)), ("RELAXED", str(route.relaxed)))
         for index, (title, value) in enumerate(stats):
             column, row = index % 2, index // 2
-            rect = pygame.Rect(text_x + column * 171, 412 + row * 43, 160, 38)
+            rect = pygame.Rect(text_x + column * 171, 405 + row * 47, 160, 42)
             pygame.draw.rect(self.surface, PANEL_LIGHT, rect, border_radius=4)
             pygame.draw.rect(self.surface, BORDER, rect, 1, border_radius=4)
-            self.label(title, rect.x + 8, rect.y + 3, 12, MUTED)
-            self.label(value, rect.x + 8, rect.y + 16, 18, TEXT)
+            self.label(title, rect.x + 8, rect.y + 4, 12, MUTED)
+            self.label(value, rect.x + 8, rect.y + 20, 18, TEXT)
 
-        self.label("COST PROFILES", text_x, 500, 14, MUTED)
-        self.label("COMPARE ROUTES", text_x + 207, 500, 14, ACCENT)
+        self.label("COST PROFILES", text_x, 510, 14, MUTED)
+        self.label("COMPARE ROUTES", text_x + 207, 510, 14, ACCENT)
         candidates = [(name, profile, self.planned_route(profile))
                       for name, profile in PROFILES.items()]
         finite_costs = [candidate.cost for _, _, candidate in candidates
@@ -692,18 +709,18 @@ class App:
             column, row = index % 2, index // 2
             self.draw_planner_profile_chip(
                 name, candidate.cost, self.profile_index == index,
-                pygame.Rect(text_x + column * 171, 518 + row * 35, 160, 30),
+                pygame.Rect(text_x + column * 171, 531 + row * 39, 160, 34),
                 min(1.0, candidate.cost / cost_ceiling) if math.isfinite(candidate.cost) else 1.0,
                 lambda selected=index: self.select_profile(selected),
             )
 
-        self.menu_button((text_x, 592, 160, 39), f"ALGORITHM: {self.route_algorithm.upper()}",
+        self.menu_button((text_x, 615, 160, 40), f"ALGORITHM: {self.route_algorithm.upper()}",
                          None, self.toggle_route_algorithm)
-        self.menu_button((text_x + 170, 592, 160, 39),
+        self.menu_button((text_x + 170, 615, 160, 40),
                          "SEASON ORDER" if self.pending_championship else "NEW CIRCUIT", None, self.generate)
         race_label = (f"START RACE {self.track_index + 1} / {len(self.authored_paths)}"
                       if self.pending_championship else "START QUICK RACE")
-        self.menu_button((text_x, 640, 330, 48), race_label, None, self.start_planned_race, True)
+        self.menu_button((text_x, 666, 330, 50), race_label, None, self.start_planned_race, True)
         destinations = self.ordered_destinations() if self.ordered_plan else [self.target]
         pickup_key = (self.source, tuple(destinations), self.resource_graph_signature())
         if pickup_key not in self._pickup_cache:
@@ -713,14 +730,20 @@ class App:
         selected = [item for item in suggestions if item.dp_selected]
         recommendation = (f"PICKUP {selected[0].vertex} / DP {selected[0].benefit} / GREEDY {int(selected[0].greedy_selected)}"
                           if selected else "NITRO: no feasible pickup within budget")
-        self.label((self.validation_message or recommendation)[:44], text_x, 695, 14, GOLD)
+        status = self.validation_message or recommendation
+        status_width = 330
+        while status and self.fonts[14].size(status)[0] > status_width:
+            status = status[:-1]
+        if status != (self.validation_message or recommendation) and len(status) > 3:
+            status = status[:-3].rstrip() + "..."
+        self.label(status, text_x, 730, 14, GOLD)
         route_key = (tuple(route.vertices), tuple(route.edges), self.resource_graph_signature())
         if route.vertices and route_key not in self._refuel_cache:
             self._refuel_cache[route_key] = route_refuelling(self.circuit.graph, route.vertices, route.edges)
         refuelling = self._refuel_cache.get(route_key)
         fuel_message = f"REFUEL PLAN: {refuelling[0] // 3} stop(s), 0.1-unit model" if refuelling is not None else "REFUEL PLAN: no feasible route"
         stop_count = refuelling[0] // 3 if refuelling is not None else "—"
-        self.label(f"FUEL PLAN  /  {stop_count} STOPS  /  0.1-UNIT MODEL", text_x, 713, 14, MUTED)
+        self.label(f"FUEL PLAN  /  {stop_count} STOPS  /  0.1-UNIT MODEL", text_x, 752, 14, MUTED)
 
     def draw_planner_profile_chip(self, name, cost, selected, rect, ratio, action):
         fill = (37, 48, 59) if selected else PANEL_LIGHT
@@ -1280,6 +1303,9 @@ class App:
         self.lab_step_started = self.time
 
     def draw_race(self):
+        if self.quick_grid_started is not None:
+            draw_grid(self, self.time - self.quick_grid_started)
+            return
         race = self.race
         self.draw_pit_background()
         self.label("RACE CONTROL  /  LIVE RACE", 48, 98, 14, EMPHASIS)
@@ -1387,6 +1413,9 @@ class App:
             ):
                 self.menu_button(rect, title, None, action, title == "DRIVE")
 
+        if not self.championship and not race.over:
+            draw_quick_telemetry(self)
+
     def change_road(self, direction):
         self.selected_road += direction
 
@@ -1478,6 +1507,15 @@ class App:
                 self.buttons = []
                 self.soundscape.cue("launch")
             return
+        if self.screen == "race" and self.quick_grid_started is not None:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                self.quick_grid_started = None
+                self.go("menu")
+            elif ((event.type == pygame.KEYDOWN and event.key in {pygame.K_RETURN, pygame.K_SPACE})
+                  or (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1)):
+                self.quick_grid_started = None
+                self.soundscape.cue("launch")
+            return
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self.keyboard_focus = False
             position = self.logical_position(event.pos)
@@ -1561,7 +1599,9 @@ class App:
                     self.draw_intro()
                     self.present()
                     continue
-            if self.screen == "race" and not self.paused:
+            if self.screen == "race" and self.quick_grid_started is not None:
+                self.advance_quick_grid(delta)
+            elif self.screen == "race" and not self.paused:
                 old_events = len(self.race.event_log)
                 player = next((racer for racer in self.race.racers if racer.id == 0), None)
                 old_progress = None if player is None else (player.laps, player.next_checkpoint)
