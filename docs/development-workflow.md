@@ -3,8 +3,10 @@
 This guide maps the complete assignment to practical work. The
 [assignment specification](assignment-specification.md) is the source for exact
 rules, formulas, examples and deliverables; consult the original PDF if wording
-is unclear. Implementation has started at the user's request. This map is a
-guide, not a set of gates; consult the code and tests for actual progress.
+is unclear. The playable implementation and assignment bonuses are in place;
+consult the [assignment-wide QA audit](testing/assignment-requirements-audit.md)
+for verified behavior and the release work that remains. This map is a guide,
+not a set of approval gates.
 
 ## Working together
 

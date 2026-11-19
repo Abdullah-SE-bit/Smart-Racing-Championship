@@ -1,8 +1,9 @@
 # Image assets
 
-`pit-lane-night.png` is the original hero-car artwork and remains the full-screen
-background for the intro and main menu. The cinematic venue photographs are
-used on circuit-specific game screens and in the main-menu circuit preview:
+`pit-lane-night.png` is the original hero-car artwork and remains the full-screen,
+still background for the intro and main menu. It is the default scene; venue art
+does not replace the menu hero. The cinematic venue scenes appear on
+circuit-specific game screens and in the main-menu circuit preview:
 `neon-harbor-night.png`, `copper-canyon-dusk.png`, and
 `aurora-circuit-dusk.png`. The Aurora image was selected from the generated
 image attached during development; the Harbor and Canyon scenes were generated

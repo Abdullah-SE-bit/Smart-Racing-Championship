@@ -1,7 +1,8 @@
-# Architecture and rules in the current prototype
+# Architecture and rules in REDLINE
 
-Implementation is in progress. This document describes the code that exists,
-including its current limitations; it is not a claim of assignment completion.
+This document records implemented behavior and its limitations. The
+[assignment-wide QA audit](../testing/assignment-requirements-audit.md)
+tracks test evidence and the remaining release checks.
 
 ## Boundaries
 
@@ -137,12 +138,13 @@ Checkpoint route legs exclude later mandatory
 checkpoints. A single-pickup recommendation checks the estimated detour and
 fuel requirement independently rather than mixing fuel and distance budgets.
 
-## Known work still needed
+## Known limitations and release work
 
-The current screens and simulation are a prototype, not final evidence of full
-assignment coverage. In particular, generated circuits are limited to a ring
-layout with extra roads; additional generation constraints and route recovery
-cases need review. Manual play testing and a
-final submission check remain. The Windows executable built locally but was
-blocked by the host's Application Control policy when a launch was attempted.
-Do not report that launch as passed.
+Generated tracks belong to a ring-based family with extra roads; the generator
+is seeded and bounded rather than an unrestricted circuit designer. Its current
+tests and validation behavior are listed in the QA audit. A full human
+playthrough, final group-specific report and ZIP, demonstration, and viva remain
+release tasks. Windows Application Control blocks launching the built
+executable on the development workstation; the current Windows CI package-smoke
+job launches its build and extracted test archive successfully. Do not treat
+that CI check as the final named group archive.

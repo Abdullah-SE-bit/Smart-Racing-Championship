@@ -1,139 +1,205 @@
-# Smart Racing Championship
+<div align="center">
 
-The game uses **REDLINE** as its interface branding, with **Smart Racing
-Championship** as the full project title.
+# REDLINE
 
-A strategy racing game with a projected 3D broadcast camera and a 2D top-down tactical map for a Design and Analysis of Algorithms
-course. Players plan routes, manage fuel and nitro, and respond to changing
-roads while racing deterministic opponents. The project combines a polished,
-animated Pygame interface with algorithms that have real roles in gameplay.
+### SMART RACING CHAMPIONSHIP
 
-**Current status: implementation and verification in progress.** A playable
-prototype, algorithms, circuits, bonus features and automated tests are present.
-Full assignment verification, the final package and group demonstration remain.
+**Choose the line. Manage the risk. Take the title.**
 
-## Project scope
+![REDLINE — race night](assets/images/pit-lane-night.png)
 
-- Three distinct circuits, each with at least ten ordered checkpoints and two
-  shortcuts, plus intersections, alternative routes, a cycle, and a dead end.
-- One player and at least three deterministic opponents; multiple laps, fuel,
-  nitro, road events, route recalculation, results, and championship standings.
-- Five accessible screens: Main Menu, Track Explorer / Route Planner, Racing,
-  Algorithm Lab, and Championship Dashboard. Animations should communicate real
-  race and algorithm state while keeping the engine independent of rendering.
-- All twelve required algorithm families: BFS, DFS, Dijkstra, A*, dynamic
-  programming, greedy selection, backtracking, Prim or Kruskal, a heap/priority
-  queue, Merge Sort, Quick Sort, and Heap Sort. Gameplay, the Lab, and experiments
-  share the same implementations.
-- All three advanced challenges: playable generated circuits, multi-objective
-  route presets, and live top-k championship analytics.
-- Five reproducible studies, meaningful tests, a technical report, executable
-  submission, demo, and viva preparation.
+*A strategy racing game where route algorithms, resource decisions, and changing track conditions shape every race.*
 
-The authoritative details, examples, formulas, and submission requirements are
-in [the assignment transcription](docs/assignment-specification.md); use the
-original PDF to resolve any transcription ambiguity. See the
-[development workflow](docs/development-workflow.md) for a detailed delivery map.
+</div>
 
-## Technology
+---
 
-Python 3.12+, Pygame, JSON, pytest and Matplotlib; PyInstaller is available as
-an optional packaging dependency. See [pyproject.toml](pyproject.toml) for the
-declared version ranges. Record exact versions and experiment environments when
-results are produced.
+## On the grid
 
-## Setup on Windows
+REDLINE is a Windows-first, keyboard-and-mouse racing game built with Python
+and Pygame for a Design and Analysis of Algorithms project. Read the circuit,
+choose a route, manage fuel and nitro, and race three deterministic rivals.
+Then see the algorithms behind those decisions in the Algorithm Lab and follow
+the standings through a three-circuit championship.
 
-From the repository directory in PowerShell, with Python 3.12 installed:
+The game combines a restrained motorsport broadcast look with real algorithm
+work. The 3D-style camera is a projection of the track graph; the tactical map,
+route planner, race engine, Lab, and experiments all use the same circuit data
+and shared algorithm implementations.
+
+> **Project status:** The playable game, required algorithms, three bonus
+> challenges, automated tests, studies, and Windows build workflow are in place.
+> Release preparation remains: the report needs group details, and a human
+> playthrough, final named ZIP, demo, and viva are still ahead. See the
+> [assignment-wide QA checklist](docs/testing/assignment-requirements-audit.md)
+> for evidence and open items.
+
+## The race weekend
+
+| Session | What you do |
+|---|---|
+| **Main Menu** | Choose a championship, quick race, or Algorithm Lab; select a circuit and adjust controls, sound, and motion. |
+| **Track Explorer** | Inspect the road graph, select endpoints, compare balanced, speed, economy, and safety routes, and review fuel recommendations. |
+| **Quick Race** | Drive through ordered checkpoints, choose legal roads, manage fuel and nitro, and react to timed road events. |
+| **Algorithm Lab** | Step, play, pause, and reset real BFS, routing, resource, event, generation, sorting, and top-k traces. |
+| **Championship** | Race all three venues, review results, watch points update, and follow the live top-k standings to the finale. |
+
+Circuits contain ten mandatory checkpoints, shortcuts, alternate roads,
+services, obstacles, and dynamic conditions. The race engine runs at a fixed
+simulation step; rendering and screen animation do not decide race outcomes.
+
+## Motion with a purpose
+
+The interface takes cues from a live race broadcast: graphite panels, clean
+typography, trackside photography, timing data, and a controlled pit-red accent.
+Motion calls attention to game state and reinforces a transition instead of
+running as decoration:
+
+- **Launch:** a four-second starting-light intro can be skipped immediately.
+- **Quick Race:** the grid countdown holds the simulation until lights out.
+- **Championship:** venue openers set the scene; classification and standings
+  animate the points change between rounds and reveal the winner at the finale.
+- **Route Planner:** selected routes reveal along the actual graph; comparisons
+  use computed paths and costs.
+- **Race:** the projected broadcast camera follows live racer positions, while
+  the tactical camera shows the same race from above.
+- **Algorithm Lab:** graph frontiers, heap changes, sort movements, and resource
+  tables animate from recorded algorithm steps.
+
+The pit-lane car image is the still main-menu backdrop. Venue scenes follow the
+selected circuit in the game and circuit preview. Reduced Motion is saved in
+player preferences and removes timed presentation movement while keeping the
+screens and controls usable.
+
+## Get on track
+
+### Windows quick start
+
+Install Python 3.12, open PowerShell in this folder, and run:
 
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --upgrade pip
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-The requirements file installs the project in editable mode with its development
-dependencies. To add the optional packaging tools later:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -e ".[packaging]"
-```
-
-Double-click **Play.cmd** in the project folder, or run it in the VS Code PowerShell terminal:
-
-```powershell
 .\Play.cmd
 ```
 
-Switch cameras during a race using the view button. Reduced motion and sound level are saved between launches; choose Mute, Quiet, Balanced, or Loud in Settings. The game opens with a four-second intro. Press Enter, Space, Escape or click
-to skip it. Use the mouse to navigate. In a race, select a road with the left/right arrow
-keys, press Enter to drive, press N for nitro, and press F at a fuel station to
-refuel. Space pauses the simulation. The race screen also provides clickable
-buttons for these actions. The race HUD reports recent resource and
-race events and marks unavailable services on the map. Championship mode opens the planner before
-each race in the fixed three-circuit season. The Title Fight introduces each venue
-and shows the points gap. After each race, points count up and drivers move into
-season order. The last reveal names the champion. Press Enter or click to skip
-either presentation. Reduced motion opens the planner and results immediately.
-The planner can compare presets with an animated reveal of each computed route, switch to
-an ordered checkpoint plan, generate a seeded circuit, show an invalid candidate,
-inspect bounded endpoint alternatives, and save a circuit for later selection.
-The planner's Refuel Plan view lists the stations and fuel purchases for the
-selected route; press F at each station to use the game's automatic fill.
-The plan assumes a full starting tank and no nitro or later event changes.
-The circuit workshop shows the seed and the actual checkpoint, service, backbone,
-road, obstacle and validation stages; it can also demonstrate a rejected track.
-Generated circuits are available for quick races. Saved circuits are stored in
-`%USERPROFILE%\SmartRacingChampionship\circuits`.
-An arrow on a road marks its permitted direction; fuel and nitro stations show
-their vertex IDs so they can be matched to the resource plan.
-The window can be resized. Tab and Shift+Tab move between buttons and Enter
-activates the focused button. In the planner, arrow keys change the destination;
-hold Shift with an arrow key to change the starting vertex.
-The Algorithm Lab uses the selected track and, when available, current
-championship standings for its shared-algorithm demonstrations.
-Windows CI also renders screen previews as the `interface-previews` workflow
-artifact. To regenerate them locally, run
-`.\.venv\Scripts\python.exe scripts/capture_previews.py`; the images are written
-to `output/previews/`.
-The original generated pit-lane artwork and its generation prompt are recorded
-in [`assets/images/README.md`](assets/images/README.md). The Windows build
-bundles this artwork; reduced motion disables the background pan and button
-highlights.
-CI also builds the Windows executable and runs its headless smoke test before
-and after extraction from a temporary test archive on a clean Windows runner.
-Run the current automated tests with `.\.venv\Scripts\python.exe -m pytest`.
+After setup, double-click `Play.cmd` to launch the game. From a terminal, use:
 
-To build a Windows executable after installing the optional packaging tools, run
-`powershell -ExecutionPolicy Bypass -File .\scripts\build.ps1`. The output is
-`dist/SmartRacingChampionship.exe` and
-contains the circuit data. Build outputs are generated locally and Git-ignored.
+```powershell
+.\.venv\Scripts\python.exe -m smart_racing
+```
 
-To regenerate the current draft report, install `.[report]` and run
-`.\.venv\Scripts\python.exe scripts/build_report.py`. The reproducible studies
-are run with `.\.venv\Scripts\python.exe experiments/benchmarks/run_studies.py`;
-raw results and an analysis are written under `experiments/results/`.
+### Controls
 
-`scripts/package_submission.py` can later prepare a local ZIP once the actual
-registration numbers and section are known. It does not upload or submit it.
+| Input | Action |
+|---|---|
+| Mouse | Navigate menus, select roads, and use on-screen race controls. |
+| `Tab` / `Shift+Tab`, `Enter` | Move focus and activate a menu control. |
+| `←` / `→` | Choose a road at the current junction; change the planner destination. |
+| `Shift` + `←` / `→` | Change the planner's starting vertex. |
+| `Enter` | Drive the selected road. |
+| `N` | Use one nitro charge. |
+| `F` | Refuel at an available station. |
+| `Space` | Pause or resume the race; also skips the intro and broadcast overlays. |
+| `Escape` | Skip the intro or return from a race screen. |
 
-## Repository guide
+The race buttons are clickable as well. Use the view control to switch between
+the projected broadcast camera and the flat tactical map. Settings retain sound
+level and Reduced Motion choices between launches.
 
-| Location | Purpose |
-| --- | --- |
-| `src/smart_racing/` | Planned algorithms, game logic, data models, and UI. |
-| `assets/`, `data/` | Versioned presentation assets, circuits, and configuration. |
-| `tests/` | Unit, integration, and fixture locations for future tests. |
-| `experiments/` | Benchmark drivers, datasets, and real results. |
-| `docs/` | Assignment, architecture, algorithm, testing, and report material. |
-| `.github/` | Contribution guidance, issue/PR templates, and CI workflow. |
+## Build, verify, and measure
 
-Read [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for the full package map,
-[AGENTS.md](AGENTS.md) for agent instructions, and
-[CONTRIBUTING.md](.github/CONTRIBUTING.md) for the GitHub workflow. Issues can
-be split or combined as needed; they track the project and do not impose phase
-gates. Record important architecture and rule choices in `docs/architecture/`.
-The [demo and viva guide](docs/demo-and-viva.md) provides a rehearsal checklist
-and prompts for explaining the implementation.
-The [requirements evidence map](docs/requirements-evidence.md) connects the
-assignment to source, tests, recorded results and remaining verification.
+Run the full suite and a headless launch check from PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\python.exe -m pip check
+$env:SDL_VIDEODRIVER = "dummy"
+$env:SDL_AUDIODRIVER = "dummy"
+.\.venv\Scripts\python.exe -m smart_racing --smoke-test
+```
+
+Build the Windows executable (install the optional packager first):
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -e ".[packaging]"
+powershell -ExecutionPolicy Bypass -File .\scripts\build.ps1
+```
+
+The executable is written to `dist/SmartRacingChampionship.exe`. GitHub Actions
+runs the test suite, builds and launches a packaged smoke-test copy, renders
+interface previews, and builds the draft report. A headless check does not
+replace a live human playthrough.
+
+Reproduce the five algorithm studies and regenerate the report with:
+
+```powershell
+.\.venv\Scripts\python.exe experiments/benchmarks/run_studies.py
+.\.venv\Scripts\python.exe -m pip install -e ".[report]"
+.\.venv\Scripts\python.exe scripts/build_report.py
+.\.venv\Scripts\python.exe scripts/render_report_preview.py
+```
+
+Study inputs use a fixed seed. Raw timings and analysis are saved under
+`experiments/results/`. They are machine-specific measurements, not proof of
+asymptotic complexity. To refresh screen previews, run
+`.\.venv\Scripts\python.exe scripts/capture_previews.py`; output goes to
+`output/previews/`.
+
+Saved circuits are stored in
+`%USERPROFILE%\SmartRacingChampionship\circuits`. The planner assumes a full
+starting tank for its refuelling recommendation; later race events or nitro
+use can change the actual outcome.
+
+## Under the hood
+
+- **Language:** Python 3.12+
+- **Game and presentation:** Pygame
+- **Circuit format:** JSON adjacency-list graphs
+- **Verification:** pytest, deterministic fixtures, integration and UI tests
+- **Studies:** seeded benchmark driver with raw JSON results and analysis
+- **Optional tools:** PyInstaller for Windows builds; ReportLab for PDF reports
+
+The twelve required algorithm families are implemented manually: BFS, DFS,
+Dijkstra, A*, dynamic programming, greedy selection, backtracking, Kruskal,
+a binary heap / priority queue, Merge Sort, Quick Sort, and Heap Sort. The Lab
+and studies reuse the game implementations. The project also includes all
+three assignment extensions: seeded track generation, four weighted route
+profiles, and heap-based live top-k standings.
+
+## Project map
+
+| Path | Purpose |
+|---|---|
+| `src/smart_racing/` | Algorithms, shared models, race rules, tracks, resources, events, standings, and Pygame UI. |
+| `data/circuits/` | Three authored circuits. |
+| `assets/` | Bundled artwork, sound, and licensed fonts with attribution. |
+| `tests/` | Unit and integration test suites. |
+| `experiments/` | Five study drivers, raw measurements, and analysis. |
+| `docs/` | Assignment, architecture, algorithms, workflow, verification, and report. |
+| `scripts/` | Run support, previews, sound generation, report, build, and packaging tools. |
+| `.github/` | Contribution guidance, issue/PR templates, and Windows CI. |
+
+## Crew notes
+
+- [Assignment specification](docs/assignment-specification.md) — source of
+  truth for rules, algorithms, studies, bonuses, and submission requirements.
+- [Assignment QA checklist](docs/testing/assignment-requirements-audit.md) —
+  evidence, status, release gaps, and current estimate.
+- [Development workflow](docs/development-workflow.md) — implementation,
+  review, testing, and delivery procedure.
+- [Visual direction](docs/architecture/visual-direction.md) — color, motion,
+  camera, sound, and presentation rules.
+- [Algorithm integration map](docs/algorithms/implementation-map.md) — shared
+  implementations and their call sites.
+- [Demo and viva guide](docs/demo-and-viva.md) — a walkthrough and explanation
+  prompts for the group.
+- [Technical report source](docs/report/technical-report.md) — current draft;
+  group details and final review are still required.
+
+REDLINE is the interface brand; **Smart Racing Championship** is the course
+project title. Original imagery and synthesized sound are documented in
+[`assets/images/README.md`](assets/images/README.md) and
+[`assets/audio/README.md`](assets/audio/README.md). The bundled Barlow fonts
+retain their [SIL Open Font License](assets/fonts/OFL.txt).
