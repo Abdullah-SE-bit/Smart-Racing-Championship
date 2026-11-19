@@ -1,5 +1,18 @@
 # Verification in progress
 
+## Assignment-wide verification snapshot (19 November 2026)
+
+See the [assignment requirements audit](assignment-requirements-audit.md) for
+the requirement-by-requirement checklist, test evidence, pending human/release
+items and a clearly qualified readiness estimate. On this date the full local
+suite passed **252 tests** in 43.36 seconds; `pip check`, the Python smoke test,
+all five measured studies, report generation/rendering, and the Windows
+executable build completed. Local launch of that executable was blocked by
+Windows Application Control before startup. GitHub Actions for `main` commit
+`b93e295` passed both `checks` and `package-smoke`. The report remains a draft,
+and a final group-specific ZIP, human playthrough, demonstration and viva are
+still pending.
+
 ## Algorithm Lab quality coverage
 
 `tests/integration/test_algorithm_lab_quality.py` applies boundary-value

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "smart-racing-championship"
 version = "0.0.0"
-description = "A planned 2D racing game for the Design and Analysis of Algorithms course."
+description = "A strategy racing game powered by graph algorithms and deterministic race simulation."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["pygame>=2.6,<3"]

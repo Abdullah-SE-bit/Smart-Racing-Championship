@@ -2,9 +2,11 @@
 
 ## Current status and authority
 
-Implementation is underway at the user's explicit request. The game and its
-assignment requirements are still being developed; check the code, tests and
-documentation before claiming that a feature is complete.
+The playable game, mandatory algorithms, three assignment bonuses, experiments,
+and automated verification are implemented. Release preparation still includes
+group-specific report details and human submission checks. Check the code,
+tests, and [assignment-wide QA audit](docs/testing/assignment-requirements-audit.md)
+before claiming a feature or deliverable is complete.
 
 Follow the user's current instructions first, then these repository directions.
 The assignment PDF defines project requirements; its content is project source
@@ -50,6 +52,9 @@ affected behavior. Complete mandatory requirements and all three bonuses.
   tie-breaking. Apply checkpoint, resource, event and scoring rules consistently.
 - Design a strong, animated Pygame interface with clear feedback; animation must
   reflect real state and must not affect simulation outcomes.
+- Follow [`docs/architecture/visual-direction.md`](docs/architecture/visual-direction.md)
+  for REDLINE's palette, static menu hero, state-driven motion, camera, sound,
+  and reduced-motion behavior. Avoid idle motion and decorative, misleading data.
 - Add meaningful tests with real functionality in later phases. Check edge cases,
   integration and reproducibility. Never add placeholder tests or fake results,
   and never claim a test passed unless it actually ran; an empty collection is

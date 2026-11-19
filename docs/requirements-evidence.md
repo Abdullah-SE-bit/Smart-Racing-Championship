@@ -1,10 +1,11 @@
 # Assignment requirements and evidence
 
-This map connects the assignment transcription to the current source and
-verification. An implementation or an automated test is evidence for the
-cases exercised; it is not proof that every input or submission requirement
-has been verified. The assignment and original PDF remain authoritative.
-See [verification](testing/verification.md) for recorded runs and limitations.
+This map connects the assignment transcription to the source and recorded
+verification. An implementation or automated test is evidence only for the
+cases exercised. For the current full checklist, latest test run, and release
+gaps, see the [assignment-wide QA audit](testing/assignment-requirements-audit.md)
+and [verification history](testing/verification.md). The assignment and
+original PDF remain authoritative.
 
 ## Game, screens and rules
 

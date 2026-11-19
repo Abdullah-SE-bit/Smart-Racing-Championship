@@ -1,13 +1,14 @@
 # Project structure and architectural boundaries
 
-Status: **Implementation in progress**. The responsibilities below describe
-the current code and reserved package boundaries. See the
-[requirements evidence map](docs/requirements-evidence.md) for implemented
-features and work that still needs verification.
+Status: **Playable implementation; release checks remain**. The responsibilities
+below describe the current code and reserved package boundaries. See the
+[assignment-wide QA audit](docs/testing/assignment-requirements-audit.md) for
+feature evidence and remaining group-specific and human submission checks.
 
 The assignment specification is transcribed in
 [docs/assignment-specification.md](docs/assignment-specification.md) and has been
-checked against the supplied PDF. The user has authorized implementation.
+checked against the supplied PDF. REDLINE's presentation rules are in
+[docs/architecture/visual-direction.md](docs/architecture/visual-direction.md).
 
 ## Source packages
 
