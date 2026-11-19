@@ -71,7 +71,10 @@ keys, press Enter to drive, press N for nitro, and press F at a fuel station to
 refuel. Space pauses the simulation. The race screen also provides clickable
 buttons for these actions. The race HUD reports recent resource and
 race events and marks unavailable services on the map. Championship mode opens the planner before
-each race in the fixed three-circuit season; results carry forward between races.
+each race in the fixed three-circuit season. The Title Fight introduces each venue
+and shows the points gap. After each race, points count up and drivers move into
+season order. The last reveal names the champion. Press Enter or click to skip
+either presentation. Reduced motion opens the planner and results immediately.
 The planner can compare presets with an animated reveal of each computed route, switch to
 an ordered checkpoint plan, generate a seeded circuit, show an invalid candidate,
 inspect bounded endpoint alternatives, and save a circuit for later selection.

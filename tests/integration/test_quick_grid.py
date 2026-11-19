@@ -71,6 +71,7 @@ def test_reduced_motion_and_championship_go_directly_to_race(app):
     assert app.screen == "race" and app.quick_grid_started is None
     app.reduced_motion = False
     app.prepare_championship()
+    app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN))
     app.draw_planner()
     click(app, (1050, 690))
     assert app.championship and app.screen == "race" and app.quick_grid_started is None

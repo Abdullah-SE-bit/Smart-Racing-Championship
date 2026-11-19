@@ -56,8 +56,12 @@ def main():
         app.time = 2
         app.generate()
         capture("07-generation", app.draw_generation)
+        app.reduced_motion = False
         app.prepare_championship()
+        app.time += 1
+        capture("07b-title-fight-opener", app.draw_planner)
         app.start_planned_race()
+        app.reduced_motion = True
         race = app.race
         human = race.racers[0]
         route = shortest_path(race.circuit.graph, human.vertex, race._destination(human))
@@ -81,7 +85,12 @@ def main():
                 app.toggle_race_camera()
         if not race.over:
             raise RuntimeError("Preview race did not finish within the time limit")
+        app.reduced_motion = False
         app.finish_race()
+        app.time += 3
+        capture("08b-title-fight-standings", app.draw_dashboard)
+        app.event(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN))
+        app.reduced_motion = True
         capture("09-results", app.draw_dashboard)
         app.go("standings")
         capture("10-standings", app.draw_standings)
